@@ -19,18 +19,20 @@
 - 筛选后的结果就是一条 URL，复制发给群友，对方点开即还原同样的筛选；
 - 没有后端、没有数据库、没有登录，一个静态目录扔到任何托管处就能用。
 
-**数据规模**：干员 155 · 道具 70 · 策略 61 · 盟约 26 · 头像 143 名（96/180px WebP）。
+**数据规模**：干员 155 · 道具 70 · 策略 61 · 盟约 26 · 头像 143 名（96/180px WebP）·
+道具/策略/盟约图标 157 个（本期「规程」，WebP）。
 
 ## 功能
 
 - **四个视图**：干员 / 道具 / 策略 / 盟约，外加「关于」页（数据版本、来源、免责声明）。
 - **搜索**：空格分词、全部命中（AND）、80ms 防抖、命中高亮；`/` 聚焦、`Esc` 清空。
 - **分面筛选**：阶数、盟约、触发时机、售价、类型、类别……每个 chip 显示「当前结果集里的数量」，点下去不会筛成 0 条。
+- **图标**：道具 / 策略发起人 / 盟约徽记使用本期「规程」官方图标，透明底白线稿配深色底座，深浅主题都清楚。
 - **盟约 AND / OR**：默认全部命中，可一键切「任一命中」。
 - **详情**：桌面是右侧常驻栏，手机是底部抽屉；详情内可点盟约、成员、合成材料继续跳转。
 - **状态全在 URL 里**：筛选、排序、详情都是 hash 参数，前进/后退、刷新、分享都成立，不需要服务端重写。
 - **响应式**：< 640 单列 + 底部 Tab；640–1023 两列；≥ 1024 三栏（筛选 / 列表 / 详情）。
-- **深色 / 浅色**主题、**头像开关**（纯色块 + 首字）、键盘导航、系统分享面板。
+- **深色 / 浅色**主题、**头像 / 图标开关**（纯色块 + 首字回退）、键盘导航、系统分享面板。
 - **离线可用**：`dist/standalone.html` 是单文件版（CSS/JS/数据全内联），微信里直接发文件、双击即开。
 
 ## 三种用法
@@ -39,7 +41,7 @@
 | --- | --- |
 | 手机 / 群友 | 打开发布网址（见下方「部署」） |
 | 自己电脑离线看 | 双击 `web/index.html`（或 `dist/index.html`） |
-| 发单个文件给别人 | `dist/standalone.html`（约 292 KB，不含头像） |
+| 发单个文件给别人 | `dist/standalone.html`（约 308 KB，不含头像与图标） |
 
 ## 目录结构
 
@@ -51,14 +53,19 @@
 ├── tools/
 │   ├── build_web_data.py         # Excel → JSON，含表头/行数/枚举校验
 │   ├── build_dist.py             # web/ → dist/，含单文件版、zip、体积自检
-│   └── prepare_avatars.py        # PRTS → 干员头像（增量抓取 + 清单）
-├── data/avatars.json             # 头像清单：文件、来源、许可、抓取日期
+│   ├── prepare_avatars.py        # PRTS → 干员头像（增量抓取 + 清单）
+│   └── prepare_icons.py          # PRTS → 道具/策略/盟约图标（本期规程锚定）
+├── data/
+│   ├── avatars.json              # 头像清单：文件、来源、许可、抓取日期
+│   └── icons.json                # 图标清单：赛季、文件、来源、许可
 ├── web/                          # 源码，可直接双击 index.html 预览
-│   ├── index.html  assets/app.css
+│   ├── index.html
+│   ├── assets/app.css
+│   ├── assets/{avatars,icons}/   # 头像 / 图标 WebP（生成物）
 │   ├── js/{store,search,ui,app}.js
 │   └── data/{data.js,data.json}  # 生成物，勿手改
 ├── deploy/                       # nginx.conf / _headers / robots.txt / Dockerfile
-├── build/                        # 校验报告、数据 diff、头像缓存（缓存不入库）
+├── build/                        # 校验报告、数据 diff、头像/图标缓存（缓存不入库）
 └── dist/                         # ★ 发布产物，GitHub Pages 直接发布它
 ```
 
@@ -66,22 +73,23 @@
 
 ```bash
 # 1. 改根目录的 卫戍协议数据表.xlsx（先备份成 source/卫戍协议数据表_YYYYMMDD.xlsx）
-# 2. 有新增干员时才需要重新抓头像（增量）
+# 2. 有新增/改名的干员、道具、策略、盟约时才重新抓素材（增量，已缓存的不重下）
 python tools/prepare_avatars.py
+python tools/prepare_icons.py
 # 3. Excel → JSON（校验不过会直接中止，不产出数据）
 python tools/build_web_data.py
 # 4. 生成发布产物 dist/（含单文件版与体积自检）
 python tools/build_dist.py
 ```
 
-依赖：`build_web_data.py` 需要 `openpyxl`，`prepare_avatars.py` 需要 `openpyxl` + `Pillow`，
-`build_dist.py` **只用标准库**。
+依赖：`build_web_data.py` 需要 `openpyxl`，`prepare_avatars.py` / `prepare_icons.py`
+需要 `openpyxl` + `Pillow`，`build_dist.py` **只用标准库**。
 
 ```bash
 pip install openpyxl pillow
 ```
 
-数据改动后提交前建议看一眼 `build/validation_report.md` 和 `build/diff_report.md`。
+数据改动后提交前建议看一眼 `build/validation_report.md`、`build/diff_report.md`、`build/icon_report.md`。
 
 ## 本地预览
 
@@ -126,7 +134,9 @@ Nginx 配置见 [`deploy/nginx.conf`](deploy/nginx.conf)（根目录 / 子目录
 ## 版权与免责
 
 - 本项目是**非官方、非商业**的玩家工具，与鹰角网络无关。
-- 《明日方舟》的干员美术、名称、数值与技能文本归**鹰角网络**所有；头像原文件取自 **PRTS Wiki**（其文本授权为 CC BY-NC-SA，**非商业**）。逐条溯源见 [`data/avatars.json`](data/avatars.json)。
+- 《明日方舟》的干员美术、图标、名称、数值与技能文本归**鹰角网络**所有；头像与图标原文件取自 **PRTS Wiki**（其文本授权为 CC BY-NC-SA，**非商业**）。
+  逐条溯源见 [`data/avatars.json`](data/avatars.json) 与 [`data/icons.json`](data/icons.json)。
+- 图标只取本期「卫戍协议·规程」页面实际渲染的文件；PRTS 上 2024 / 2025-11「盟约」/ 2026-03「盟约 下半」的同名旧素材不使用。
 - 因此**本项目整体不得用于商业用途**。若权利人提出异议，会立即移除相关内容。
 - 详见 [NOTICE.md](NOTICE.md)。
 

@@ -1,6 +1,6 @@
 {
  "version": "2026-11-09 04:53",
- "generatedAt": "2026-11-09 22:52:36",
+ "generatedAt": "2026-11-09 23:56:51",
  "source": "卫戍协议数据表.xlsx",
  "counts": {
   "operators": 155,
@@ -3761,7 +3761,9 @@
    "normalText": "攻击力+15%",
    "eliteText": "攻击力+25%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-33981944-64.webp",
+   "iconFull": "assets/icons/it-33981944-128.webp"
   },
   {
    "key": "坚守盾牌",
@@ -3773,7 +3775,9 @@
    "normalText": "防御力+20%",
    "eliteText": "防御力+35%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-ecf9c380-64.webp",
+   "iconFull": "assets/icons/it-ecf9c380-128.webp"
   },
   {
    "key": "盟约之币",
@@ -3785,7 +3789,9 @@
    "normalText": "装备时销毁，并获得1资金",
    "eliteText": "装备时销毁，并获得2资金",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-3386ad59-64.webp",
+   "iconFull": "assets/icons/it-3386ad59-128.webp"
   },
   {
    "key": "随身身份牌",
@@ -3797,7 +3803,9 @@
    "normalText": "装备时销毁，并使携带者所属盟约层数+3（无需激活盟约）",
    "eliteText": "装备时销毁，并使携带者所属盟约层数+6（无需激活盟约）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-fa0d9213-64.webp",
+   "iconFull": "assets/icons/it-fa0d9213-128.webp"
   },
   {
    "key": "源石溶剂",
@@ -3809,7 +3817,9 @@
    "normalText": "携带者每秒流失60点生命值，攻击力+40%",
    "eliteText": "携带者每秒流失60点生命值，攻击力+60%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-e626cd48-64.webp",
+   "iconFull": "assets/icons/it-e626cd48-128.webp"
   },
   {
    "key": "虹彩活血饮料",
@@ -3821,7 +3831,9 @@
    "normalText": "携带者无法被治疗，每秒回复75点生命值",
    "eliteText": "携带者无法被治疗，每秒回复150点生命值",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-160322cc-64.webp",
+   "iconFull": "assets/icons/it-160322cc-128.webp"
   },
   {
    "key": "雪祀之衣",
@@ -3833,7 +3845,9 @@
    "normalText": "生命上限+15%，使携带者更不容易受到攻击且阻挡数-1",
    "eliteText": "生命上限+25%，使携带者更不容易受到攻击且阻挡数-1",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-0f4fba7d-64.webp",
+   "iconFull": "assets/icons/it-0f4fba7d-128.webp"
   },
   {
    "key": "不屈弹射器",
@@ -3845,7 +3859,9 @@
    "normalText": "再部署时间-30%，生命上限-30%",
    "eliteText": "再部署时间-50%，生命上限-30%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-e3ad3f5b-64.webp",
+   "iconFull": "assets/icons/it-e3ad3f5b-128.webp"
   },
   {
    "key": "紧急调度券",
@@ -3857,7 +3873,9 @@
    "normalText": "装备时销毁，随机获取当前调度中心内的1名干员（调度中心中对应干员消失）",
    "eliteText": "装备时销毁，随机获取当前调度中心内的2名干员（调度中心中对应干员消失）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-2785061e-64.webp",
+   "iconFull": "assets/icons/it-2785061e-128.webp"
   },
   {
    "key": "战栗维式重锤",
@@ -3869,7 +3887,9 @@
    "normalText": "攻击力+20%；若携带者是地面干员则攻击时有10%概率使目标战栗2秒",
    "eliteText": "攻击力+35%；若携带者是地面干员则攻击时有10%概率使目标战栗2秒",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-489103b2-64.webp",
+   "iconFull": "assets/icons/it-489103b2-128.webp"
   },
   {
    "key": "萨尔贡浓茶",
@@ -3881,7 +3901,9 @@
    "normalText": "技力自然回复速度+0.15/秒",
    "eliteText": "技力自然回复速度+0.25/秒",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-82226596-64.webp",
+   "iconFull": "assets/icons/it-82226596-128.webp"
   },
   {
    "key": "精打细算玩偶",
@@ -3893,7 +3915,9 @@
    "normalText": "装备时销毁，之后每回合开始时额外获得1资金",
    "eliteText": "装备时销毁，之后每回合开始时额外获得2资金",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-b4e7b4ef-64.webp",
+   "iconFull": "assets/icons/it-b4e7b4ef-128.webp"
   },
   {
    "key": "简易通讯机",
@@ -3905,7 +3929,9 @@
    "normalText": "装备时销毁，随机获得1名拥有该干员第一盟约的干员",
    "eliteText": "装备时销毁，随机获得2名拥有该干员第一盟约的干员",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-1a902fb0-64.webp",
+   "iconFull": "assets/icons/it-1a902fb0-128.webp"
   },
   {
    "key": "见钱眼开玩偶",
@@ -3917,7 +3943,9 @@
    "normalText": "装备时销毁，下回合额外获得2资金",
    "eliteText": "装备时销毁，下回合额外获得4资金",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-0652e262-64.webp",
+   "iconFull": "assets/icons/it-0652e262-128.webp"
   },
   {
    "key": "卫戍推荐信",
@@ -3929,7 +3957,9 @@
    "normalText": "休整期结束时，使携带者所属的已激活盟约层数+1",
    "eliteText": "休整期结束时，使携带者所属的已激活盟约层数+2",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-3158f24c-64.webp",
+   "iconFull": "assets/icons/it-3158f24c-128.webp"
   },
   {
    "key": "聚合急救箱",
@@ -3941,7 +3971,9 @@
    "normalText": "攻击范围内每个友方干员首次生命值低于50%时，立刻治疗其35%最大生命值",
    "eliteText": "攻击范围内每个友方干员首次生命值低于50%时，立刻治疗其50%最大生命值",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-11bee105-64.webp",
+   "iconFull": "assets/icons/it-11bee105-128.webp"
   },
   {
    "key": "灵巧涡轮手套",
@@ -3953,7 +3985,9 @@
    "normalText": "部署后每秒攻击速度+2（最多叠加20次），受到伤害时失去该效果",
    "eliteText": "部署后每秒攻击速度+3（最多叠加20次），受到伤害时失去该效果",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-9ac1d6c3-64.webp",
+   "iconFull": "assets/icons/it-9ac1d6c3-128.webp"
   },
   {
    "key": "叙拉古正装",
@@ -3965,7 +3999,9 @@
    "normalText": "攻击速度+15，携带者部署方向左右两侧的我方干员攻击速度+10",
    "eliteText": "攻击速度+25，携带者部署方向左右两侧的我方干员攻击速度+15",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-ea0b8657-64.webp",
+   "iconFull": "assets/icons/it-ea0b8657-128.webp"
   },
   {
    "key": "精准狙击镜",
@@ -3977,7 +4013,9 @@
    "normalText": "攻击距离自身3格及以上的目标时，伤害提高30%",
    "eliteText": "攻击距离自身3格及以上的目标时，伤害提高50%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-0461bddd-64.webp",
+   "iconFull": "assets/icons/it-0461bddd-128.webp"
   },
   {
    "key": "炎国短刀",
@@ -3989,7 +4027,9 @@
    "normalText": "每开启一次技能，获得5%的攻击力加成（最多叠加10次）",
    "eliteText": "每开启一次技能，获得8%的攻击力加成（最多叠加10次）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-f7ff3ef0-64.webp",
+   "iconFull": "assets/icons/it-f7ff3ef0-128.webp"
   },
   {
    "key": "迅捷作战粮",
@@ -4001,7 +4041,9 @@
    "normalText": "部署时，获得3点技力；每有一个同盟约的其他干员，额外获得3点技力",
    "eliteText": "部署时，获得6点技力；每有一个同盟约的其他干员，额外获得6点技力",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-00639b94-64.webp",
+   "iconFull": "assets/icons/it-00639b94-128.webp"
   },
   {
    "key": "歌利亚头盔",
@@ -4013,7 +4055,9 @@
    "normalText": "生命上限+25%；部署时若身前一格没有其他干员，生命上限额外+15%",
    "eliteText": "生命上限+45%；部署时若身前一格没有其他干员，生命上限额外+25%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-6430de83-64.webp",
+   "iconFull": "assets/icons/it-6430de83-128.webp"
   },
   {
    "key": "阿戈尔重刃",
@@ -4025,7 +4069,9 @@
    "normalText": "攻击力+40%，攻击速度-10",
    "eliteText": "攻击力+60%，攻击速度-10",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-73c25a2c-64.webp",
+   "iconFull": "assets/icons/it-73c25a2c-128.webp"
   },
   {
    "key": "奥术法阵",
@@ -4037,7 +4083,9 @@
    "normalText": "法术抗性+20，攻击使目标失去特殊能力5秒",
    "eliteText": "法术抗性+30，攻击使目标失去特殊能力5秒",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-54ca8cd4-64.webp",
+   "iconFull": "assets/icons/it-54ca8cd4-128.webp"
   },
   {
    "key": "坚固维式重锤",
@@ -4049,7 +4097,9 @@
    "normalText": "攻击力+25%；首次受到致命伤害时生命值不低于1，持续8秒",
    "eliteText": "攻击力+45%；首次受到致命伤害时生命值不低于1，持续8秒",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-2012aa8c-64.webp",
+   "iconFull": "assets/icons/it-2012aa8c-128.webp"
   },
   {
    "key": "加速维式重锤",
@@ -4061,7 +4111,9 @@
    "normalText": "攻击力+25%；攻击速度+30",
    "eliteText": "攻击力+45%；攻击速度+30",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-0217c266-64.webp",
+   "iconFull": "assets/icons/it-0217c266-128.webp"
   },
   {
    "key": "突袭手雷",
@@ -4073,7 +4125,9 @@
    "normalText": "每次部署后的10秒内，攻击时使目标晕眩2秒",
    "eliteText": "每次部署后的15秒内，攻击时使目标晕眩2秒",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-bb2240e6-64.webp",
+   "iconFull": "assets/icons/it-bb2240e6-128.webp"
   },
   {
    "key": "驮兽储蓄罐",
@@ -4085,7 +4139,9 @@
    "normalText": "装备时销毁，并随机获得1~6资金",
    "eliteText": "装备时销毁，并随机获得2~12资金",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-1d8b4949-64.webp",
+   "iconFull": "assets/icons/it-1d8b4949-128.webp"
   },
   {
    "key": "乌萨斯呼吸器",
@@ -4097,7 +4153,9 @@
    "normalText": "阻挡数+1，攻击力+20%，每次再部署时上述加成效果叠加（最多叠加2次）",
    "eliteText": "阻挡数+1，攻击力+30%，每次再部署时上述加成效果叠加（最多叠加3次）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-6625241d-64.webp",
+   "iconFull": "assets/icons/it-6625241d-128.webp"
   },
   {
    "key": "多功能补剂",
@@ -4109,7 +4167,9 @@
    "normalText": "携带者每次造成伤害时，自身所属已激活盟约临时层数+1（每场战斗最多叠加12层）",
    "eliteText": "携带者每次造成伤害时，自身所属已激活盟约临时层数+2（每场战斗最多叠加24层）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-dbdab162-64.webp",
+   "iconFull": "assets/icons/it-dbdab162-128.webp"
   },
   {
    "key": "伊比利亚骨刺刀",
@@ -4121,7 +4181,9 @@
    "normalText": "携带者每次造成伤害时，额外造成1次相当于自身攻击力25%的法术伤害",
    "eliteText": "携带者每次造成伤害时，额外造成2次相当于自身攻击力25%的法术伤害",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-dfa84e97-64.webp",
+   "iconFull": "assets/icons/it-dfa84e97-128.webp"
   },
   {
    "key": "定期存折",
@@ -4133,7 +4195,9 @@
    "normalText": "装备时销毁，获得〔当前累计资金，随对局变化〕资金（持有时每回合+1）",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-fe6220a4-64.webp",
+   "iconFull": "assets/icons/it-fe6220a4-128.webp"
   },
   {
    "key": "不退者之盾",
@@ -4145,7 +4209,9 @@
    "normalText": "免疫晕眩、冻结等特殊状态，若与“不退者力场”同时持有则组合为“不退者卫护系统”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-662b14b5-64.webp",
+   "iconFull": "assets/icons/it-662b14b5-128.webp"
   },
   {
    "key": "寻呼模块",
@@ -4157,7 +4223,9 @@
    "normalText": "装备时销毁，在调度中心出现至多3名拥有该干员第一盟约的干员，免费获取其中1名（不高于当前调度中心等级）",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-f6c2feeb-64.webp",
+   "iconFull": "assets/icons/it-f6c2feeb-128.webp"
   },
   {
    "key": "蜂鸣器",
@@ -4169,7 +4237,9 @@
    "normalText": "更容易受到攻击，生命上限+40%",
    "eliteText": "更容易受到攻击，生命上限+60%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-1411c577-64.webp",
+   "iconFull": "assets/icons/it-1411c577-128.webp"
   },
   {
    "key": "伪装服",
@@ -4181,7 +4251,9 @@
    "normalText": "首次受到伤害后获得隐匿，持续15秒",
    "eliteText": "首次受到伤害后获得隐匿，持续25秒",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-c092c59e-64.webp",
+   "iconFull": "assets/icons/it-c092c59e-128.webp"
   },
   {
    "key": "卡西米尔竞技旗",
@@ -4193,7 +4265,9 @@
    "normalText": "部署后15秒内造成的伤害提升至135%，随后逐渐衰减",
    "eliteText": "部署后15秒内造成的伤害提升至160%，随后逐渐衰减",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-6ebb7f46-64.webp",
+   "iconFull": "assets/icons/it-6ebb7f46-128.webp"
   },
   {
    "key": "灼燃维式重锤",
@@ -4205,7 +4279,9 @@
    "normalText": "攻击力+30%；造成法术伤害时附带相当于10%伤害的灼燃损伤",
    "eliteText": "攻击力+50%；造成法术伤害时附带相当于10%伤害的灼燃损伤",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-31a2bb4d-64.webp",
+   "iconFull": "assets/icons/it-31a2bb4d-128.webp"
   },
   {
    "key": "护盾无人机",
@@ -4217,7 +4293,9 @@
    "normalText": "治疗时有10%概率使目标获得1层护盾（最多1层）",
    "eliteText": "治疗时有15%概率使目标获得1层护盾（最多1层）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-855ffebb-64.webp",
+   "iconFull": "assets/icons/it-855ffebb-128.webp"
   },
   {
    "key": "M3茧甲",
@@ -4229,7 +4307,9 @@
    "normalText": "战斗阶段被击倒时立刻复活（一场战斗仅1次）",
    "eliteText": "战斗阶段被击倒时立刻复活（一场战斗仅2次）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-833dc304-64.webp",
+   "iconFull": "assets/icons/it-833dc304-128.webp"
   },
   {
    "key": "莱塔尼亚小鼓",
@@ -4241,7 +4321,9 @@
    "normalText": "携带者攻击范围内每次有单位被击倒时回复2技力",
    "eliteText": "携带者攻击范围内每次有单位被击倒时回复4技力",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-92feac9f-64.webp",
+   "iconFull": "assets/icons/it-92feac9f-128.webp"
   },
   {
    "key": "谢拉格不融冰",
@@ -4253,7 +4335,9 @@
    "normalText": "造成伤害时有12%概率对目标施加1.5秒的寒冷",
    "eliteText": "造成伤害时有20%概率对目标施加1.5秒的寒冷",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-0022497b-64.webp",
+   "iconFull": "assets/icons/it-0022497b-128.webp"
   },
   {
    "key": "可靠怀表",
@@ -4265,7 +4349,9 @@
    "normalText": "携带者技能开启所需技力-20%，但技能期间攻击速度-25%",
    "eliteText": "携带者技能开启所需技力-40%，但技能期间攻击速度-25%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-d5cfc049-64.webp",
+   "iconFull": "assets/icons/it-d5cfc049-128.webp"
   },
   {
    "key": "一次性促销券",
@@ -4277,7 +4363,9 @@
    "normalText": "装备时销毁，在调度中心出现3件装备，免费获取其中1件（不高于当前调度中心等级）",
    "eliteText": "装备时销毁，在调度中心出现6件装备，免费获取其中2件（不高于当前调度中心等级）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-c321c880-64.webp",
+   "iconFull": "assets/icons/it-c321c880-128.webp"
   },
   {
    "key": "驱逐者警棍",
@@ -4289,7 +4377,9 @@
    "normalText": "携带者对受到晕眩、冻结、恐惧等异常效果影响的敌人造成的伤害提升30%，若与“驱逐者瓦斯”同时持有则组合为“驱逐者防暴装备”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-cee2ab64-64.webp",
+   "iconFull": "assets/icons/it-cee2ab64-128.webp"
   },
   {
    "key": "动能单手弩",
@@ -4301,7 +4391,9 @@
    "normalText": "造成伤害时有30%概率使该次攻击力提升至130%；若与“动能加速器”同时持有则组合为“动能轰击弩”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-e78c6333-64.webp",
+   "iconFull": "assets/icons/it-e78c6333-128.webp"
   },
   {
    "key": "汲取者之喙",
@@ -4313,7 +4405,9 @@
    "normalText": "每次造成伤害时回复相当于造成伤害5%的生命值；若与“汲取者之心”同时持有则组合为“汲取者之镰”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-48e8647b-64.webp",
+   "iconFull": "assets/icons/it-48e8647b-128.webp"
   },
   {
    "key": "双模机械臂",
@@ -4325,7 +4419,9 @@
    "normalText": "攻击力+30%，自身造成物理和法术伤害时，伤害类型转化为弱点伤害",
    "eliteText": "攻击力+50%，自身造成物理和法术伤害时，伤害类型转化为弱点伤害",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-907e0eb9-64.webp",
+   "iconFull": "assets/icons/it-907e0eb9-128.webp"
   },
   {
    "key": "信标",
@@ -4337,7 +4433,9 @@
    "normalText": "装备时目标干员和本装备销毁，在调度中心出现2名与目标干员同等阶的干员，免费获取其中1名\n若在同盟模拟中且存在其他队友，下个休整期向相应盟约人数最多的队友发送1个原干员\n相应盟约人数相同则随机发送\n无法装备给自编干员",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-51dfbae1-64.webp",
+   "iconFull": "assets/icons/it-51dfbae1-128.webp"
   },
   {
    "key": "拟态物质",
@@ -4349,7 +4447,9 @@
    "normalText": "装备时销毁，若已拥有至少2名该初始干员，则再获得1名该初始干员；否则随机获得1名同阶干员",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-f4d3d77d-64.webp",
+   "iconFull": "assets/icons/it-f4d3d77d-128.webp"
   },
   {
    "key": "博士投影",
@@ -4361,7 +4461,9 @@
    "normalText": "装备后下个回合开始时销毁，并使该干员晋升为精锐干员",
    "eliteText": "装备时销毁，立即使该干员晋升为精锐干员",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-700fe6c8-64.webp",
+   "iconFull": "assets/icons/it-700fe6c8-128.webp"
   },
   {
    "key": "天马之盔",
@@ -4373,7 +4475,9 @@
    "normalText": "生命上限+60%，若与“天马之枪”同时持有则组合为“天马之耀”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-0f5f8641-64.webp",
+   "iconFull": "assets/icons/it-0f5f8641-128.webp"
   },
   {
    "key": "电流维式重锤",
@@ -4385,7 +4489,9 @@
    "normalText": "攻击力+30%；造成伤害时有5%概率使目标获得1层麻痹，且对麻痹的敌人造成伤害时无视其30%防御和法术抗性",
    "eliteText": "攻击力+50%；造成伤害时有5%概率使目标获得1层麻痹，且对麻痹的敌人造成伤害时无视其30%防御和法术抗性",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-05e2b4e7-64.webp",
+   "iconFull": "assets/icons/it-05e2b4e7-128.webp"
   },
   {
    "key": "佣兵名牌",
@@ -4397,7 +4503,9 @@
    "normalText": "每有一种激活的盟约，使携带者攻击力+6%、生命上限+6%（最多叠加8次）",
    "eliteText": "每有一种激活的盟约，使携带者攻击力+12%、生命上限+12%（最多叠加8次）",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-fedfdeda-64.webp",
+   "iconFull": "assets/icons/it-fedfdeda-128.webp"
   },
   {
    "key": "人事部记录",
@@ -4409,7 +4517,9 @@
    "normalText": "装备时销毁，立刻特殊刷新1次调度中心，优先出现拥有该干员第一盟约的干员（不高于当前调度中心等级）",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-8378fd29-64.webp",
+   "iconFull": "assets/icons/it-8378fd29-128.webp"
   },
   {
    "key": "瓶装烈性反应",
@@ -4421,7 +4531,9 @@
    "normalText": "携带者对处于元素爆发状态的敌人造成的伤害额外增加30%",
    "eliteText": "携带者对处于元素爆发状态的敌人造成的伤害额外增加50%",
    "hasElite": true,
-   "fuseCount": 2
+   "fuseCount": 2,
+   "icon": "assets/icons/it-1a0e3b9d-64.webp",
+   "iconFull": "assets/icons/it-1a0e3b9d-128.webp"
   },
   {
    "key": "不退者力场",
@@ -4433,7 +4545,9 @@
    "normalText": "阻挡数+2，每阻挡一个单位自身生命上限和防御力提升20%，若与“不退者之盾”同时持有则组合为“不退者卫护系统”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-ca6a2af9-64.webp",
+   "iconFull": "assets/icons/it-ca6a2af9-128.webp"
   },
   {
    "key": "驱逐者瓦斯",
@@ -4445,7 +4559,9 @@
    "normalText": "携带者攻击范围内的敌人受到的晕眩、冻结、恐惧等异常状态影响时间提高100%，若与“驱逐者警棍”同时持有则组合为“驱逐者防暴装备”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-e7b992fd-64.webp",
+   "iconFull": "assets/icons/it-e7b992fd-128.webp"
   },
   {
    "key": "投机骰子",
@@ -4457,7 +4573,9 @@
    "normalText": "装备时销毁，从3个指令中选择1个替换当前指令",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-021a3781-64.webp",
+   "iconFull": "assets/icons/it-021a3781-128.webp"
   },
   {
    "key": "天马之枪",
@@ -4469,7 +4587,9 @@
    "normalText": "攻击力+50%，若与“天马之盔”同时持有则组合为“天马之耀”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-3b115a7a-64.webp",
+   "iconFull": "assets/icons/it-3b115a7a-128.webp"
   },
   {
    "key": "人事部文档",
@@ -4481,7 +4601,9 @@
    "normalText": "装备时销毁，最大可部署人数变为9",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-4ccce620-64.webp",
+   "iconFull": "assets/icons/it-4ccce620-128.webp"
   },
   {
    "key": "变形同构体",
@@ -4493,7 +4615,9 @@
    "normalText": "携带者获得额外盟约（由另一件携带装备而定）\n具体对应关系可在模拟中查看本装备天赋栏",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-69d70c19-64.webp",
+   "iconFull": "assets/icons/it-69d70c19-128.webp"
   },
   {
    "key": "动能加速器",
@@ -4505,7 +4629,9 @@
    "normalText": "每次攻击或治疗时攻击速度+2（最高60层）；若与“动能单手弩”同时持有则组合为“动能轰击弩”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-0a35595a-64.webp",
+   "iconFull": "assets/icons/it-0a35595a-128.webp"
   },
   {
    "key": "汲取者之心",
@@ -4517,7 +4643,9 @@
    "normalText": "攻击力+30%，攻击速度+30，每秒流失1%最大生命值（不会降至0）；若与“汲取者之喙”同时持有则组合为“汲取者之镰”",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-7e1dbb64-64.webp",
+   "iconFull": "assets/icons/it-7e1dbb64-128.webp"
   },
   {
    "key": "终极维式重锤",
@@ -4529,7 +4657,9 @@
    "normalText": "携带者获得当前场上所有维式重锤特殊效果，且每有一种带有特殊效果的维式重锤自身攻击力额外+20%",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-a208d4bf-64.webp",
+   "iconFull": "assets/icons/it-a208d4bf-128.webp"
   },
   {
    "key": "不退者卫护系统",
@@ -4541,7 +4671,9 @@
    "normalText": "免疫晕眩、冻结等特殊状态，阻挡数+2，每阻挡一个单位自身生命上限和防御力提升20%；携带者开启技能时对自身周围范围内敌人产生一次诱导，持续3秒",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-88bed551-64.webp",
+   "iconFull": "assets/icons/it-88bed551-128.webp"
   },
   {
    "key": "动能轰击弩",
@@ -4553,7 +4685,9 @@
    "normalText": "造成伤害时有30%概率使攻击力提升至130%；每次攻击后攻击速度+2（最高60层），攻击速度叠加达到上限后每次攻击时有30%概率对攻击范围内随机敌人造成自身攻击力100%的范围物理伤害",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-621f98f3-64.webp",
+   "iconFull": "assets/icons/it-621f98f3-128.webp"
   },
   {
    "key": "汲取者之镰",
@@ -4565,7 +4699,9 @@
    "normalText": "攻击力+30%，攻击速度+30，每秒流失1%最大生命值（不会降至0），每次造成伤害时回复相当于造成伤害5%的生命值；携带者处于技能期间时上述效果翻倍且自身无法被治疗",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-9deba572-64.webp",
+   "iconFull": "assets/icons/it-9deba572-128.webp"
   },
   {
    "key": "驱逐者防暴装备",
@@ -4577,7 +4713,9 @@
    "normalText": "携带者攻击范围内的敌人受到的晕眩、冻结、恐惧等异常状态影响时间提高100%，且对受这类异常状态影响的敌人造成伤害提升30%；携带者处于技能期间时，每次施加这类异常状态时有50%概率将其传递给附近另一名敌人",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-3c6e185b-64.webp",
+   "iconFull": "assets/icons/it-3c6e185b-128.webp"
   },
   {
    "key": "天马之耀",
@@ -4589,7 +4727,9 @@
    "normalText": "生命上限+60%，每秒恢复8%最大生命值；攻击力+50%，造成伤害时额外造成攻击力30%真实伤害",
    "eliteText": "未配置独立进阶形态",
    "hasElite": false,
-   "fuseCount": null
+   "fuseCount": null,
+   "icon": "assets/icons/it-f541a95c-64.webp",
+   "iconFull": "assets/icons/it-f541a95c-128.webp"
   }
  ],
  "strategies": [
@@ -4614,7 +4754,9 @@
      "nextId": "",
      "id": "aceffect_band_22"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-9802e87a-96.webp",
+   "iconFull": "assets/icons/st-9802e87a-184.webp"
   },
   {
    "key": "歌利亚/坚不可摧",
@@ -4637,7 +4779,9 @@
      "nextId": "",
      "id": "aceffect_band_7"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-aec74625-96.webp",
+   "iconFull": "assets/icons/st-aec74625-184.webp"
   },
   {
    "key": "大帝/加急调派",
@@ -4660,7 +4804,9 @@
      "nextId": "",
      "id": "aceffect_band_10"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-9d5dc6a8-96.webp",
+   "iconFull": "assets/icons/st-9d5dc6a8-184.webp"
   },
   {
    "key": "卡莱莎/食腐之蝶",
@@ -4683,7 +4829,9 @@
      "nextId": "",
      "id": "aceffect_band_11"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-b675e0b4-96.webp",
+   "iconFull": "assets/icons/st-b675e0b4-184.webp"
   },
   {
    "key": "伊奥莱塔·罗素/统御号令",
@@ -4706,7 +4854,9 @@
      "nextId": "",
      "id": "aceffect_band_17"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-8c9d6b18-96.webp",
+   "iconFull": "assets/icons/st-8c9d6b18-184.webp"
   },
   {
    "key": "百炼嘉维尔/意志鼓舞",
@@ -4729,7 +4879,9 @@
      "nextId": "",
      "id": "aceffect_band_101"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-03a778d0-96.webp",
+   "iconFull": "assets/icons/st-03a778d0-184.webp"
   },
   {
    "key": "天空盒/内部货源",
@@ -4752,7 +4904,9 @@
      "nextId": "",
      "id": "aceffect_band_73"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-09c5300f-96.webp",
+   "iconFull": "assets/icons/st-09c5300f-184.webp"
   },
   {
    "key": "风丸/纸片替身",
@@ -4775,7 +4929,9 @@
      "nextId": "",
      "id": "aceffect_band_92"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-753e4956-96.webp",
+   "iconFull": "assets/icons/st-753e4956-184.webp"
   },
   {
    "key": "妮芙/溃心领域",
@@ -4831,7 +4987,9 @@
      "nextId": "",
      "id": "aceffect_band_110"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-0266b4c4-96.webp",
+   "iconFull": "assets/icons/st-0266b4c4-184.webp"
   },
   {
    "key": "夕/幻画为真",
@@ -4854,7 +5012,9 @@
      "nextId": "",
      "id": "aceffect_band_96"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-c35bf12b-96.webp",
+   "iconFull": "assets/icons/st-c35bf12b-184.webp"
   },
   {
    "key": "但书/条文修正",
@@ -4888,7 +5048,9 @@
      "nextId": "",
      "id": "aceffect_band_89"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-ed2f555e-96.webp",
+   "iconFull": "assets/icons/st-ed2f555e-184.webp"
   },
   {
    "key": "大嘴莫布/全场聚焦",
@@ -4911,7 +5073,9 @@
      "nextId": "",
      "id": "aceffect_band_102"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-fa2b7841-96.webp",
+   "iconFull": "assets/icons/st-fa2b7841-184.webp"
   },
   {
    "key": "杰西卡/集结指示",
@@ -4934,7 +5098,9 @@
      "nextId": "",
      "id": "aceffect_band_18"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-0d932841-96.webp",
+   "iconFull": "assets/icons/st-0d932841-184.webp"
   },
   {
    "key": "华法琳/重点监护",
@@ -4979,7 +5145,9 @@
      "nextId": "",
      "id": "aceffect_band_33"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-aced5a2f-96.webp",
+   "iconFull": "assets/icons/st-aced5a2f-184.webp"
   },
   {
    "key": "桑葚/药枚实验",
@@ -5013,7 +5181,9 @@
      "nextId": "",
      "id": "aceffect_band_38"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-d26f40e4-96.webp",
+   "iconFull": "assets/icons/st-d26f40e4-184.webp"
   },
   {
    "key": "奥达/全力熔铸",
@@ -5036,7 +5206,9 @@
      "nextId": "",
      "id": "aceffect_band_77"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-559c4d55-96.webp",
+   "iconFull": "assets/icons/st-559c4d55-184.webp"
   },
   {
    "key": "陈/以己之长",
@@ -5059,7 +5231,9 @@
      "nextId": "",
      "id": "aceffect_band_12"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-d187eb01-96.webp",
+   "iconFull": "assets/icons/st-d187eb01-184.webp"
   },
   {
    "key": "老鲤/得闲饮茶",
@@ -5082,7 +5256,9 @@
      "nextId": "",
      "id": "aceffect_band_8"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-28d41368-96.webp",
+   "iconFull": "assets/icons/st-28d41368-184.webp"
   },
   {
    "key": "芬/协力共进",
@@ -5105,7 +5281,9 @@
      "nextId": "",
      "id": "aceffect_band_19"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-d5c6c10b-96.webp",
+   "iconFull": "assets/icons/st-d5c6c10b-184.webp"
   },
   {
    "key": "Touch/外勤医疗",
@@ -5128,7 +5306,9 @@
      "nextId": "",
      "id": "aceffect_band_61"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-0391a257-96.webp",
+   "iconFull": "assets/icons/st-0391a257-184.webp"
   },
   {
    "key": "森蚺/暴躁铁皮",
@@ -5151,7 +5331,9 @@
      "nextId": "",
      "id": "aceffect_band_103"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-d84571e4-96.webp",
+   "iconFull": "assets/icons/st-d84571e4-184.webp"
   },
   {
    "key": "寻宝人/宝藏探机",
@@ -5174,7 +5356,9 @@
      "nextId": "",
      "id": "aceffect_band_100"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-f4faf179-96.webp",
+   "iconFull": "assets/icons/st-f4faf179-184.webp"
   },
   {
    "key": "缪尔赛思/至纯凝结",
@@ -5197,7 +5381,9 @@
      "nextId": "",
      "id": "aceffect_band_99"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-d5182605-96.webp",
+   "iconFull": "assets/icons/st-d5182605-184.webp"
   },
   {
    "key": "Misery/消解空间",
@@ -5220,7 +5406,9 @@
      "nextId": "",
      "id": "aceffect_band_91"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-f5aa7304-96.webp",
+   "iconFull": "assets/icons/st-f5aa7304-184.webp"
   },
   {
    "key": "“变形者集群”/变形同构",
@@ -5243,7 +5431,9 @@
      "nextId": "",
      "id": "aceffect_band_13"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-1faed0da-96.webp",
+   "iconFull": "assets/icons/st-1faed0da-184.webp"
   },
   {
    "key": "小贾斯汀/私募基金",
@@ -5266,7 +5456,9 @@
      "nextId": "",
      "id": "aceffect_band_80"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-8ac32bc3-96.webp",
+   "iconFull": "assets/icons/st-8ac32bc3-184.webp"
   },
   {
    "key": "铃兰/御守之力",
@@ -5289,7 +5481,9 @@
      "nextId": "",
      "id": "aceffect_band_97"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-5b804c41-96.webp",
+   "iconFull": "assets/icons/st-5b804c41-184.webp"
   },
   {
    "key": "苏苏洛/强制休整",
@@ -5312,7 +5506,9 @@
      "nextId": "",
      "id": "aceffect_band_90"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-6b3f35f7-96.webp",
+   "iconFull": "assets/icons/st-6b3f35f7-184.webp"
   },
   {
    "key": "昆图斯/不稳定要素",
@@ -5346,7 +5542,9 @@
      "nextId": "",
      "id": "aceffect_band_112"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-4c69c54c-96.webp",
+   "iconFull": "assets/icons/st-4c69c54c-184.webp"
   },
   {
    "key": "信仰搅拌机/献身护卫",
@@ -5380,7 +5578,9 @@
      "nextId": "",
      "id": "aceffect_band_94"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-75b6e1f9-96.webp",
+   "iconFull": "assets/icons/st-75b6e1f9-184.webp"
   },
   {
    "key": "“追随者们”/好多委托！",
@@ -5403,7 +5603,9 @@
      "nextId": "",
      "id": "aceffect_band_72"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-1983bd12-96.webp",
+   "iconFull": "assets/icons/st-1983bd12-184.webp"
   },
   {
    "key": "坎诺特/利滚利",
@@ -5426,7 +5628,9 @@
      "nextId": "",
      "id": "aceffect_band_15"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-12034ba5-96.webp",
+   "iconFull": "assets/icons/st-12034ba5-184.webp"
   },
   {
    "key": "鸭爵/“神秘顾客”",
@@ -5449,7 +5653,9 @@
      "nextId": "",
      "id": "aceffect_band_16"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-3d2e5876-96.webp",
+   "iconFull": "assets/icons/st-3d2e5876-184.webp"
   },
   {
    "key": "琳琅诗怀雅/最佳品味",
@@ -5494,7 +5700,9 @@
      "nextId": "",
      "id": "aceffect_band_55"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-8f66b1b6-96.webp",
+   "iconFull": "assets/icons/st-8f66b1b6-184.webp"
   },
   {
    "key": "巫恋/替身娃娃",
@@ -5517,7 +5725,9 @@
      "nextId": "",
      "id": "aceffect_band_98"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-b97b1646-96.webp",
+   "iconFull": "assets/icons/st-b97b1646-184.webp"
   },
   {
    "key": "三船光平/东之极道",
@@ -5540,7 +5750,9 @@
      "nextId": "",
      "id": "aceffect_band_105"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-69a946b4-96.webp",
+   "iconFull": "assets/icons/st-69a946b4-184.webp"
   },
   {
    "key": "雅拉/人才锁定",
@@ -5563,7 +5775,9 @@
      "nextId": "",
      "id": "aceffect_band_74"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-9364136f-96.webp",
+   "iconFull": "assets/icons/st-9364136f-184.webp"
   },
   {
    "key": "渡桥/专享情报",
@@ -5586,7 +5800,9 @@
      "nextId": "",
      "id": "aceffect_band_106"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-b40ce877-96.webp",
+   "iconFull": "assets/icons/st-b40ce877-184.webp"
   },
   {
    "key": "Mechanist/精巧设计",
@@ -5609,7 +5825,9 @@
      "nextId": "",
      "id": "aceffect_band_78"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-01e113e0-96.webp",
+   "iconFull": "assets/icons/st-01e113e0-184.webp"
   },
   {
    "key": "布丁/电气化！",
@@ -5632,7 +5850,9 @@
      "nextId": "",
      "id": "aceffect_band_86"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-e31f0f57-96.webp",
+   "iconFull": "assets/icons/st-e31f0f57-184.webp"
   },
   {
    "key": "拜松/打包速递",
@@ -5655,7 +5875,9 @@
      "nextId": "",
      "id": "aceffect_band_75"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-d8b3c181-96.webp",
+   "iconFull": "assets/icons/st-d8b3c181-184.webp"
   },
   {
    "key": "Pith/优等生",
@@ -5678,7 +5900,9 @@
      "nextId": "",
      "id": "aceffect_band_14"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-f96f2eb9-96.webp",
+   "iconFull": "assets/icons/st-f96f2eb9-184.webp"
   },
   {
    "key": "坚雷/正直教官",
@@ -5701,7 +5925,9 @@
      "nextId": "",
      "id": "aceffect_band_87"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-e0ce649a-96.webp",
+   "iconFull": "assets/icons/st-e0ce649a-184.webp"
   },
   {
    "key": "复奏/二重奏",
@@ -5724,7 +5950,9 @@
      "nextId": "",
      "id": "aceffect_band_76"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-371546d9-96.webp",
+   "iconFull": "assets/icons/st-371546d9-184.webp"
   },
   {
    "key": "望/黑白相易",
@@ -5747,7 +5975,9 @@
      "nextId": "",
      "id": "aceffect_band_83"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-7af9108c-96.webp",
+   "iconFull": "assets/icons/st-7af9108c-184.webp"
   },
   {
    "key": "杜遥夜/广交豪杰",
@@ -5770,7 +6000,9 @@
      "nextId": "",
      "id": "aceffect_band_79"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-1497e739-96.webp",
+   "iconFull": "assets/icons/st-1497e739-184.webp"
   },
   {
    "key": "娜仁图亚/沙洲梦魇",
@@ -5793,7 +6025,9 @@
      "nextId": "",
      "id": "aceffect_band_69"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-de159382-96.webp",
+   "iconFull": "assets/icons/st-de159382-184.webp"
   },
   {
    "key": "佩佩/博学多通",
@@ -5816,7 +6050,9 @@
      "nextId": "",
      "id": "aceffect_band_29"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-a5ec4d51-96.webp",
+   "iconFull": "assets/icons/st-a5ec4d51-184.webp"
   },
   {
    "key": "洛洛/自发制造",
@@ -5839,7 +6075,9 @@
      "nextId": "",
      "id": "aceffect_band_66"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-271c20ca-96.webp",
+   "iconFull": "assets/icons/st-271c20ca-184.webp"
   },
   {
    "key": "哈洛德/人才盲盒",
@@ -5862,7 +6100,9 @@
      "nextId": "",
      "id": "aceffect_band_30"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-63a1700f-96.webp",
+   "iconFull": "assets/icons/st-63a1700f-184.webp"
   },
   {
    "key": "歌蕾蒂娅/猎人战法",
@@ -5896,7 +6136,9 @@
      "nextId": "",
      "id": "aceffect_band_68"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-1339d579-96.webp",
+   "iconFull": "assets/icons/st-1339d579-184.webp"
   },
   {
    "key": "克莱门莎/崇高牺牲",
@@ -5919,7 +6161,9 @@
      "nextId": "",
      "id": "aceffect_band_9"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-0fa3864c-96.webp",
+   "iconFull": "assets/icons/st-0fa3864c-184.webp"
   },
   {
    "key": "焰尾/骑士团长",
@@ -5942,7 +6186,9 @@
      "nextId": "",
      "id": "aceffect_band_62"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-38c26de0-96.webp",
+   "iconFull": "assets/icons/st-38c26de0-184.webp"
   },
   {
    "key": "玛恩纳/业务指标",
@@ -5965,7 +6211,9 @@
      "nextId": "",
      "id": "aceffect_band_20"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-feecaca2-96.webp",
+   "iconFull": "assets/icons/st-feecaca2-184.webp"
   },
   {
    "key": "耶拉/不融信念",
@@ -5988,7 +6236,9 @@
      "nextId": "",
      "id": "aceffect_band_104"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-c6432303-96.webp",
+   "iconFull": "assets/icons/st-c6432303-184.webp"
   },
   {
    "key": "休露丝/雪域礼赠",
@@ -6011,7 +6261,9 @@
      "nextId": "",
      "id": "aceffect_band_81"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-dc2b3b39-96.webp",
+   "iconFull": "assets/icons/st-dc2b3b39-184.webp"
   },
   {
    "key": "裁度/量体裁衣",
@@ -6034,7 +6286,9 @@
      "nextId": "",
      "id": "aceffect_band_65"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-3e03fa9e-96.webp",
+   "iconFull": "assets/icons/st-3e03fa9e-184.webp"
   },
   {
    "key": "贾维/团伙行动",
@@ -6057,7 +6311,9 @@
      "nextId": "",
      "id": "aceffect_band_82"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-5ddb122e-96.webp",
+   "iconFull": "assets/icons/st-5ddb122e-184.webp"
   },
   {
    "key": "车尔尼/流动乐章",
@@ -6080,7 +6336,9 @@
      "nextId": "",
      "id": "aceffect_band_70"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-e96890f7-96.webp",
+   "iconFull": "assets/icons/st-e96890f7-184.webp"
   },
   {
    "key": "怒潮凛冬/无惧风雪",
@@ -6103,7 +6361,9 @@
      "nextId": "",
      "id": "aceffect_band_71"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-4f2ada30-96.webp",
+   "iconFull": "assets/icons/st-4f2ada30-184.webp"
   },
   {
    "key": "引星棘刺/出航时刻",
@@ -6137,7 +6397,9 @@
      "nextId": "",
      "id": "aceffect_band_85"
     }
-   ]
+   ],
+   "icon": "assets/icons/st-97dec0f0-96.webp",
+   "iconFull": "assets/icons/st-97dec0f0-184.webp"
   }
  ],
  "covenants": [
@@ -6168,7 +6430,9 @@
     "夕"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-92510a49-48.webp",
+   "iconFull": "assets/icons/cv-92510a49-96.webp"
   },
   {
    "key": "sargonShip",
@@ -6197,7 +6461,9 @@
     "真言"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-8f08277b-48.webp",
+   "iconFull": "assets/icons/cv-8f08277b-96.webp"
   },
   {
    "key": "victoriaShip",
@@ -6227,7 +6493,9 @@
     "酒神"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-a31161fe-48.webp",
+   "iconFull": "assets/icons/cv-a31161fe-96.webp"
   },
   {
    "key": "kjeragShip",
@@ -6257,7 +6525,9 @@
     "锏"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-0a6314f6-48.webp",
+   "iconFull": "assets/icons/cv-0a6314f6-96.webp"
   },
   {
    "key": "egirShip",
@@ -6286,7 +6556,9 @@
     "克莱门莎"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-8f2377fa-48.webp",
+   "iconFull": "assets/icons/cv-8f2377fa-96.webp"
   },
   {
    "key": "siracusaShip",
@@ -6315,7 +6587,9 @@
     "荒芜拉普兰德"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-e1d5a7a9-48.webp",
+   "iconFull": "assets/icons/cv-e1d5a7a9-96.webp"
   },
   {
    "key": "kazimierzShip",
@@ -6344,7 +6618,9 @@
     "锏"
    ],
    "memberCount": 10,
-   "garrison": true
+   "garrison": true,
+   "icon": "assets/icons/cv-1f6611c6-48.webp",
+   "iconFull": "assets/icons/cv-1f6611c6-96.webp"
   },
   {
    "key": "ursusShip",
@@ -6373,7 +6649,9 @@
     "塔露拉"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-88803819-48.webp",
+   "iconFull": "assets/icons/cv-88803819-96.webp"
   },
   {
    "key": "iberiaShip",
@@ -6402,7 +6680,9 @@
     "引星棘刺"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-b9057624-48.webp",
+   "iconFull": "assets/icons/cv-b9057624-96.webp"
   },
   {
    "key": "lethaniaShip",
@@ -6431,7 +6711,9 @@
     "锏"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-2f3edf5b-48.webp",
+   "iconFull": "assets/icons/cv-2f3edf5b-96.webp"
   },
   {
    "key": "preciShip",
@@ -6462,7 +6744,9 @@
     "蕾缪安"
    ],
    "memberCount": 12,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-25815209-48.webp",
+   "iconFull": "assets/icons/cv-25815209-96.webp"
   },
   {
    "key": "swiftShip",
@@ -6495,7 +6779,9 @@
     "妮芙"
    ],
    "memberCount": 12,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-93406de7-48.webp",
+   "iconFull": "assets/icons/cv-93406de7-96.webp"
   },
   {
    "key": "skillfulShip",
@@ -6528,7 +6814,9 @@
     "帕拉斯"
    ],
    "memberCount": 12,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-cc929b5f-48.webp",
+   "iconFull": "assets/icons/cv-cc929b5f-96.webp"
   },
   {
    "key": "steadShip",
@@ -6560,7 +6848,9 @@
     "机械师"
    ],
    "memberCount": 13,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-dc7e4f32-48.webp",
+   "iconFull": "assets/icons/cv-dc7e4f32-96.webp"
   },
   {
    "key": "deputShip",
@@ -6588,7 +6878,9 @@
     "帕拉斯"
    ],
    "memberCount": 9,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-0d725916-48.webp",
+   "iconFull": "assets/icons/cv-0d725916-96.webp"
   },
   {
    "key": "visiShip",
@@ -6622,7 +6914,9 @@
     "妮芙"
    ],
    "memberCount": 9,
-   "garrison": true
+   "garrison": true,
+   "icon": "assets/icons/cv-cd2a2697-48.webp",
+   "iconFull": "assets/icons/cv-cd2a2697-96.webp"
   },
   {
    "key": "miraShip",
@@ -6653,7 +6947,9 @@
     "遥"
    ],
    "memberCount": 10,
-   "garrison": true
+   "garrison": true,
+   "icon": "assets/icons/cv-6a002b4c-48.webp",
+   "iconFull": "assets/icons/cv-6a002b4c-96.webp"
   },
   {
    "key": "investShip",
@@ -6679,7 +6975,9 @@
     "可露希尔"
    ],
    "memberCount": 5,
-   "garrison": true
+   "garrison": true,
+   "icon": "assets/icons/cv-f872baa2-48.webp",
+   "iconFull": "assets/icons/cv-f872baa2-96.webp"
   },
   {
    "key": "raidShip",
@@ -6710,7 +7008,9 @@
     "史尔特尔"
    ],
    "memberCount": 10,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-3969f554-48.webp",
+   "iconFull": "assets/icons/cv-3969f554-96.webp"
   },
   {
    "key": "indomShip",
@@ -6740,7 +7040,9 @@
     "史尔特尔"
    ],
    "memberCount": 11,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-0730d798-48.webp",
+   "iconFull": "assets/icons/cv-0730d798-96.webp"
   },
   {
    "key": "maniShip",
@@ -6759,7 +7061,9 @@
     "魔王"
    ],
    "memberCount": 2,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-5171ca2b-48.webp",
+   "iconFull": "assets/icons/cv-5171ca2b-96.webp"
   },
   {
    "key": "emptyShip",
@@ -6784,7 +7088,9 @@
     "缪尔赛思"
    ],
    "memberCount": 8,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-b0925f13-48.webp",
+   "iconFull": "assets/icons/cv-b0925f13-96.webp"
   },
   {
    "key": "soloShip",
@@ -6806,7 +7112,9 @@
     "水灯心"
    ],
    "memberCount": 3,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-3cd088c2-48.webp",
+   "iconFull": "assets/icons/cv-3cd088c2-96.webp"
   },
   {
    "key": "suntShip",
@@ -6828,7 +7136,9 @@
    "cond": "BOARD_ALL_CHESS",
    "members": [],
    "memberCount": 0,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-279f10ee-48.webp",
+   "iconFull": "assets/icons/cv-279f10ee-96.webp"
   },
   {
    "key": "docShip",
@@ -6859,7 +7169,9 @@
     "遥"
    ],
    "memberCount": 12,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-115b6227-48.webp",
+   "iconFull": "assets/icons/cv-115b6227-96.webp"
   },
   {
    "key": "arcaneShip",
@@ -6892,7 +7204,9 @@
     "夕"
    ],
    "memberCount": 14,
-   "garrison": false
+   "garrison": false,
+   "icon": "assets/icons/cv-f2c33fba-48.webp",
+   "iconFull": "assets/icons/cv-f2c33fba-96.webp"
   }
  ],
  "fusions": [

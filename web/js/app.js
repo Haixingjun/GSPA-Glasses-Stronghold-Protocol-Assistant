@@ -110,16 +110,18 @@
   /* ---------------- 头像开关（纯展示偏好，不进 URL） ---------------- */
   function initAvatarPref() {
     var btn = els.avatars;
-    if (global.GARRISON_NO_AVATARS) {
+    if (global.GARRISON_NO_AVATARS || global.GARRISON_NO_ICONS) {
       document.body.classList.add('no-avatars');
       if (btn) btn.hidden = true;
       return;
     }
     var data = global.GARRISON_DATA || {};
-    var ops = data.operators || [];
+    var groups = [data.operators || [], data.items || [], data.strategies || [], data.covenants || []];
     var hasAny = false;
-    for (var i = 0; i < ops.length; i++) {
-      if (ops[i].avatar) { hasAny = true; break; }
+    for (var g = 0; g < groups.length && !hasAny; g++) {
+      for (var i = 0; i < groups[g].length; i++) {
+        if (groups[g][i].avatar || groups[g][i].icon) { hasAny = true; break; }
+      }
     }
     if (btn) btn.hidden = !hasAny;
     if (!hasAny) return;
@@ -136,7 +138,7 @@
     var btn = els.avatars;
     if (btn) {
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      btn.title = on ? '隐藏头像' : '显示头像';
+      btn.title = on ? '隐藏头像与图标' : '显示头像与图标';
     }
   }
 
@@ -206,7 +208,8 @@
 
   function onImgError(e) {
     var t = e.target;
-    if (t && t.tagName === 'IMG' && t.classList.contains('avatar-img')) {
+    if (t && t.tagName === 'IMG' &&
+        (t.classList.contains('avatar-img') || t.classList.contains('icon-img'))) {
       t.classList.add('is-broken');
       t.removeAttribute('src');
     }

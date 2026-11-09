@@ -519,6 +519,37 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
 }
 .avatar-img.is-broken { display: none; }
 body.no-avatars .avatar { display: none; }
+
+/* 道具 / 策略 / 盟约图标：透明底白色线稿统一放在深色底座上，浅色主题也清楚 */
+.icon {
+  position: relative; display: grid; place-items: center; flex: none;
+  width: var(--size, 44px); height: var(--size, 44px);
+  border-radius: 10px; overflow: hidden;
+  background:
+    radial-gradient(130% 120% at 30% 12%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 46%),
+    linear-gradient(155deg, #2c3540 0%, #161b21 72%, #101419 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.18);
+  color: hsl(var(--h, 210), 70%, 74%);
+  font-weight: 700; font-size: calc(var(--size, 44px) * 0.38);
+  line-height: 1; -webkit-user-select: none; user-select: none;
+}
+[data-theme="light"] .icon {
+  border-color: rgba(15, 23, 32, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.icon-letter { position: relative; z-index: 0; }
+.icon-img {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%; object-fit: contain;
+}
+.icon-img.is-broken { display: none; }
+.icon-strategy { border-radius: 12px; }
+.icon-strategy .icon-img { object-fit: cover; }
+.icon-covenant { border-radius: 50%; border-color: hsla(var(--h, 210), 62%, 62%, 0.42); }
+.icon-covenant .icon-img { inset: 9%; width: auto; height: auto; }
+body.no-avatars .icon { display: none; }
+
 .card-badges { display: flex; align-items: center; gap: 5px; flex: none; }
 
 .tier {

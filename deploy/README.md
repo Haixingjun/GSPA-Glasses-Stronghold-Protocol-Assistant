@@ -12,8 +12,9 @@ python tools/build_dist.py
 | 路径 | 用途 |
 | --- | --- |
 | `dist/` | 目录版，服务器 / Cloudflare Pages / B站 Toy 静态包都用它 |
-| `dist/standalone.html` | 单文件版，CSS+JS+数据全内联，双击即开、单文件发送（不含头像） |
+| `dist/standalone.html` | 单文件版，CSS+JS+数据全内联，双击即开、单文件发送（不含头像与图标） |
 | `dist/assets/avatars/` | 143 名干员头像（96px / 180px WebP，共约 2.7 MB，懒加载） |
+| `dist/assets/icons/` | 157 个道具/策略/盟约图标（两档 WebP，共约 2.0 MB，懒加载） |
 | `build/garrison-web.zip` | 目录版的 zip，B站 Toy 上传用 |
 | `dist/BUILD_INFO.txt` | 本次构建的版本、指纹、体积报告 |
 
@@ -21,7 +22,7 @@ python tools/build_dist.py
 
 1. **所有资源都是相对路径**（`assets/…`、`js/…`、`data/…`），所以能放在任意子目录。
 2. **路由只用 `location.hash`**（`#/op/幽灵鲨`），不需要服务端重写规则，`file://` 也能用。
-3. **零外部请求**：不引 CDN、不引外链字体、不热链图片；头像是本地 WebP，随 `dist/` 一起上传。
+3. **零外部请求**：不引 CDN、不引外链字体、不热链图片；头像与图标都是本地 WebP，随 `dist/` 一起上传。
 
 ---
 
@@ -86,8 +87,9 @@ certbot --nginx -d your-domain.com
 **日常更新（一条命令）：**
 
 ```bash
-# 有新干员时才需要先抓头像（需要 Pillow；系统 Python 没装就用工作区自带的）
+# 有新干员 / 道具 / 策略 / 盟约时才需要先抓素材（需要 Pillow；系统 Python 没装就用工作区自带的）
 python tools/prepare_avatars.py
+python tools/prepare_icons.py
 python tools/build_dist.py && scp -r dist/* root@<IP>:/var/www/garrison/
 ```
 
@@ -123,7 +125,7 @@ Toy 的定位是「绑在视频/动态上的互动小玩具」，不是独立站
 - [x] hash 路由，不需要服务端重写；iframe 内嵌不会被 `pushState` 卡住
 - [x] 移动端优先：单列布局、底部 Tab、安全区适配、`viewport-fit=cover`
 - [x] 触控目标 ≥ 27px，支持 320px 宽度不横向滚动
-- [x] 包体：目录版约 2.9 MB（含 143 名干员头像 2.7 MB）；单文件版约 0.29 MB
+- [x] 包体：目录版约 4.9 MB（含 143 名干员头像 2.7 MB + 157 个图标 2.0 MB）；单文件版约 0.31 MB
 
 上传后建议在**B站 App 内**真机过一遍：微信/B站 WebView 的内核版本较杂，重点看首屏、搜索输入、详情抽屉和返回。
 
@@ -131,9 +133,10 @@ Toy 的定位是「绑在视频/动态上的互动小玩具」，不是独立站
 > - Toy 开发者 FAQ：<https://www.bilibili.com/opus/1241171666570051585>
 > - 官方示例仓库（含内容自检清单）：<https://github.com/bilibili/toy>
 
-**头像版权**：干员头像来自 PRTS wiki，美术版权归鹰角网络所有。若审核敏感或收到权利人异议，
-删掉 `dist/assets/avatars/` 即可（页面自动回退成色块首字，不会报错）；也可以把 `web/js/app.js`
-里 `initAvatarPref()` 的默认值改成关闭，让公开版默认不显示头像。
+**头像与图标版权**：干员头像、道具/策略/盟约图标来自 PRTS wiki 的本期「规程」页面，美术版权归鹰角网络所有。
+若审核敏感或收到权利人异议，删掉 `dist/assets/avatars/`、`dist/assets/icons/` 即可
+（页面自动回退成色块首字，不会报错）；也可以把 `web/js/app.js` 里 `initAvatarPref()` 的默认值改成关闭，
+让公开版默认不显示头像与图标。
 
 ### 如果 Toy 的沙箱限制比预期严格
 
@@ -242,9 +245,9 @@ cloudflared tunnel --url http://127.0.0.1:8080
 
 | 给谁 | 发什么 | 说明 |
 | --- | --- | --- |
-| 安卓 / 电脑 | `dist/standalone.html`（292 KB，无头像） | 对方保存后用浏览器打开，断网也能用 |
-| 微信 / QQ | `build/garrison-standalone.zip`（53 KB） | 单文件压缩包；微信对 `.html` 直传不友好，zip 更稳 |
-| 想连数据 + 头像一起给 | `build/garrison-web.zip`（2.9 MB） | 整站目录版，解压后打开 `index.html` |
+| 安卓 / 电脑 | `dist/standalone.html`（约 308 KB，无头像与图标） | 对方保存后用浏览器打开，断网也能用 |
+| 微信 / QQ | `build/garrison-standalone.zip`（约 59 KB） | 单文件压缩包；微信对 `.html` 直传不友好，zip 更稳 |
+| 想连数据 + 头像 + 图标一起给 | `build/garrison-web.zip`（约 4.9 MB） | 整站目录版，解压后打开 `index.html` |
 | iPhone | 建议发**链接**而不是文件 | iOS「文件」App 打开本地 HTML 的体验较差 |
 
 ### 8.6 让测试者怎么反馈

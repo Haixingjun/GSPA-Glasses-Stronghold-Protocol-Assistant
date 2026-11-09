@@ -136,6 +136,33 @@ if os.path.exists(AVATAR_MANIFEST):
             if p and not os.path.exists(os.path.join(ROOT, "web", p)):
                 warn("头像文件缺失：%s -> %s" % (name, p))
 
+# 图标清单（可选）：data/icons.json = {"season": "卫戍协议·规程",
+#     "items": {"维式重锤": {"list": "assets/icons/it-xxx-64.webp", ...}}, ...}
+# 只给「本期·规程」的道具 / 策略发起人 / 盟约图标；缺图时 icon 为 null，前端回退色块首字。
+ICON_MANIFEST = os.path.join(ROOT, "data", "icons.json")
+ICONS = {"items": {}, "strategies": {}, "covenants": {}}
+if os.path.exists(ICON_MANIFEST):
+    try:
+        with open(ICON_MANIFEST, encoding="utf-8") as f:
+            _icons = json.load(f)
+        for cat in ICONS:
+            if isinstance(_icons.get(cat), dict):
+                ICONS[cat] = _icons[cat]
+        if _icons.get("season") and _icons.get("season") != "卫戍协议·规程":
+            warn("图标清单的赛季是「%s」，与本项目「卫戍协议·规程」不一致" % _icons.get("season"))
+    except Exception as e:
+        warn("图标清单读取失败：%s" % e)
+    for cat in ICONS:
+        for key, meta in ICONS[cat].items():
+            for k in ("list", "full"):
+                p = meta.get(k)
+                if p and not os.path.exists(os.path.join(ROOT, "web", p)):
+                    warn("图标文件缺失：%s/%s -> %s" % (cat, key, p))
+
+
+def icon_meta(cat, key):
+    return ICONS.get(cat, {}).get(key) or {}
+
 
 def split_tags(*vals):
     out = []
@@ -210,6 +237,8 @@ for r in ITEM:
         "normalText": normal, "eliteText": elite or "未配置独立进阶形态",
         "hasElite": p2 not in ("", "—"),
         "fuseCount": int_or(fuse),
+        "icon": icon_meta("items", name).get("list"),
+        "iconFull": icon_meta("items", name).get("full"),
     })
 
 names = [x["name"] for x in items]
@@ -242,6 +271,8 @@ for r in STRAT:
         "key": key, "role": role, "name": name, "category": cat,
         "hp": hp, "text": desc, "unlock": unlock, "banned": banned,
         "stages": st,
+        "icon": icon_meta("strategies", role).get("list"),
+        "iconFull": icon_meta("strategies", role).get("full"),
     })
 
 roles = [s["role"] for s in strategies]
@@ -310,10 +341,20 @@ for r in COV:
         },
         "cond": cond, "members": members, "memberCount": len(members),
         "garrison": "整备区" in desc,
+        "icon": icon_meta("covenants", cid or name).get("list"),
+        "iconFull": icon_meta("covenants", cid or name).get("full"),
     })
 
 if len(covenants) != 26:
     err("盟约数为 %d" % len(covenants))
+
+# 图标清单的键必须能在本期数据里找到；多出来的多半是跨期残留
+for k in sorted(set(ICONS["items"]) - ITEM_NAMES):
+    warn("图标清单里的道具「%s」不在道具表（跨期残留？）" % k)
+for k in sorted(set(ICONS["strategies"]) - {s["role"] for s in strategies}):
+    warn("图标清单里的策略角色「%s」不在策略表（跨期残留？）" % k)
+for k in sorted(set(ICONS["covenants"]) - {(c["id"] or c["name"]) for c in covenants}):
+    warn("图标清单里的盟约「%s」不在盟约表（跨期残留？）" % k)
 
 # ---------------------------------------------------------------- 配方 / 增益
 fusions = []
@@ -379,6 +420,10 @@ lines.append("- 道具类型：" + dist(lambda o: o["type"], items))
 lines.append("- 道具阶数：" + dist(lambda o: o["tier"], items))
 lines.append("- 策略类别：" + dist(lambda s: s["category"], strategies))
 lines.append("- 盟约方式：" + dist(lambda c: c["activation"]["kind"], covenants))
+lines.append("- 图标覆盖：道具 %d/%d、策略 %d/%d、盟约 %d/%d" % (
+    sum(1 for x in items if x["icon"]), len(items),
+    sum(1 for x in strategies if x["icon"]), len(strategies),
+    sum(1 for x in covenants if x["icon"]), len(covenants)))
 lines.append("")
 lines.append("## 错误\n")
 lines.append("\n".join("- " + e for e in errors) if errors else "无")

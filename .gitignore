@@ -22,9 +22,13 @@ env/
 *.egg-info/
 
 # ---- 构建中间产物（可重跑，不进仓库）----
-# build/ 里只保留三份 .md 报告（见下方说明），其余都是缓存
+# build/ 里只保留四份 .md 报告（见下方说明），其余都是缓存
 build/avatar-cache/
+build/icon-cache/
 build/screenshots/
+build/edge-*/
+build/*.log
+build/standalone_dom.html
 build/*.zip
 
 # ---- 大图 / 历史截图（只留本地，避免仓库被几 MB 的截图撑大）----

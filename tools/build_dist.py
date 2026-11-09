@@ -101,10 +101,11 @@ def main():
         try:
             shutil.rmtree(DIST)
         except PermissionError:
-            print("无法删除 dist/：目录正被占用（可能开着本地预览服务器）。")
-            print("请先关掉 serving dist 的进程，或换一个目录再试。")
-            return 1
-    shutil.copytree(WEB, DIST)
+            # Windows 上目录可能被正在运行的预览服务器占着。删不掉不等于不能更新：
+            # 改为覆盖写入，旧版本的残留文件不会被删（带指纹的资源不会互相干扰）。
+            print("dist/ 正被占用，改为增量覆盖；旧版本残留文件不会删除。")
+            print("需要彻底清理时，先关掉预览服务再重跑本脚本。")
+    shutil.copytree(WEB, DIST, dirs_exist_ok=True)
 
     def bust(m):
         attr, url = m.group(1), m.group(2)
@@ -153,7 +154,7 @@ def main():
     )
     standalone = standalone.replace(
         "</head>",
-        "<script>window.GARRISON_NO_AVATARS = true;</script>\n</head>",
+        "<script>window.GARRISON_NO_AVATARS = true; window.GARRISON_NO_ICONS = true;</script>\n</head>",
         1,
     )
     write_text(os.path.join(DIST, "standalone.html"), standalone)
@@ -193,18 +194,27 @@ def main():
 
     lines.append("")
     avatar_files = [(r, s) for r, s in files if r.startswith("assets/avatars/")]
-    other_files = [(r, s) for r, s in files if not r.startswith("assets/avatars/")]
+    icon_files = [(r, s) for r, s in files if r.startswith("assets/icons/")]
+    other_files = [(r, s) for r, s in files
+                   if not r.startswith("assets/avatars/") and not r.startswith("assets/icons/")]
     lines.append("dist 文件清单：")
     for rel, size in other_files:
         lines.append("  %-26s %8s" % (rel, human(size)))
     if avatar_files:
         lines.append("  %-26s %8s" % ("assets/avatars/ (%d 个)" % len(avatar_files),
                                       human(sum(s for _r, s in avatar_files))))
+    if icon_files:
+        lines.append("  %-26s %8s" % ("assets/icons/ (%d 个)" % len(icon_files),
+                                      human(sum(s for _r, s in icon_files))))
 
-    avatar_line = ""
+    image_lines = []
     if avatar_files:
-        avatar_line = "头像：dist/assets/avatars 共 %d 个 WebP（%s），懒加载；单文件版不含头像。" % (
-            len(avatar_files), human(sum(s for _r, s in avatar_files)))
+        image_lines.append("头像：dist/assets/avatars 共 %d 个 WebP（%s），懒加载；单文件版不含头像。" % (
+            len(avatar_files), human(sum(s for _r, s in avatar_files))))
+    if icon_files:
+        image_lines.append("图标：dist/assets/icons 共 %d 个 WebP（%s，本期「规程」道具 / 策略 / 盟约）；"
+                           "单文件版不含图标。" % (
+                               len(icon_files), human(sum(s for _r, s in icon_files))))
 
     info = "\n".join([
         "卫戍协议小助手 · 构建产物说明",
@@ -216,7 +226,7 @@ def main():
         "",
         "部署：把整个 dist/ 目录上传到站点根目录或任意子目录即可。",
         "单文件：dist/standalone.html 可单独发送 / 双击打开，无需其他文件。",
-        avatar_line,
+        "\n".join(image_lines),
         "缓存：资源已带 ?v=%s，index.html 建议 no-cache，静态资源可长缓存。" % stamp,
         "",
     ] + lines + [""])
@@ -255,6 +265,8 @@ def main():
         problems.append("standalone.html 未内联数据")
     if "window.GARRISON_NO_AVATARS" not in sa_html:
         problems.append("standalone.html 缺少关闭头像的标记（单文件版不应引用外部头像）")
+    if "window.GARRISON_NO_ICONS" not in sa_html:
+        problems.append("standalone.html 缺少关闭图标的标记（单文件版不应引用外部图标）")
     if re.search(r'(?:src|href)="/(?!/)', sa_html):
         problems.append("standalone.html 出现绝对路径")
 
@@ -276,6 +288,19 @@ def main():
                         problems.append("data.json 引用的头像不存在：%s（%s）" % (p, o.get("name")))
         if missing_avatar > 3:
             problems.append("还有 %d 个头像引用缺失" % (missing_avatar - 3))
+
+        missing_icon = 0
+        for group in ("items", "strategies", "covenants"):
+            for e in dj.get(group, []):
+                for k in ("icon", "iconFull"):
+                    p = e.get(k)
+                    if p and not os.path.exists(os.path.join(DIST, p)):
+                        missing_icon += 1
+                        if missing_icon <= 3:
+                            problems.append("data.json 引用的图标不存在：%s（%s/%s）" % (
+                                p, group, e.get("name") or e.get("role") or e.get("key")))
+        if missing_icon > 3:
+            problems.append("还有 %d 个图标引用缺失" % (missing_icon - 3))
 
     if problems:
         print("\n自检未通过：")

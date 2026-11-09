@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    ui.js — DOM 构造：筛选面板、卡片、详情、关于页、页脚
    --------------------------------------------------------------------------
    全部字符串拼接 + 统一转义（Search.esc / Search.format），不信任数据里的任何
@@ -16,6 +16,7 @@
   var hueCache = {};
   var opByName = {};
   var NO_AVATARS = !!global.GARRISON_NO_AVATARS;
+  var NO_ICONS = !!global.GARRISON_NO_ICONS;
 
   var KIND_LABEL = {
     count: '人数',
@@ -95,6 +96,21 @@
       : '';
     return '<span class="avatar" style="--h:' + hue(name) + ';--size:' + size + 'px" aria-hidden="true">' +
       '<span class="avatar-letter">' + esc(initial(name)) + '</span>' + img + '</span>';
+  }
+
+  /* ---------------- 道具 / 策略 / 盟约图标 ----------------
+   * 三套图标都来自本期「卫戍协议·规程」的 PRTS 页面，透明底白色线稿居多，
+   * 因此统一放在深色底座上（浅色主题也清楚）；缺图/坏图回退「色块 + 首字」。
+   */
+  function iconHtml(entry, name, size, kind, full) {
+    if (NO_ICONS) return '';
+    var src = entry ? (full ? (entry.iconFull || entry.icon) : entry.icon) : null;
+    var img = src
+      ? '<img class="icon-img" src="' + esc(src) + '" alt="" width="' + size + '" height="' + size +
+        '" loading="lazy" decoding="async">'
+      : '';
+    return '<span class="icon icon-' + kind + '" style="--h:' + hue(name) + ';--size:' + size + 'px" aria-hidden="true">' +
+      '<span class="icon-letter">' + esc(initial(name)) + '</span>' + img + '</span>';
   }
 
   /* ======================================================================
@@ -553,6 +569,7 @@
 
     return cardOpen('item', o.name, label, active) +
       '<div class="card-top">' +
+      iconHtml(o, o.name, 44, 'item') +
       '<div class="card-title">' + Search.highlight(o.name, toks) + '</div>' +
       '<div class="card-badges">' +
       '<span class="tier" data-tier="' + o.tier + '">' + o.tier + '</span>' +
@@ -576,10 +593,10 @@
     var active = st.sel === s.key ? 'is-active' : '';
     var label = '角色 ' + s.role + ' 的策略「' + s.name + '」，' + s.category + '，生命值 ' + s.hp;
 
-    // 策略以「角色」为主体：大头像是角色，策略名作为副标题；效果统一放详情。
+    // 策略以「角色」为主体：大图标是策略发起人，策略名作为副标题；效果统一放详情。
     return cardOpen('strategy', s.key, label, active) +
       '<div class="card-top">' +
-      avatarHtml(null, s.role, 44) +
+      iconHtml(s, s.role, 44, 'strategy') +
       '<div class="card-main">' +
       '<div class="card-title">' + Search.highlight(s.role, toks) + '</div>' +
       '<div class="card-sub">策略「' + Search.highlight(s.name, toks) + '」</div>' +
@@ -609,6 +626,7 @@
 
     return cardOpen('covenant', c.name, label, active) +
       '<div class="card-top">' +
+      iconHtml(c, c.name, 40, 'covenant') +
       '<div class="card-title"><span class="tag" style="--h:' + hue(c.name) + ';font-size:13px">' +
       '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></div>' +
       '<div class="card-badges"><span class="pill">' + esc(KIND_LABEL[c.activation.kind] || c.activation.kind) + '</span></div>' +
@@ -722,7 +740,9 @@
   }
 
   function itemDetail(o, toks) {
-    var html = '<div class="d-head"><h2 class="d-title">' + Search.highlight(o.name, toks) + '</h2>' + closeBtn() + '</div>';
+    var html = '<div class="d-head">' + iconHtml(o, o.name, 64, 'item', true) +
+      '<div class="d-head-main"><h2 class="d-title">' + Search.highlight(o.name, toks) + '</h2></div>' +
+      closeBtn() + '</div>';
     html += '<div class="d-sub">' + esc(o.type) + ' · ' + o.tier + ' 阶 · 普通售价 ◈' + o.price +
       ' · 精锐售价 ' + (o.hasElite ? '◈' + o.elitePrice : '—（无进阶形态）') + '</div>';
 
@@ -780,7 +800,7 @@
 
   function strategyDetail(s, toks) {
     // 详情同样以角色为主体，策略名放在副标题
-    var html = '<div class="d-head">' + avatarHtml(null, s.role, 56) +
+    var html = '<div class="d-head">' + iconHtml(s, s.role, 64, 'strategy', true) +
       '<div class="d-head-main"><h2 class="d-title">' + Search.highlight(s.role, toks) + '</h2>' +
       '<div class="d-sub" style="margin-bottom:0">策略「' + Search.highlight(s.name, toks) + '」 · ' +
       esc(s.category) + ' · 生命值 ' + s.hp + '</div></div>' + closeBtn() + '</div>';
@@ -828,9 +848,10 @@
 
   function covenantDetail(c, toks) {
     var a = c.activation;
-    var html = '<div class="d-head"><h2 class="d-title">' +
+    var html = '<div class="d-head">' + iconHtml(c, c.name, 56, 'covenant', true) +
+      '<div class="d-head-main"><h2 class="d-title">' +
       '<span class="tag" style="--h:' + hue(c.name) + ';font-size:16px;padding:2px 10px">' +
-      '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></h2>' + closeBtn() + '</div>';
+      '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></h2></div>' + closeBtn() + '</div>';
 
     html += '<div class="d-sub">' + esc(KIND_LABEL[a.kind] || a.kind) + ' · 成员 ' + c.memberCount + ' 名' +
       (c.garrison ? ' · 整备区可计入' : '') + '</div>';
@@ -918,15 +939,17 @@
       '<li><b>深链</b>：地址栏就是状态。点右上角分享按钮复制链接，发给别人打开即还原视图、筛选和详情。</li>' +
       '<li><b>键盘</b>：<code>/</code> 聚焦搜索框，<code>Esc</code> 关闭详情，<code>←</code> <code>→</code> 在结果间切换。</li>' +
       '<li><b>标题</b>：卡片上的色块是盟约标签，颜色由盟约名哈希固定，全站一致；点击标签直接筛该盟约。</li>' +
-      '<li><b>头像</b>：顶栏的人像按钮可一键隐藏头像，隐藏后只用色块 + 首字；偏好会记住。</li>' +
+      '<li><b>图片</b>：顶栏的人像按钮可一键隐藏干员头像与道具 / 策略 / 盟约图标，隐藏后只用色块 + 首字；偏好会记住。</li>' +
       '</ul>' +
 
       '<h3>数据来源</h3>' +
       '<p>数据取自官方 Android 热更新解包（本期 V3_1），并经过构建期校验：表头守卫、行数断言、' +
       '枚举校验、引用完整性检查。页脚显示的数据版本即源表修改时间，可据此确认看到的是不是最新一版。</p>' +
-      '<p>干员头像抓取自 <a href="https://prts.wiki" target="_blank" rel="noopener noreferrer">PRTS wiki</a>' +
-      '（文件命名规则为「文件:头像_&lt;干员名&gt;.png」，180×180），游戏美术版权归鹰角网络所有，' +
-      '此处仅作非商业的玩家查询用途；如果权利人提出异议，关闭头像显示或删除对应文件即可。</p>' +
+      '<p>干员头像与道具 / 策略 / 盟约图标均抓取自 ' +
+      '<a href="https://prts.wiki" target="_blank" rel="noopener noreferrer">PRTS wiki</a>，' +
+      '并锚定本期「卫戍协议·规程」页面实际渲染的文件；策略图标为「策略发起人」头像，' +
+      '不混用 2024 / 2025-11「盟约」/ 2026-03「盟约 下半」的素材。游戏美术版权归鹰角网络所有，' +
+      '此处仅作非商业的玩家查询用途；如果权利人提出异议，关闭图片显示或删除对应文件即可。</p>' +
       '<p>已知限制：自选配置条目没有盟约与触发时机；「绝技」没有固定成员，按精锐数量判定；' +
       '「盟约·辅助干员」与「“暴躁铁皮”」默认隐藏，可在筛选里打开。</p>' +
 
