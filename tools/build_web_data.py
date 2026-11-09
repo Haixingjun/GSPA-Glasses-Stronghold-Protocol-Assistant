@@ -10,7 +10,7 @@
     2. 先校验，后导出；有 ERROR 时不产出数据文件（避免把坏数据发上线）。
     3. 所有规则性字段（盟约激活方式/阈值/强化条件）都写进 JSON，前端不写死。
 """
-import sys, io, os, re, json, time, hashlib
+import sys, io, os, re, json, time, hashlib, collections
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 try:
@@ -31,6 +31,21 @@ TIERS = ["I", "II", "III", "IV", "V", "VI"]
 LAYER_CV = {"迅捷", "灵巧", "远见", "奇迹", "投资人", "突袭"}
 SPECIAL_CV = {"调和", "独行", "协防干员"}
 ELITE_CV = {"绝技"}
+
+# 盟约分类是编辑口径，不写死在代码里：data/covenant_meta.json 维护
+#   rank:    core（核心盟约/主） | additional（附加盟约/副）
+#   family:  faction（阵营） | combat（战斗） | growth（成长） | special（特殊）
+#   functions: output/survival/sustain/stack/economy/summon/rule
+COV_RANK = {"core", "additional"}
+COV_FAMILY = {"faction", "combat", "growth", "special"}
+COV_FUNC = {"output", "survival", "sustain", "stack", "economy", "summon", "rule"}
+COV_RANK_LABEL = {"core": "核心（主）", "additional": "附加（副）"}
+COV_FAMILY_LABEL = {"faction": "阵营", "combat": "战斗", "growth": "成长", "special": "特殊"}
+COV_FUNC_LABEL = {
+    "output": "输出", "survival": "生存", "sustain": "续航", "stack": "叠层",
+    "economy": "经济", "summon": "召唤", "rule": "规则",
+}
+COV_META_PATH = os.path.join(ROOT, "data", "covenant_meta.json")
 
 errors, warnings = [], []
 
@@ -114,6 +129,26 @@ for name, (data, n) in expect.items():
 COV_NAMES = {r[0] for r in COV}
 OP_NAMES = {r[0] for r in OP}
 ITEM_NAMES = {r[0] for r in ITEM}
+
+# 盟约分类元数据：缺文件/缺条目直接报错，避免前端拿到半套分类。
+COV_META = {}
+if not os.path.exists(COV_META_PATH):
+    err("缺少盟约分类文件 data/covenant_meta.json")
+else:
+    try:
+        with open(COV_META_PATH, encoding="utf-8") as f:
+            _meta = json.load(f)
+        if not isinstance(_meta, dict):
+            err("data/covenant_meta.json 顶层必须是对象")
+        else:
+            COV_META = _meta
+    except Exception as e:
+        err("data/covenant_meta.json 读取失败：%s" % e)
+
+for _name in sorted(set(COV_META) - COV_NAMES):
+    warn("盟约分类文件里的「%s」不在盟约表（跨期残留？）" % _name)
+for _name in sorted(COV_NAMES - set(COV_META)):
+    err("盟约「%s」缺少分类（data/covenant_meta.json）" % _name)
 
 # 头像清单（可选）：data/avatars.json = {"幽灵鲨": {"list": "assets/avatars/youlingxia-96.webp",
 #                                                   "full": "assets/avatars/youlingxia-256.webp",
@@ -333,20 +368,66 @@ for r in COV:
     elif kind == "elite":
         nodes = nums or [2, 5]
 
+    # 官方口径：核心盟约=阵营，附加盟约=能力。
+    meta = COV_META.get(name) or {}
+    rank = meta.get("rank")
+    family = meta.get("family")
+    functions = meta.get("functions")
+    if rank not in COV_RANK:
+        err("盟约「%s」层级非法：%r" % (name, rank))
+        rank = "additional"
+    if family not in COV_FAMILY:
+        err("盟约「%s」子类非法：%r" % (name, family))
+        family = "special"
+    if not isinstance(functions, list) or not functions:
+        err("盟约「%s」功能标签为空或非法：%r" % (name, functions))
+        functions = []
+    else:
+        for fn in functions:
+            if fn not in COV_FUNC:
+                err("盟约「%s」功能标签「%s」非法" % (name, fn))
+
+    # 强化人数从描述里的「在场N名…」取；特殊盟约（调和/协防/独行）没有统一人数强化。
+    emp_nums = []
+    if kind != "special":
+        for t in tags:
+            for n in re.findall(r"在场(\d+)名", t):
+                emp_nums.append(int(n))
+    empower_threshold = max(emp_nums) if emp_nums else None
+
     covenants.append({
         "key": cid or name, "id": cid, "name": name, "desc": desc,
+        "rank": rank, "family": family, "functions": functions,
         "activation": {
             "kind": kind, "threshold": count, "nodes": nodes,
-            "empower": tags,
+            "empower": tags, "empowerThreshold": empower_threshold,
         },
         "cond": cond, "members": members, "memberCount": len(members),
-        "garrison": "整备区" in desc,
+        # 只有 BOARD_AND_DECK 才把整备区计入激活；卡西米尔是 BOARD，
+        # 它的「整备区」只出现在 6 人强化的召唤效果里。
+        "garrison": cond == "BOARD_AND_DECK",
         "icon": icon_meta("covenants", cid or name).get("list"),
         "iconFull": icon_meta("covenants", cid or name).get("full"),
     })
 
 if len(covenants) != 26:
     err("盟约数为 %d" % len(covenants))
+
+rank_counts = collections.Counter(c["rank"] for c in covenants)
+family_counts = collections.Counter(c["family"] for c in covenants)
+if rank_counts.get("core") != 10 or rank_counts.get("additional") != 16:
+    err("盟约层级数量不符：核心 %d / 附加 %d（期望 10 / 16）" %
+        (rank_counts.get("core", 0), rank_counts.get("additional", 0)))
+if family_counts.get("faction") != 10 or family_counts.get("combat") != 6 \
+        or family_counts.get("growth") != 6 or family_counts.get("special") != 4:
+    err("盟约子类数量不符：阵营 %d / 战斗 %d / 成长 %d / 特殊 %d（期望 10 / 6 / 6 / 4）" %
+        (family_counts.get("faction", 0), family_counts.get("combat", 0),
+         family_counts.get("growth", 0), family_counts.get("special", 0)))
+for c in covenants:
+    if c["rank"] == "core" and c["family"] != "faction":
+        err("核心盟约「%s」的子类必须是 faction，实际 %s" % (c["name"], c["family"]))
+    if c["rank"] == "additional" and c["family"] == "faction":
+        err("附加盟约「%s」不应使用 faction 子类" % c["name"])
 
 # 图标清单的键必须能在本期数据里找到；多出来的多半是跨期残留
 for k in sorted(set(ICONS["items"]) - ITEM_NAMES):
@@ -419,7 +500,13 @@ lines.append("- 触发时机：" + dist(lambda o: o["normalTrigger"], operators)
 lines.append("- 道具类型：" + dist(lambda o: o["type"], items))
 lines.append("- 道具阶数：" + dist(lambda o: o["tier"], items))
 lines.append("- 策略类别：" + dist(lambda s: s["category"], strategies))
+lines.append("- 盟约层级：" + dist(lambda c: COV_RANK_LABEL.get(c["rank"], c["rank"]), covenants))
+lines.append("- 盟约子类：" + dist(lambda c: COV_FAMILY_LABEL.get(c["family"], c["family"]), covenants))
+func_counts = collections.Counter(fn for c in covenants for fn in c["functions"])
+lines.append("- 盟约功能：" + "、".join("%s %d" % (COV_FUNC_LABEL[k], func_counts[k])
+    for k in ["output", "survival", "sustain", "stack", "economy", "summon", "rule"]))
 lines.append("- 盟约方式：" + dist(lambda c: c["activation"]["kind"], covenants))
+lines.append("- 整备区可计入：" + dist(lambda c: "是" if c["garrison"] else "否", covenants))
 lines.append("- 图标覆盖：道具 %d/%d、策略 %d/%d、盟约 %d/%d" % (
     sum(1 for x in items if x["icon"]), len(items),
     sum(1 for x in strategies if x["icon"]), len(strategies),
@@ -461,7 +548,7 @@ else:
         ("干员", "operators", ["tierLabel", "tags", "type", "hidden", "price", "normalText", "eliteText"]),
         ("道具", "items", ["type", "tier", "price", "elitePrice", "normalText", "eliteText"]),
         ("策略", "strategies", ["role", "name", "category", "hp", "text"]),
-        ("盟约", "covenants", ["name", "desc", "members"]),
+        ("盟约", "covenants", ["name", "desc", "rank", "family", "functions", "members"]),
     ]
     total = 0
     for label, key, fields in groups:

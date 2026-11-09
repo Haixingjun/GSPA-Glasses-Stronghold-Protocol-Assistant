@@ -53,7 +53,9 @@
         e: o,
         h: low([
           o.name, o.desc, (o.activation.empower || []).join(' '),
-          (o.members || []).join(' '), kindLabel(o.activation.kind)
+          (o.members || []).join(' '), kindLabel(o.activation.kind),
+          rankLabel(o.rank), familyLabel(o.family),
+          (o.functions || []).map(funcLabel).join(' ')
         ].join(SEP))
       };
     });
@@ -71,6 +73,19 @@
     if (kind === 'elite') return '精锐数';
     return '特殊';
   }
+
+  var RANK_LABEL = { core: '核心', additional: '附加' };
+  var FAMILY_LABEL = { faction: '阵营', combat: '战斗', growth: '成长', special: '特殊' };
+  var FUNC_LABEL = {
+    output: '输出', survival: '生存', sustain: '续航', stack: '叠层',
+    economy: '经济', summon: '召唤', rule: '规则'
+  };
+  var RANK_ORDER = { core: 0, additional: 1 };
+  var FAMILY_ORDER = { faction: 0, combat: 1, growth: 2, special: 3 };
+
+  function rankLabel(rank) { return RANK_LABEL[rank] || rank || ''; }
+  function familyLabel(family) { return FAMILY_LABEL[family] || family || ''; }
+  function funcLabel(fn) { return FUNC_LABEL[fn] || fn || ''; }
 
   /* ---------------- 分词 / 匹配 ---------------- */
   function tokens(q) {
@@ -144,6 +159,8 @@
       } else if (view === 'strategy') {
         if (st.icats.length && st.icats.indexOf(e.category) < 0) continue;
       } else if (view === 'covenant') {
+        if (st.ranks && st.ranks.length && st.ranks.indexOf(e.rank) < 0) continue;
+        if (st.families && st.families.length && st.families.indexOf(e.family) < 0) continue;
         if (st.kinds.length && st.kinds.indexOf(e.activation.kind) < 0) continue;
       }
 
@@ -212,6 +229,21 @@
       });
     } else if (view === 'covenant') {
       arr.sort(function (a, b) {
+        // 默认按「核心 → 附加」；family 排序时先按功能大类。
+        if (sort === 'family') {
+          var fa = FAMILY_ORDER[a.family], fb = FAMILY_ORDER[b.family];
+          if (fa == null) fa = 99;
+          if (fb == null) fb = 99;
+          if (fa !== fb) return fa - fb;
+        }
+        var ra = RANK_ORDER[a.rank], rb = RANK_ORDER[b.rank];
+        if (ra == null) ra = 99;
+        if (rb == null) rb = 99;
+        if (ra !== rb) return ra - rb;
+        var ga = FAMILY_ORDER[a.family], gb = FAMILY_ORDER[b.family];
+        if (ga == null) ga = 99;
+        if (gb == null) gb = 99;
+        if (ga !== gb) return ga - gb;
         if (a.memberCount !== b.memberCount) return b.memberCount - a.memberCount;
         return cmpName(a.name, b.name);
       });

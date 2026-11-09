@@ -1,0 +1,132 @@
+{
+  "炎": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "stack"]
+  },
+  "萨尔贡": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "stack"]
+  },
+  "维多利亚": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "stack"]
+  },
+  "谢拉格": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "summon", "stack"]
+  },
+  "阿戈尔": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["survival", "stack"]
+  },
+  "叙拉古": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "stack"]
+  },
+  "卡西米尔": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "summon", "stack"]
+  },
+  "乌萨斯": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "survival", "stack"]
+  },
+  "伊比利亚": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "stack"]
+  },
+  "莱塔尼亚": {
+    "rank": "core",
+    "family": "faction",
+    "functions": ["output", "summon", "stack"]
+  },
+  "精准": {
+    "rank": "additional",
+    "family": "combat",
+    "functions": ["output", "stack"]
+  },
+  "坚守": {
+    "rank": "additional",
+    "family": "combat",
+    "functions": ["survival", "stack"]
+  },
+  "助力": {
+    "rank": "additional",
+    "family": "combat",
+    "functions": ["survival", "stack"]
+  },
+  "不屈": {
+    "rank": "additional",
+    "family": "combat",
+    "functions": ["survival", "stack"]
+  },
+  "聚合": {
+    "rank": "additional",
+    "family": "combat",
+    "functions": ["sustain", "survival", "stack"]
+  },
+  "奥术": {
+    "rank": "additional",
+    "family": "combat",
+    "functions": ["output", "stack"]
+  },
+  "迅捷": {
+    "rank": "additional",
+    "family": "growth",
+    "functions": ["stack"]
+  },
+  "灵巧": {
+    "rank": "additional",
+    "family": "growth",
+    "functions": ["stack"]
+  },
+  "远见": {
+    "rank": "additional",
+    "family": "growth",
+    "functions": ["economy", "stack"]
+  },
+  "奇迹": {
+    "rank": "additional",
+    "family": "growth",
+    "functions": ["economy", "stack"]
+  },
+  "投资人": {
+    "rank": "additional",
+    "family": "growth",
+    "functions": ["economy", "stack"]
+  },
+  "突袭": {
+    "rank": "additional",
+    "family": "growth",
+    "functions": ["output", "stack"]
+  },
+  "调和": {
+    "rank": "additional",
+    "family": "special",
+    "functions": ["rule", "stack"]
+  },
+  "协防干员": {
+    "rank": "additional",
+    "family": "special",
+    "functions": ["survival", "output"]
+  },
+  "独行": {
+    "rank": "additional",
+    "family": "special",
+    "functions": ["output", "survival"]
+  },
+  "绝技": {
+    "rank": "additional",
+    "family": "special",
+    "functions": ["output", "rule"]
+  }
+}

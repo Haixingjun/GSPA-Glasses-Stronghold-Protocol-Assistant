@@ -33,6 +33,8 @@
     itypes: [],
     icats: [],
     otypes: [],
+    ranks: [],
+    families: [],
     kinds: [],
     sort: 'default',
     hidden: false,
@@ -180,6 +182,8 @@
         case 'itype': next.itypes = splitList(val); break;
         case 'icat': next.icats = splitList(val); break;
         case 'otype': next.otypes = splitList(val); break;
+        case 'rank': next.ranks = splitList(val); break;
+        case 'fam': next.families = splitList(val); break;
         case 'kind': next.kinds = splitList(val); break;
         case 'sort': next.sort = val || 'default'; break;
         case 'hidden': next.hidden = oflag(val); break;
@@ -217,6 +221,8 @@
     if (s.itypes && s.itypes.length) qs.push('itype=' + encodeList(s.itypes));
     if (s.icats && s.icats.length) qs.push('icat=' + encodeList(s.icats));
     if (s.otypes && s.otypes.length) qs.push('otype=' + encodeList(s.otypes));
+    if (s.ranks && s.ranks.length) qs.push('rank=' + encodeList(s.ranks));
+    if (s.families && s.families.length) qs.push('fam=' + encodeList(s.families));
     if (s.kinds && s.kinds.length) qs.push('kind=' + encodeList(s.kinds));
     if (s.sort !== 'default') qs.push('sort=' + encodeURIComponent(s.sort));
     if (s.hidden) qs.push('hidden=1');
@@ -343,6 +349,8 @@
     if (s.itypes.length) n++;
     if (s.icats.length) n++;
     if (s.otypes.length) n++;
+    if (s.ranks.length) n++;
+    if (s.families.length) n++;
     if (s.kinds.length) n++;
     if (s.hidden) n++;
     return n;

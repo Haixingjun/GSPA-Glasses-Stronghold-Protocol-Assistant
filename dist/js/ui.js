@@ -25,6 +25,22 @@
     special: '特殊'
   };
 
+  // 盟约分类（官方口径 + 功能子类），与激活方式 KIND_LABEL 正交
+  var RANK_LABEL = { core: '核心', additional: '附加' };
+  var FAMILY_LABEL = { faction: '阵营', combat: '战斗', growth: '成长', special: '特殊' };
+  var FUNC_LABEL = {
+    output: '输出', survival: '生存', sustain: '续航', stack: '叠层',
+    economy: '经济', summon: '召唤', rule: '规则'
+  };
+
+  function rankLabel(v) { return RANK_LABEL[v] || v || ''; }
+  function familyLabel(v) { return FAMILY_LABEL[v] || v || ''; }
+  function funcsLabel(list) {
+    var out = [];
+    for (var i = 0; i < (list || []).length; i++) out.push(FUNC_LABEL[list[i]] || list[i]);
+    return out.join(' / ');
+  }
+
   function esc(s) { return Search.esc(s); }
 
   function init() {
@@ -186,6 +202,8 @@
     copy.itypes = st.itypes.slice();
     copy.icats = st.icats.slice();
     copy.otypes = st.otypes.slice();
+    copy.ranks = st.ranks.slice();
+    copy.families = st.families.slice();
     copy.kinds = st.kinds.slice();
 
     if (facet === 'tags') {
@@ -341,6 +359,24 @@
 
     if (st.view === 'covenant') {
       groups.push({
+        id: 'ranks', title: '盟约层级', wide: true,
+        items: [
+          { v: 'core', label: '核心（主）' },
+          { v: 'additional', label: '附加（副）' }
+        ],
+        countOf: function (o) { return [o.rank]; }
+      });
+      groups.push({
+        id: 'families', title: '功能大类', wide: true,
+        items: [
+          { v: 'faction', label: '阵营' },
+          { v: 'combat', label: '战斗' },
+          { v: 'growth', label: '成长' },
+          { v: 'special', label: '特殊' }
+        ],
+        countOf: function (o) { return [o.family]; }
+      });
+      groups.push({
         id: 'kinds', title: '激活方式', wide: true,
         items: [
           { v: 'count', label: '人数' },
@@ -437,7 +473,9 @@
       ];
     }
     return [
-      { v: 'default', label: '成员数' },
+      { v: 'default', label: '层级 → 成员数' },
+      { v: 'family', label: '功能 → 成员数' },
+      { v: 'members', label: '成员数' },
       { v: 'name', label: '名称' }
     ];
   }
@@ -464,10 +502,20 @@
     if (st.itypes.length) out.push(afChip('itypes', st.itypes.join('/')));
     if (st.icats.length) out.push(afChip('icats', st.icats.join('/')));
     if (st.otypes.length) out.push(afChip('otypes', st.otypes.join('/')));
+    if (st.ranks.length) {
+      var rl = [];
+      for (i = 0; i < st.ranks.length; i++) rl.push(rankLabel(st.ranks[i]));
+      out.push(afChip('ranks', '层级 ' + rl.join('/')));
+    }
+    if (st.families.length) {
+      var fl = [];
+      for (i = 0; i < st.families.length; i++) fl.push(familyLabel(st.families[i]));
+      out.push(afChip('families', '功能 ' + fl.join('/')));
+    }
     if (st.kinds.length) {
       var kl = [];
       for (i = 0; i < st.kinds.length; i++) kl.push(KIND_LABEL[st.kinds[i]] || st.kinds[i]);
-      out.push(afChip('kinds', kl.join('/')));
+      out.push(afChip('kinds', '激活 ' + kl.join('/')));
     }
     if (st.hidden) out.push(afChip('hidden', '含隐藏'));
 
@@ -615,8 +663,10 @@
 
   function covenantCard(c, toks, st) {
     var active = st.sel === c.name ? 'is-active' : '';
-    var label = '盟约 ' + c.name + '，' + (KIND_LABEL[c.activation.kind] || '') +
-      '，成员 ' + c.memberCount + ' 名';
+    var kindText = KIND_LABEL[c.activation.kind] || c.activation.kind;
+    var familyText = familyLabel(c.family);
+    var label = '盟约 ' + c.name + '，' + rankLabel(c.rank) + '，' + familyText +
+      (kindText !== familyText ? '，' + kindText : '') + '，成员 ' + c.memberCount + ' 名';
 
     var rule = activationShort(c);
 
@@ -631,7 +681,10 @@
       iconHtml(c, c.name, 40, 'covenant') +
       '<div class="card-title"><span class="tag" style="--h:' + hue(c.name) + ';font-size:13px">' +
       '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></div>' +
-      '<div class="card-badges"><span class="pill">' + esc(KIND_LABEL[c.activation.kind] || c.activation.kind) + '</span></div>' +
+      '<div class="card-badges">' +
+      '<span class="pill ' + (c.rank === 'core' ? 'pill-core' : 'pill-add') + '">' + esc(rankLabel(c.rank)) + '</span>' +
+      '<span class="pill">' + esc(familyLabel(c.family)) + '</span>' +
+      '</div>' +
       '</div>' +
       '<p class="desc">' + Search.format(c.desc, toks) + '</p>' +
       '<div class="card-foot">' +
@@ -645,9 +698,16 @@
 
   function activationShort(c) {
     var a = c.activation;
-    if (a.kind === 'count') return '在场 ' + a.threshold + ' 人激活';
-    if (a.kind === 'count_layer') return a.threshold + ' 人激活 / ' + (a.nodes.join('·') || '-') + ' 层';
-    if (a.kind === 'elite') return '精锐 ' + a.threshold + ' 名';
+    var emp = a.empowerThreshold;
+    if (a.kind === 'count') {
+      return '在场 ' + a.threshold + ' 人激活' + (emp ? ' / ' + emp + ' 人强化' : '');
+    }
+    if (a.kind === 'count_layer') {
+      return a.threshold + ' 人激活 / ' + (a.nodes.join('·') || '-') + ' 层';
+    }
+    if (a.kind === 'elite') {
+      return '精锐 ' + a.threshold + ' 名' + (emp ? ' / ' + emp + ' 名强化' : '');
+    }
     if (c.name === '独行') return '仅 1 人时生效';
     if (c.name === '调和') return '核心盟约 +1 人';
     return '特殊规则';
@@ -855,8 +915,16 @@
       '<span class="tag" style="--h:' + hue(c.name) + ';font-size:16px;padding:2px 10px">' +
       '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></h2></div>' + closeBtn() + '</div>';
 
-    html += '<div class="d-sub">' + esc(KIND_LABEL[a.kind] || a.kind) + ' · 成员 ' + c.memberCount + ' 名' +
+    html += '<div class="d-sub">' + esc(rankLabel(c.rank)) + '盟约 · ' +
+      esc(familyLabel(c.family)) + ' · 成员 ' + c.memberCount + ' 名' +
       (c.garrison ? ' · 整备区可计入' : '') + '</div>';
+
+    html += '<div class="d-sec"><h3>盟约分类</h3><div class="d-box"><dl class="rule">' +
+      '<dt>盟约层级</dt><dd>' + esc(rankLabel(c.rank)) + '盟约（' +
+      (c.rank === 'core' ? '主' : '副') + '）</dd>' +
+      '<dt>功能大类</dt><dd>' + esc(familyLabel(c.family)) + '</dd>' +
+      '<dt>功能定位</dt><dd>' + esc(funcsLabel(c.functions) || '—') + '</dd>' +
+      '</dl></div></div>';
 
     html += '<div class="d-sec"><h3>激活规则</h3><div class="d-box"><dl class="rule">' +
       '<dt>激活方式</dt><dd>' + esc(KIND_LABEL[a.kind] || a.kind) + '</dd>';
@@ -869,6 +937,9 @@
     if (a.kind === 'special') {
       html += '<dt>判定</dt><dd>' + esc(activationShort(c)) + '</dd>';
     }
+    if (a.empowerThreshold && a.empowerThreshold !== a.threshold) {
+      html += '<dt>强化人数</dt><dd>' + a.empowerThreshold + ' 名</dd>';
+    }
     if (a.nodes && a.nodes.length) {
       html += '<dt>强化节点</dt><dd><span class="nodes">';
       for (var i = 0; i < a.nodes.length; i++) {
@@ -877,7 +948,9 @@
       }
       html += '</span></dd>';
     }
-    html += '<dt>整备区</dt><dd>' + (c.garrison ? '可计入（含整备区内的干员）' : '不可计入') + '</dd>';
+    var benchText = c.garrison ? '可计入（含整备区内的干员）' :
+      (c.name === '卡西米尔' ? '不可计入（6 人强化会从整备区召唤）' : '不可计入');
+    html += '<dt>整备区</dt><dd>' + benchText + '</dd>';
     html += '</dl></div></div>';
 
     if (a.empower && a.empower.length) {
