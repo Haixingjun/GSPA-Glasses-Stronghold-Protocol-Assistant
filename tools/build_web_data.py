@@ -11,6 +11,7 @@
     3. 所有规则性字段（盟约激活方式/阈值/强化条件）都写进 JSON，前端不写死。
 """
 import sys, io, os, re, json, time, hashlib, collections
+import urllib.parse
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 try:
@@ -46,6 +47,7 @@ COV_FUNC_LABEL = {
     "economy": "经济", "summon": "召唤", "rule": "规则",
 }
 COV_META_PATH = os.path.join(ROOT, "data", "covenant_meta.json")
+SPECIAL_PATH = os.path.join(ROOT, "data", "special_operators.json")
 
 errors, warnings = [], []
 
@@ -199,6 +201,48 @@ def icon_meta(cat, key):
     return ICONS.get(cat, {}).get(key) or {}
 
 
+# 盟约数值文本（可选）：data/covenant_values.json
+# 来自 PRTS「卫戍协议·规程」本期盟约页，含 (23+0.9×层数) 这类公式，供配队按层数换算。
+# 抓取脚本会先对账赛季与人数，这边再做一次名字/赛季校验，防止别期数据混进来。
+COV_VALUES_PATH = os.path.join(ROOT, "data", "covenant_values.json")
+COV_VALUES = {}
+if os.path.exists(COV_VALUES_PATH):
+    try:
+        with open(COV_VALUES_PATH, encoding="utf-8") as f:
+            _cv = json.load(f)
+        _meta = _cv.get("meta") or {}
+        if _meta.get("season") and _meta.get("season") != "卫戍协议·规程":
+            warn("盟约数值的赛季是「%s」，与本项目「卫戍协议·规程」不一致" % _meta.get("season"))
+        COV_VALUES = _cv.get("texts") or {}
+        if _meta.get("gameDataVersion"):
+            print("盟约数值：%s（页面修订 %s，游戏数据 %s）" % (
+                _meta.get("season", "?"), _meta.get("revisionAt", "?"), _meta.get("gameDataVersion")))
+    except Exception as e:
+        warn("盟约数值读取失败：%s" % e)
+
+for _name in sorted(set(COV_VALUES) - COV_NAMES):
+    warn("盟约数值里的「%s」不在盟约表（跨期残留？）" % _name)
+for _name in sorted(COV_NAMES - set(COV_VALUES)):
+    warn("盟约「%s」缺少数值文本（配队里只会显示主表描述）" % _name)
+
+# 装备 → 所属盟约（可选）：data/equipment_meta.json
+# 只用于「变形同构体」（携带者获得另一件装备所属的盟约）；null = 未收录。
+EQUIP_META_PATH = os.path.join(ROOT, "data", "equipment_meta.json")
+EQUIP_META = {}
+if os.path.exists(EQUIP_META_PATH):
+    try:
+        with open(EQUIP_META_PATH, encoding="utf-8") as f:
+            EQUIP_META = (json.load(f).get("items") or {})
+    except Exception as e:
+        warn("装备盟约表读取失败：%s" % e)
+
+for _name, _cov in sorted(EQUIP_META.items()):
+    if _name not in ITEM_NAMES:
+        warn("装备盟约表里的「%s」不在道具表（跨期残留？）" % _name)
+    if _cov is not None and _cov not in COV_NAMES:
+        err("装备盟约表里的「%s」写了未知盟约「%s」" % (_name, _cov))
+
+
 def split_tags(*vals):
     out = []
     for v in vals:
@@ -272,6 +316,8 @@ for r in ITEM:
         "normalText": normal, "eliteText": elite or "未配置独立进阶形态",
         "hasElite": p2 not in ("", "—"),
         "fuseCount": int_or(fuse),
+        # 所属盟约：只有部分装备能从 PRTS 描述确定，其余为 None（配队里手动指定）
+        "covenant": EQUIP_META.get(name),
         "icon": icon_meta("items", name).get("list"),
         "iconFull": icon_meta("items", name).get("full"),
     })
@@ -313,6 +359,120 @@ for r in STRAT:
 roles = [s["role"] for s in strategies]
 if len(set(roles)) != len(roles):
     err("策略角色存在重复：%s" % [n for n in set(roles) if roles.count(n) > 1])
+
+# ---------------------------------------------------------------- 特殊干员
+# 来源：data/special_operators.json（由 tools/fetch_special_operators.py 从 PRTS 抓取/解析）。
+# 只做「补充档案」：不改动主表的阶数/盟约/售价/效果，只在干员上挂 special 字段，
+# 并在召唤它的策略上挂 specialOperator，供前端做双向跳转与版本说明。
+SPECIAL_META = {}
+SPECIAL_OPS = {}
+SPECIAL_STRATEGY_UNITS = []
+if not os.path.exists(SPECIAL_PATH):
+    warn("缺少特殊干员档案 data/special_operators.json（特殊干员将没有 PRTS 详情与跳转）")
+else:
+    try:
+        with open(SPECIAL_PATH, encoding="utf-8") as f:
+            _sp_doc = json.load(f)
+        SPECIAL_META = _sp_doc.get("meta") or {}
+        SPECIAL_OPS = _sp_doc.get("operators") or {}
+        SPECIAL_STRATEGY_UNITS = _sp_doc.get("strategyUnits") or []
+        if not isinstance(SPECIAL_OPS, dict):
+            err("data/special_operators.json 的 operators 必须是对象")
+            SPECIAL_OPS = {}
+        if not isinstance(SPECIAL_STRATEGY_UNITS, list):
+            err("data/special_operators.json 的 strategyUnits 必须是数组")
+            SPECIAL_STRATEGY_UNITS = []
+        if SPECIAL_META.get("season") and SPECIAL_META.get("season") != "卫戍协议·规程":
+            warn("特殊干员档案的赛季是「%s」，与本项目「卫戍协议·规程」不一致" % SPECIAL_META.get("season"))
+    except Exception as e:
+        err("data/special_operators.json 读取失败：%s" % e)
+
+_OP_BY_NAME = {o["name"]: o for o in operators}
+_STRAT_BY_KEY = {s["key"]: s for s in strategies}
+special_names = []
+for _name in sorted(SPECIAL_OPS):
+    _sp = SPECIAL_OPS[_name] or {}
+    _op = _OP_BY_NAME.get(_name)
+    if not _op:
+        err("特殊干员档案里的「%s」不在干员表" % _name)
+        continue
+    _skey = txt(_sp.get("strategy"))
+    _st = _STRAT_BY_KEY.get(_skey)
+    if not _st:
+        err("特殊干员「%s」引用了不存在的策略「%s」" % (_name, _skey))
+        continue
+    _prts = _sp.get("prts") or {}
+    if not _prts.get("class") or not _prts.get("skills"):
+        err("特殊干员「%s」的 PRTS 档案缺少职业或技能" % _name)
+    if _name not in _st.get("text", "") and "特殊干员" not in _st.get("text", ""):
+        warn("策略「%s」的描述里没有出现特殊干员「%s」" % (_skey, _name))
+    if not _op.get("hidden"):
+        warn("特殊干员「%s」在主表里不是隐藏条目，请确认展示口径" % _name)
+
+    _aliases = []
+    for _a in (_sp.get("aliases") or []):
+        _a = txt(_a)
+        if _a and _a not in _aliases:
+            _aliases.append(_a)
+
+    _op["special"] = {
+        "kind": "strategy",
+        "strategyKey": _skey,
+        "strategyRole": _st["role"],
+        "strategyName": _st["name"],
+        "aliases": _aliases,
+        # 解包原始参数里的召唤 ID（source/卫戍协议_完整数据表.xlsx → 原始参数）
+        "chessId": txt(_sp.get("chessId")),
+        "unpackNote": txt(_sp.get("unpackNote")),
+        "debut": txt(_sp.get("debut")) or txt(_prts.get("onlineAt")),
+        "debutSeason": txt(_sp.get("debutSeason")),
+        "versionNote": txt(_sp.get("versionNote")),
+        "prts": _prts,
+    }
+    _st["specialOperator"] = _name
+    special_names.append(_name)
+
+if SPECIAL_OPS:
+    _missing = [n for n in SPECIAL_OPS if n not in special_names]
+    if _missing:
+        err("以下特殊干员没有成功挂接：%s" % "、".join(_missing))
+    _linked = [s["key"] for s in strategies if s.get("specialOperator")]
+    print("特殊干员：%d 名（%s）；召唤策略：%s" % (
+        len(special_names), "、".join(special_names) or "—", "、".join(_linked) or "—"))
+
+# 策略固定添加、但不属于本期「特殊干员」档案的单位（如 Touch/外勤医疗）。
+# 只做来源说明与 PRTS 外链，不伪造阶数/售价/盟约，也不塞进 155 条干员表。
+for _su in SPECIAL_STRATEGY_UNITS:
+    if not isinstance(_su, dict):
+        err("strategyUnits 的条目必须是对象")
+        continue
+    _skey = txt(_su.get("strategy"))
+    _st = _STRAT_BY_KEY.get(_skey)
+    if not _st:
+        err("策略固定单位引用了不存在的策略「%s」" % _skey)
+        continue
+    _units = []
+    for _u in (_su.get("units") or []):
+        if not isinstance(_u, dict):
+            continue
+        _uname = txt(_u.get("name"))
+        _utitle = txt(_u.get("prtsTitle"))
+        if not _uname or not _utitle:
+            warn("策略「%s」的固定单位缺少 name / prtsTitle" % _skey)
+            continue
+        _units.append({
+            "name": _uname,
+            "star": int_or(_u.get("star")),
+            "class": txt(_u.get("class")),
+            "note": txt(_u.get("note")),
+            "prtsUrl": "https://prts.wiki/w/" + urllib.parse.quote(_utitle.replace(" ", "_")),
+        })
+    if _units:
+        _st["fixedUnits"] = {
+            "label": txt(_su.get("label")) or "固定添加的单位",
+            "note": txt(_su.get("note")),
+            "units": _units,
+        }
 
 # ---------------------------------------------------------------- 盟约
 NUM_RE = re.compile(r"(\d+)")
@@ -406,6 +566,8 @@ for r in COV:
         # 只有 BOARD_AND_DECK 才把整备区计入激活；卡西米尔是 BOARD，
         # 它的「整备区」只出现在 6 人强化的召唤效果里。
         "garrison": cond == "BOARD_AND_DECK",
+        # 来自 PRTS 本期盟约页的数值文本（含层数公式），配队 tooltip 用
+        "valueText": COV_VALUES.get(name),
         "icon": icon_meta("covenants", cid or name).get("list"),
         "iconFull": icon_meta("covenants", cid or name).get("full"),
     })
@@ -462,8 +624,10 @@ payload = {
         "operators": len(operators), "items": len(items), "strategies": len(strategies),
         "covenants": len(covenants), "fusions": len(fusions),
         "stages": sum(len(s["stages"]) for s in strategies), "buffs": len(buffs),
+        "specials": len(special_names),
     },
     "tiers": TIERS,
+    "specialMeta": SPECIAL_META,
     "operators": operators,
     "items": items,
     "strategies": strategies,
@@ -511,6 +675,17 @@ lines.append("- 图标覆盖：道具 %d/%d、策略 %d/%d、盟约 %d/%d" % (
     sum(1 for x in items if x["icon"]), len(items),
     sum(1 for x in strategies if x["icon"]), len(strategies),
     sum(1 for x in covenants if x["icon"]), len(covenants)))
+lines.append("- 特殊干员：%d 名（%s）" % (
+    len(special_names), "、".join(
+        "%s ← %s" % (n, (SPECIAL_OPS.get(n) or {}).get("strategy", "?")) for n in special_names) or "无"))
+if SPECIAL_META:
+    lines.append("- 特殊干员档案：%s，PRTS 抓取 %s，游戏数据 %s" % (
+        SPECIAL_META.get("season", "?"), SPECIAL_META.get("fetchedAt", "?"),
+        SPECIAL_META.get("gameDataVersion", "?")))
+_fu = [(s["key"], len(s["fixedUnits"]["units"])) for s in strategies if s.get("fixedUnits")]
+if _fu:
+    lines.append("- 策略固定添加的专属单位：%s（非本期特殊干员，只做 PRTS 说明）" % "、".join(
+        "%s %d 名" % (k, n) for k, n in _fu))
 lines.append("")
 lines.append("## 错误\n")
 lines.append("\n".join("- " + e for e in errors) if errors else "无")
@@ -547,7 +722,8 @@ else:
     groups = [
         ("干员", "operators", ["tierLabel", "tags", "type", "hidden", "price", "normalText", "eliteText"]),
         ("道具", "items", ["type", "tier", "price", "elitePrice", "normalText", "eliteText"]),
-        ("策略", "strategies", ["role", "name", "category", "hp", "text"]),
+        ("策略", "strategies", ["role", "name", "category", "hp", "text", "specialOperator", "fixedUnits"]),
+        ("特殊干员", "operators", ["special"]),
         ("盟约", "covenants", ["name", "desc", "rank", "family", "functions", "members"]),
     ]
     total = 0

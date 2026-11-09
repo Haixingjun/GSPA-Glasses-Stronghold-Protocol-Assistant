@@ -11,6 +11,13 @@
   var Store = global.Store;
   var Search = global.Search;
   var UI = global.UI;
+  var Team = global.Team;
+
+  // 给 team.js 用的小接口（toast / 遮罩同步），避免两个模块各写一套
+  global.App = {
+    syncScrim: function () { syncScrim(); },
+    toast: function (msg) { toast(msg); }
+  };
 
   var els = {};
   var debounceTimer = null;
@@ -46,9 +53,16 @@
     Store.init(data);
     Search.init(data);
     UI.init();
+    if (Team) Team.init();
 
     Store.loadFromUrl();
     Store.validateSelection();
+    // 深链直接打开隐藏条目（特殊干员）时，顺手把「显示隐藏条目」打开，
+    // 否则详情有内容、背后列表却没有这张卡，关闭详情后会像丢了一样。
+    if (Store.state.view === 'op' && Store.state.sel && !Store.state.hidden) {
+      var selOp = Store.entity('op', Store.state.sel);
+      if (selOp && selOp.hidden) Store.set({ hidden: true });
+    }
 
     Store.subscribe(function () {
       UI.render();
@@ -224,6 +238,10 @@
     Store.syncFromUrl();
     syncInputFromState();
     closeOverlays(false);
+    if (Team) {
+      Team.closeSheet();
+      Team.hideTip();
+    }
   }
 
   function onKeydown(e) {
@@ -313,10 +331,19 @@
       Store.set({ view: 'item', sel: item.getAttribute('data-item'), q: '' }, { push: true });
       return;
     }
+    var stg = t.closest('[data-strategy]');
+    if (stg) {
+      Store.set({ view: 'strategy', sel: stg.getAttribute('data-strategy') }, { push: true });
+      return;
+    }
     var op = t.closest('[data-op]');
     if (op) {
       var opName = op.getAttribute('data-op');
-      Store.set({ view: 'op', sel: opName }, { push: true });
+      var target = Store.entity('op', opName);
+      var patch = { view: 'op', sel: opName };
+      // 隐藏条目（特殊干员）被跳转时，顺手打开「显示隐藏条目」，否则列表里没有卡片可高亮
+      if (target && target.hidden) patch.hidden = true;
+      Store.set(patch, { push: true });
       return;
     }
 
@@ -370,7 +397,8 @@
 
     // 5) 遮罩
     if (t === els.scrim) {
-      if (document.body.classList.contains('filters-open')) toggleFilters(false);
+      if (document.body.classList.contains('sheet-open')) Team.closeSheet();
+      else if (document.body.classList.contains('filters-open')) toggleFilters(false);
       else if (Store.state.sel) Store.set({ sel: null });
     }
   }
@@ -487,7 +515,8 @@
 
   function syncScrim() {
     var on = document.body.classList.contains('filters-open') ||
-      document.body.classList.contains('detail-open');
+      document.body.classList.contains('detail-open') ||
+      document.body.classList.contains('sheet-open');
     els.scrim.hidden = !on;
   }
 

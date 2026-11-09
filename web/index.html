@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0b0f14">
 <meta name="format-detection" content="telephone=no">
 <title>GSPA · 眼镜卫戍协议小助手 · 干员图鉴</title>
-<meta name="description" content="《明日方舟》卫戍协议数据速查：155 条干员条目、70 件道具、61 个策略、26 个盟约，支持搜索、多维筛选、深链分享。手机与电脑通用，无需登录。">
+<meta name="description" content="《明日方舟》卫戍协议数据速查：155 条干员条目（含 2 名策略召唤的特殊干员）、70 件道具、61 个策略、26 个盟约，支持搜索、多维筛选、深链分享。手机与电脑通用，无需登录。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="GSPA · 眼镜卫戍协议小助手">
 <meta property="og:description" content="卫戍协议数据速查：干员 / 道具 / 策略 / 盟约，搜索 + 筛选 + 深链分享。">
@@ -36,6 +36,7 @@
   <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15.4V3.8M8.2 7.4 12 3.6l3.8 3.8"/><path d="M5.4 13.4v5.2a1.8 1.8 0 0 0 1.8 1.8h9.6a1.8 1.8 0 0 0 1.8-1.8v-5.2"/></symbol>
   <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.6" y="4.6" width="16.8" height="14.8" rx="2.6"/><circle cx="9" cy="9.8" r="1.7"/><path d="m5.6 17.4 4.4-4.2 3.2 3 2.4-2.2 3 3"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.4 12.6 4.2 4.2 9-9.6"/></symbol>
+  <symbol id="i-team" viewBox="0 0 24 24"><rect x="3.4" y="3.8" width="7.2" height="7.2" rx="1.7"/><rect x="13.4" y="3.8" width="7.2" height="7.2" rx="1.7"/><rect x="3.4" y="13.6" width="7.2" height="7.2" rx="1.7"/><path d="M17 13.4v7.6M13.2 17.2h7.6"/></symbol>
 </svg>
 
 <header class="topbar">
@@ -87,6 +88,10 @@
     <svg class="ico" aria-hidden="true"><use href="#i-covenant"/></svg>
     <span>盟约</span><em class="tab-n" data-n="covenant"></em>
   </button>
+  <button class="tab" type="button" role="tab" data-view="team" aria-selected="false">
+    <svg class="ico" aria-hidden="true"><use href="#i-team"/></svg>
+    <span>配队</span><em class="tab-badge">BETA</em>
+  </button>
 </nav>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -107,6 +112,9 @@
   <aside class="drawer" id="drawer" aria-label="详情" hidden></aside>
 </main>
 
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="选择干员" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
 <footer class="footer" id="footer"></footer>
 
 <noscript>
@@ -116,7 +124,10 @@
 <script src="data/data.js"></script>
 <script src="js/store.js"></script>
 <script src="js/search.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/code.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/team.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

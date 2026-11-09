@@ -74,10 +74,16 @@ def main():
 
     index_path = os.path.join(WEB, "index.html")
     css_path = os.path.join(WEB, "assets", "app.css")
-    js_names = ["store.js", "search.js", "ui.js", "app.js"]
     data_path = os.path.join(WEB, "data", "data.js")
 
     index_src = read_text(index_path)
+    # 按 index.html 里 <script src="js/..."> 的出现顺序收集：
+    # 以后再加前端模块（calc.js / team.js 这类）不用回来改本脚本。
+    js_names = re.findall(r'<script\b[^>]*\bsrc="js/([^"?]+)', index_src)
+    if not js_names:
+        print("index.html 里没有找到 js/ 脚本，先确认页面没被改坏")
+        return 1
+
     css_src = read_text(css_path)
     js_src = {n: read_text(os.path.join(WEB, "js", n)) for n in js_names}
     data_src = read_text(data_path)
