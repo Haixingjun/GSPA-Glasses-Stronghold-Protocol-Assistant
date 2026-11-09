@@ -288,7 +288,7 @@
       toggleFilters(false);
       Store.set({
         view: 'op', q: '', tiers: [], tags: [name], tagMode: 'and',
-        triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [], families: [], funcs: [], kinds: [],
+        triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [],
         hidden: false, sel: null
       }, { push: true });
       els.cards.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -305,7 +305,7 @@
     // 3) 详情内的交叉引用
     var cov = t.closest('[data-cov]');
     if (cov) {
-      Store.set({ view: 'covenant', sel: cov.getAttribute('data-cov'), q: '', tiers: [], tags: [], triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [], families: [], funcs: [], kinds: [] }, { push: true });
+      Store.set({ view: 'covenant', sel: cov.getAttribute('data-cov'), q: '', tiers: [], tags: [], triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [] }, { push: true });
       return;
     }
     var item = t.closest('[data-item]');

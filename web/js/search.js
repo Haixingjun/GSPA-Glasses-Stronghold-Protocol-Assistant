@@ -74,7 +74,7 @@
     return '特殊';
   }
 
-  var RANK_LABEL = { core: '核心', additional: '附加' };
+  var RANK_LABEL = { core: '主盟约', additional: '副盟约' };
   var FAMILY_LABEL = { faction: '阵营', combat: '战斗', growth: '成长', special: '特殊' };
   var FUNC_LABEL = {
     output: '输出', survival: '生存', sustain: '续航', stack: '叠层',
@@ -160,9 +160,6 @@
         if (st.icats.length && st.icats.indexOf(e.category) < 0) continue;
       } else if (view === 'covenant') {
         if (st.ranks && st.ranks.length && st.ranks.indexOf(e.rank) < 0) continue;
-        if (st.families && st.families.length && st.families.indexOf(e.family) < 0) continue;
-        if (st.funcs && st.funcs.length && !anyOverlap(e.functions || [], st.funcs)) continue;
-        if (st.kinds.length && st.kinds.indexOf(e.activation.kind) < 0) continue;
       }
 
       out.push(e);
@@ -230,13 +227,7 @@
       });
     } else if (view === 'covenant') {
       arr.sort(function (a, b) {
-        // 默认按「核心 → 附加」；family 排序时先按功能大类。
-        if (sort === 'family') {
-          var fa = FAMILY_ORDER[a.family], fb = FAMILY_ORDER[b.family];
-          if (fa == null) fa = 99;
-          if (fb == null) fb = 99;
-          if (fa !== fb) return fa - fb;
-        }
+        // 默认按「主盟约 → 副盟约」，同层再按大类、成员数。
         var ra = RANK_ORDER[a.rank], rb = RANK_ORDER[b.rank];
         if (ra == null) ra = 99;
         if (rb == null) rb = 99;

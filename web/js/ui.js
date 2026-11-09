@@ -25,8 +25,8 @@
     special: '特殊'
   };
 
-  // 盟约分类（官方口径 + 功能子类），与激活方式 KIND_LABEL 正交
-  var RANK_LABEL = { core: '核心', additional: '附加' };
+  // 盟约一级分类：主盟约（核心）/ 副盟约（附加）
+  var RANK_LABEL = { core: '主盟约', additional: '副盟约' };
   var FAMILY_LABEL = { faction: '阵营', combat: '战斗', growth: '成长', special: '特殊' };
   var FUNC_LABEL = {
     output: '输出', survival: '生存', sustain: '续航', stack: '叠层',
@@ -203,9 +203,6 @@
     copy.icats = st.icats.slice();
     copy.otypes = st.otypes.slice();
     copy.ranks = st.ranks.slice();
-    copy.families = st.families.slice();
-    copy.funcs = st.funcs.slice();
-    copy.kinds = st.kinds.slice();
 
     if (facet === 'tags') {
       return Search.filter(st.view, copy, { skipTags: true });
@@ -360,45 +357,12 @@
 
     if (st.view === 'covenant') {
       groups.push({
-        id: 'ranks', title: '盟约层级', wide: true,
+        id: 'ranks', title: '盟约分类', wide: true,
         items: [
-          { v: 'core', label: '核心（主）' },
-          { v: 'additional', label: '附加（副）' }
+          { v: 'core', label: '主盟约' },
+          { v: 'additional', label: '副盟约' }
         ],
         countOf: function (o) { return [o.rank]; }
-      });
-      groups.push({
-        id: 'families', title: '盟约大类', wide: true,
-        items: [
-          { v: 'faction', label: '阵营' },
-          { v: 'combat', label: '战斗' },
-          { v: 'growth', label: '成长' },
-          { v: 'special', label: '特殊' }
-        ],
-        countOf: function (o) { return [o.family]; }
-      });
-      groups.push({
-        id: 'funcs', title: '功能定位', wide: true,
-        items: [
-          { v: 'output', label: '输出' },
-          { v: 'survival', label: '生存' },
-          { v: 'sustain', label: '续航' },
-          { v: 'stack', label: '叠层' },
-          { v: 'economy', label: '经济' },
-          { v: 'summon', label: '召唤' },
-          { v: 'rule', label: '规则' }
-        ],
-        countOf: function (o) { return o.functions || []; }
-      });
-      groups.push({
-        id: 'kinds', title: '激活方式', wide: true,
-        items: [
-          { v: 'count', label: '人数' },
-          { v: 'count_layer', label: '人数 + 层数' },
-          { v: 'elite', label: '精锐数' },
-          { v: 'special', label: '特殊' }
-        ],
-        countOf: function (o) { return [o.activation.kind]; }
       });
       return groups;
     }
@@ -487,8 +451,7 @@
       ];
     }
     return [
-      { v: 'default', label: '层级 → 成员数' },
-      { v: 'family', label: '功能 → 成员数' },
+      { v: 'default', label: '主/副 → 成员数' },
       { v: 'members', label: '成员数' },
       { v: 'name', label: '名称' }
     ];
@@ -519,22 +482,7 @@
     if (st.ranks.length) {
       var rl = [];
       for (i = 0; i < st.ranks.length; i++) rl.push(rankLabel(st.ranks[i]));
-      out.push(afChip('ranks', '层级 ' + rl.join('/')));
-    }
-    if (st.families.length) {
-      var fl = [];
-      for (i = 0; i < st.families.length; i++) fl.push(familyLabel(st.families[i]));
-      out.push(afChip('families', '大类 ' + fl.join('/')));
-    }
-    if (st.funcs.length) {
-      var fnl = [];
-      for (i = 0; i < st.funcs.length; i++) fnl.push(FUNC_LABEL[st.funcs[i]] || st.funcs[i]);
-      out.push(afChip('funcs', '功能 ' + fnl.join('/')));
-    }
-    if (st.kinds.length) {
-      var kl = [];
-      for (i = 0; i < st.kinds.length; i++) kl.push(KIND_LABEL[st.kinds[i]] || st.kinds[i]);
-      out.push(afChip('kinds', '激活 ' + kl.join('/')));
+      out.push(afChip('ranks', '分类 ' + rl.join('/')));
     }
     if (st.hidden) out.push(afChip('hidden', '含隐藏'));
 
@@ -682,10 +630,7 @@
 
   function covenantCard(c, toks, st) {
     var active = st.sel === c.name ? 'is-active' : '';
-    var kindText = KIND_LABEL[c.activation.kind] || c.activation.kind;
-    var familyText = familyLabel(c.family);
-    var label = '盟约 ' + c.name + '，' + rankLabel(c.rank) + '，' + familyText +
-      (kindText !== familyText ? '，' + kindText : '') + '，成员 ' + c.memberCount + ' 名';
+    var label = '盟约 ' + c.name + '，' + rankLabel(c.rank) + '，成员 ' + c.memberCount + ' 名';
 
     var rule = activationShort(c);
 
@@ -702,7 +647,6 @@
       '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></div>' +
       '<div class="card-badges">' +
       '<span class="pill ' + (c.rank === 'core' ? 'pill-core' : 'pill-add') + '">' + esc(rankLabel(c.rank)) + '</span>' +
-      '<span class="pill">' + esc(familyLabel(c.family)) + '</span>' +
       '</div>' +
       '</div>' +
       '<p class="desc">' + Search.format(c.desc, toks) + '</p>' +
@@ -934,14 +878,14 @@
       '<span class="tag" style="--h:' + hue(c.name) + ';font-size:16px;padding:2px 10px">' +
       '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></h2></div>' + closeBtn() + '</div>';
 
-    html += '<div class="d-sub">' + esc(rankLabel(c.rank)) + '盟约 · ' +
+    html += '<div class="d-sub">' + esc(rankLabel(c.rank)) + ' · ' +
       esc(familyLabel(c.family)) + ' · 成员 ' + c.memberCount + ' 名' +
       (c.garrison ? ' · 整备区可计入' : '') + '</div>';
 
     html += '<div class="d-sec"><h3>盟约分类</h3><div class="d-box"><dl class="rule">' +
-      '<dt>盟约层级</dt><dd>' + esc(rankLabel(c.rank)) + '盟约（' +
-      (c.rank === 'core' ? '主' : '副') + '）</dd>' +
-      '<dt>功能大类</dt><dd>' + esc(familyLabel(c.family)) + '</dd>' +
+      '<dt>盟约层级</dt><dd>' + esc(rankLabel(c.rank)) + '（' +
+      (c.rank === 'core' ? '核心' : '附加') + '）</dd>' +
+      '<dt>盟约大类</dt><dd>' + esc(familyLabel(c.family)) + '</dd>' +
       '<dt>功能定位</dt><dd>' + esc(funcsLabel(c.functions) || '—') + '</dd>' +
       '</dl></div></div>';
 

@@ -1,28 +1,28 @@
 卫戍协议小助手 · 构建产物说明
 ========================================
-构建时间：2026-11-10 00:23:50
+构建时间：2026-11-10 00:36:09
 数据版本：2026-11-09 04:53
 数据生成：2026-11-10 00:15:31
-资源指纹：ff894a60
+资源指纹：44bf373d
 
 部署：把整个 dist/ 目录上传到站点根目录或任意子目录即可。
 单文件：dist/standalone.html 可单独发送 / 双击打开，无需其他文件。
 头像：dist/assets/avatars 共 286 个 WebP（2704.1 KB），懒加载；单文件版不含头像。
 图标：dist/assets/icons 共 314 个 WebP（2027.7 KB，本期「规程」道具 / 策略 / 盟约）；单文件版不含图标。
-缓存：资源已带 ?v=ff894a60，index.html 建议 no-cache，静态资源可长缓存。
+缓存：资源已带 ?v=44bf373d，index.html 建议 no-cache，静态资源可长缓存。
 
 首屏（gzip 前 → 后）：
   index.html           7.4 KB  →   2.6 KB
   assets/app.css      32.8 KB  →   7.5 KB
-  js/store.js         11.6 KB  →   3.7 KB
-  js/search.js        11.2 KB  →   3.6 KB
-  js/ui.js            44.6 KB  →  11.5 KB
-  js/app.js           17.0 KB  →   5.0 KB
+  js/store.js         11.1 KB  →   3.6 KB
+  js/search.js        10.8 KB  →   3.5 KB
+  js/ui.js            42.4 KB  →  11.1 KB
+  js/app.js           16.9 KB  →   5.0 KB
   data/data.js       192.5 KB  →  28.1 KB
-  合计                 317.2 KB  →  62.1 KB
+  合计                 313.9 KB  →  61.5 KB
   预算 100 KB（gzip）：通过
 
-单文件版 standalone.html：317.3 KB（gzip 60.5 KB）
+单文件版 standalone.html：314.0 KB（gzip 59.9 KB）
 
 dist 文件清单：
   .nojekyll                    0.0 KB
@@ -31,11 +31,11 @@ dist 文件清单：
   data/data.js               192.5 KB
   data/data.json             236.6 KB
   index.html                   7.4 KB
-  js/app.js                   17.0 KB
-  js/search.js                11.2 KB
-  js/store.js                 11.6 KB
-  js/ui.js                    44.6 KB
+  js/app.js                   16.9 KB
+  js/search.js                10.8 KB
+  js/store.js                 11.1 KB
+  js/ui.js                    42.4 KB
   robots.txt                   0.0 KB
-  standalone.html            317.3 KB
+  standalone.html            314.0 KB
   assets/avatars/ (286 个)    2704.1 KB
   assets/icons/ (314 个)      2027.7 KB
