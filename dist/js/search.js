@@ -161,6 +161,7 @@
       } else if (view === 'covenant') {
         if (st.ranks && st.ranks.length && st.ranks.indexOf(e.rank) < 0) continue;
         if (st.families && st.families.length && st.families.indexOf(e.family) < 0) continue;
+        if (st.funcs && st.funcs.length && !anyOverlap(e.functions || [], st.funcs)) continue;
         if (st.kinds.length && st.kinds.indexOf(e.activation.kind) < 0) continue;
       }
 

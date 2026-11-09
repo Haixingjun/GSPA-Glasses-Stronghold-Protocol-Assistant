@@ -35,6 +35,7 @@
     otypes: [],
     ranks: [],
     families: [],
+    funcs: [],
     kinds: [],
     sort: 'default',
     hidden: false,
@@ -184,6 +185,7 @@
         case 'otype': next.otypes = splitList(val); break;
         case 'rank': next.ranks = splitList(val); break;
         case 'fam': next.families = splitList(val); break;
+        case 'fn': next.funcs = splitList(val); break;
         case 'kind': next.kinds = splitList(val); break;
         case 'sort': next.sort = val || 'default'; break;
         case 'hidden': next.hidden = oflag(val); break;
@@ -223,6 +225,7 @@
     if (s.otypes && s.otypes.length) qs.push('otype=' + encodeList(s.otypes));
     if (s.ranks && s.ranks.length) qs.push('rank=' + encodeList(s.ranks));
     if (s.families && s.families.length) qs.push('fam=' + encodeList(s.families));
+    if (s.funcs && s.funcs.length) qs.push('fn=' + encodeList(s.funcs));
     if (s.kinds && s.kinds.length) qs.push('kind=' + encodeList(s.kinds));
     if (s.sort !== 'default') qs.push('sort=' + encodeURIComponent(s.sort));
     if (s.hidden) qs.push('hidden=1');
@@ -351,6 +354,7 @@
     if (s.otypes.length) n++;
     if (s.ranks.length) n++;
     if (s.families.length) n++;
+    if (s.funcs.length) n++;
     if (s.kinds.length) n++;
     if (s.hidden) n++;
     return n;

@@ -1091,6 +1091,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
     otypes: [],
     ranks: [],
     families: [],
+    funcs: [],
     kinds: [],
     sort: 'default',
     hidden: false,
@@ -1240,6 +1241,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
         case 'otype': next.otypes = splitList(val); break;
         case 'rank': next.ranks = splitList(val); break;
         case 'fam': next.families = splitList(val); break;
+        case 'fn': next.funcs = splitList(val); break;
         case 'kind': next.kinds = splitList(val); break;
         case 'sort': next.sort = val || 'default'; break;
         case 'hidden': next.hidden = oflag(val); break;
@@ -1279,6 +1281,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
     if (s.otypes && s.otypes.length) qs.push('otype=' + encodeList(s.otypes));
     if (s.ranks && s.ranks.length) qs.push('rank=' + encodeList(s.ranks));
     if (s.families && s.families.length) qs.push('fam=' + encodeList(s.families));
+    if (s.funcs && s.funcs.length) qs.push('fn=' + encodeList(s.funcs));
     if (s.kinds && s.kinds.length) qs.push('kind=' + encodeList(s.kinds));
     if (s.sort !== 'default') qs.push('sort=' + encodeURIComponent(s.sort));
     if (s.hidden) qs.push('hidden=1');
@@ -1407,6 +1410,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
     if (s.otypes.length) n++;
     if (s.ranks.length) n++;
     if (s.families.length) n++;
+    if (s.funcs.length) n++;
     if (s.kinds.length) n++;
     if (s.hidden) n++;
     return n;
@@ -1601,6 +1605,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
       } else if (view === 'covenant') {
         if (st.ranks && st.ranks.length && st.ranks.indexOf(e.rank) < 0) continue;
         if (st.families && st.families.length && st.families.indexOf(e.family) < 0) continue;
+        if (st.funcs && st.funcs.length && !anyOverlap(e.functions || [], st.funcs)) continue;
         if (st.kinds.length && st.kinds.indexOf(e.activation.kind) < 0) continue;
       }
 
@@ -1992,6 +1997,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
     copy.otypes = st.otypes.slice();
     copy.ranks = st.ranks.slice();
     copy.families = st.families.slice();
+    copy.funcs = st.funcs.slice();
     copy.kinds = st.kinds.slice();
 
     if (facet === 'tags') {
@@ -2155,7 +2161,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
         countOf: function (o) { return [o.rank]; }
       });
       groups.push({
-        id: 'families', title: '功能大类', wide: true,
+        id: 'families', title: '盟约大类', wide: true,
         items: [
           { v: 'faction', label: '阵营' },
           { v: 'combat', label: '战斗' },
@@ -2163,6 +2169,19 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
           { v: 'special', label: '特殊' }
         ],
         countOf: function (o) { return [o.family]; }
+      });
+      groups.push({
+        id: 'funcs', title: '功能定位', wide: true,
+        items: [
+          { v: 'output', label: '输出' },
+          { v: 'survival', label: '生存' },
+          { v: 'sustain', label: '续航' },
+          { v: 'stack', label: '叠层' },
+          { v: 'economy', label: '经济' },
+          { v: 'summon', label: '召唤' },
+          { v: 'rule', label: '规则' }
+        ],
+        countOf: function (o) { return o.functions || []; }
       });
       groups.push({
         id: 'kinds', title: '激活方式', wide: true,
@@ -2298,7 +2317,12 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
     if (st.families.length) {
       var fl = [];
       for (i = 0; i < st.families.length; i++) fl.push(familyLabel(st.families[i]));
-      out.push(afChip('families', '功能 ' + fl.join('/')));
+      out.push(afChip('families', '大类 ' + fl.join('/')));
+    }
+    if (st.funcs.length) {
+      var fnl = [];
+      for (i = 0; i < st.funcs.length; i++) fnl.push(FUNC_LABEL[st.funcs[i]] || st.funcs[i]);
+      out.push(afChip('funcs', '功能 ' + fnl.join('/')));
     }
     if (st.kinds.length) {
       var kl = [];
@@ -3151,7 +3175,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
       toggleFilters(false);
       Store.set({
         view: 'op', q: '', tiers: [], tags: [name], tagMode: 'and',
-        triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [], families: [], kinds: [],
+        triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [], families: [], funcs: [], kinds: [],
         hidden: false, sel: null
       }, { push: true });
       els.cards.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -3168,7 +3192,7 @@ window.GARRISON_DATA = {"version":"2026-11-09 04:53","generatedAt":"2026-11-10 0
     // 3) 详情内的交叉引用
     var cov = t.closest('[data-cov]');
     if (cov) {
-      Store.set({ view: 'covenant', sel: cov.getAttribute('data-cov'), q: '', tiers: [], tags: [], triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [], families: [], kinds: [] }, { push: true });
+      Store.set({ view: 'covenant', sel: cov.getAttribute('data-cov'), q: '', tiers: [], tags: [], triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [], families: [], funcs: [], kinds: [] }, { push: true });
       return;
     }
     var item = t.closest('[data-item]');

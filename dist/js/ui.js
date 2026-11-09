@@ -204,6 +204,7 @@
     copy.otypes = st.otypes.slice();
     copy.ranks = st.ranks.slice();
     copy.families = st.families.slice();
+    copy.funcs = st.funcs.slice();
     copy.kinds = st.kinds.slice();
 
     if (facet === 'tags') {
@@ -367,7 +368,7 @@
         countOf: function (o) { return [o.rank]; }
       });
       groups.push({
-        id: 'families', title: '功能大类', wide: true,
+        id: 'families', title: '盟约大类', wide: true,
         items: [
           { v: 'faction', label: '阵营' },
           { v: 'combat', label: '战斗' },
@@ -375,6 +376,19 @@
           { v: 'special', label: '特殊' }
         ],
         countOf: function (o) { return [o.family]; }
+      });
+      groups.push({
+        id: 'funcs', title: '功能定位', wide: true,
+        items: [
+          { v: 'output', label: '输出' },
+          { v: 'survival', label: '生存' },
+          { v: 'sustain', label: '续航' },
+          { v: 'stack', label: '叠层' },
+          { v: 'economy', label: '经济' },
+          { v: 'summon', label: '召唤' },
+          { v: 'rule', label: '规则' }
+        ],
+        countOf: function (o) { return o.functions || []; }
       });
       groups.push({
         id: 'kinds', title: '激活方式', wide: true,
@@ -510,7 +524,12 @@
     if (st.families.length) {
       var fl = [];
       for (i = 0; i < st.families.length; i++) fl.push(familyLabel(st.families[i]));
-      out.push(afChip('families', '功能 ' + fl.join('/')));
+      out.push(afChip('families', '大类 ' + fl.join('/')));
+    }
+    if (st.funcs.length) {
+      var fnl = [];
+      for (i = 0; i < st.funcs.length; i++) fnl.push(FUNC_LABEL[st.funcs[i]] || st.funcs[i]);
+      out.push(afChip('funcs', '功能 ' + fnl.join('/')));
     }
     if (st.kinds.length) {
       var kl = [];
