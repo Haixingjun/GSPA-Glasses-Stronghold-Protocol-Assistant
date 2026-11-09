@@ -1,8 +1,9 @@
 # GSPA · 眼镜卫戍协议小助手
 
-**GSPA** = **G**lasses **S**tronghold **P**rotocol **A**ssistant（眼镜卫戍协议小助手）。
+**GSPA** : **G**lasses **S**tronghold **P**rotocol **A**ssistant（眼镜卫戍协议小助手）。
 
 本网页由 [@眼镜](https://space.bilibili.com/20597523) 提议，[@海星君](https://space.bilibili.com/341607034) 开发。
+思路提供、测试：[@夕阳]https://space.bilibili.com/327907133等星海攻略组成员
 
 关注眼镜谢谢喵　关注海星谢谢喵　关注星海攻略组谢谢喵
 
@@ -89,14 +90,6 @@ GSPA-Glasses-Stronghold-Protocol-Assistant/
 推送到 `main` 后，GitHub Actions 会自动把 `dist/` 发布到 GitHub Pages（首次使用需在仓库 Settings → Pages → Source 选择 `GitHub Actions`）；详细步骤与各平台注意事项见 [deploy/README.md](deploy/README.md)。
 
 另外，`dist/standalone.html` 是单文件版（约 314 KB，CSS、JS、数据全部内联），不含头像与图标，可离线双击打开或直接发给别人。
-
-## 项目更名说明
-
-本项目原名 `ASA-Amiya-Stronghold-Assistant`，现更名为 **`GSPA-Glasses-Stronghold-Protocol-Assistant`**（GSPA = Glasses-Stronghold-Protocol-Assistant）。
-
-- 仓库地址：<https://github.com/Haixingjun/GSPA-Glasses-Stronghold-Protocol-Assistant>
-- 在线站点：<https://haixingjun.github.io/GSPA-Glasses-Stronghold-Protocol-Assistant/>
-- GitHub 会把旧仓库地址自动重定向到新地址；旧的书签、群聊链接建议逐步替换为新地址。
 
 ## 版权与免责
 
