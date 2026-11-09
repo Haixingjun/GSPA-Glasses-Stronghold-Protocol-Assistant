@@ -3,7 +3,7 @@
 **GSPA** : **G**lasses **S**tronghold **P**rotocol **A**ssistant（眼镜卫戍协议小助手）。
 
 本网页由 [@眼镜](https://space.bilibili.com/20597523) 提议，[@海星君](https://space.bilibili.com/341607034) 开发。
-思路提供、测试：[@夕阳]https://space.bilibili.com/327907133等星海攻略组成员
+思路提供、测试：[@夕阳](https://space.bilibili.com/327907133) 等星海攻略组成员
 
 关注眼镜谢谢喵　关注海星谢谢喵　关注星海攻略组谢谢喵
 
