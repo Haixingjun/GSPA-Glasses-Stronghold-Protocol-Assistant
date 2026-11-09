@@ -7,13 +7,13 @@
 <meta name="theme-color" content="#0b0f14">
 <meta name="format-detection" content="telephone=no">
 <title>GSPA · 眼镜卫戍协议小助手 · 干员图鉴</title>
-<meta name="description" content="《明日方舟》卫戍协议数据速查：155 条干员条目、70 件道具、61 个策略、26 个盟约，支持搜索、多维筛选、深链分享。手机与电脑通用，无需登录。">
+<meta name="description" content="《明日方舟》卫戍协议数据速查：155 条干员条目（含 2 名策略召唤的特殊干员）、70 件道具、61 个策略、26 个盟约，支持搜索、多维筛选、深链分享。手机与电脑通用，无需登录。">
 <meta property="og:type" content="website">
 <meta property="og:title" content="GSPA · 眼镜卫戍协议小助手">
 <meta property="og:description" content="卫戍协议数据速查：干员 / 道具 / 策略 / 盟约，搜索 + 筛选 + 深链分享。">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5 4.5 7.3v8.6c0 6.6 4.7 11.5 11.5 13.6 6.8-2.1 11.5-7 11.5-13.6V7.3z' fill='%235bd1e6'/%3E%3Cpath d='M10 11.6h12M16 11.6v10.2' stroke='%230b0f14' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/app.css?v=a3922147">
+<link rel="stylesheet" href="assets/app.css?v=ceadae16">
 </head>
 <body>
 
@@ -36,6 +36,7 @@
   <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15.4V3.8M8.2 7.4 12 3.6l3.8 3.8"/><path d="M5.4 13.4v5.2a1.8 1.8 0 0 0 1.8 1.8h9.6a1.8 1.8 0 0 0 1.8-1.8v-5.2"/></symbol>
   <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3.6" y="4.6" width="16.8" height="14.8" rx="2.6"/><circle cx="9" cy="9.8" r="1.7"/><path d="m5.6 17.4 4.4-4.2 3.2 3 2.4-2.2 3 3"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.4 12.6 4.2 4.2 9-9.6"/></symbol>
+  <symbol id="i-team" viewBox="0 0 24 24"><rect x="3.4" y="3.8" width="7.2" height="7.2" rx="1.7"/><rect x="13.4" y="3.8" width="7.2" height="7.2" rx="1.7"/><rect x="3.4" y="13.6" width="7.2" height="7.2" rx="1.7"/><path d="M17 13.4v7.6M13.2 17.2h7.6"/></symbol>
 </svg>
 
 <header class="topbar">
@@ -87,6 +88,10 @@
     <svg class="ico" aria-hidden="true"><use href="#i-covenant"/></svg>
     <span>盟约</span><em class="tab-n" data-n="covenant"></em>
   </button>
+  <button class="tab" type="button" role="tab" data-view="team" aria-selected="false">
+    <svg class="ico" aria-hidden="true"><use href="#i-team"/></svg>
+    <span>配队</span><em class="tab-badge">BETA</em>
+  </button>
 </nav>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -107,16 +112,22 @@
   <aside class="drawer" id="drawer" aria-label="详情" hidden></aside>
 </main>
 
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="选择干员" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
 <footer class="footer" id="footer"></footer>
 
 <noscript>
   <div class="noscript">这个工具需要启用 JavaScript 才能运行。数据本身已内嵌在页面里，不会发起任何网络请求。</div>
 </noscript>
 
-<script src="data/data.js?v=a3922147"></script>
-<script src="js/store.js?v=a3922147"></script>
-<script src="js/search.js?v=a3922147"></script>
-<script src="js/ui.js?v=a3922147"></script>
-<script src="js/app.js?v=a3922147"></script>
+<script src="data/data.js?v=ceadae16"></script>
+<script src="js/store.js?v=ceadae16"></script>
+<script src="js/search.js?v=ceadae16"></script>
+<script src="js/calc.js?v=ceadae16"></script>
+<script src="js/code.js?v=ceadae16"></script>
+<script src="js/ui.js?v=ceadae16"></script>
+<script src="js/team.js?v=ceadae16"></script>
+<script src="js/app.js?v=ceadae16"></script>
 </body>
 </html>

@@ -13,14 +13,18 @@
 (function (global) {
   'use strict';
 
-  var VIEWS = ['op', 'item', 'strategy', 'covenant', 'about'];
+  var VIEWS = ['op', 'item', 'strategy', 'covenant', 'team', 'about'];
 
   // URL 里的短名（#/cov/炎 与 #/covenant/炎 都认，输出用 cov）
-  var PATH_OF = { op: 'op', item: 'item', strategy: 'strategy', covenant: 'cov', about: 'about' };
+  var PATH_OF = { op: 'op', item: 'item', strategy: 'strategy', covenant: 'cov', team: 'team', about: 'about' };
   var VIEW_OF_PATH = {
     op: 'op', item: 'item', strategy: 'strategy',
-    cov: 'covenant', covenant: 'covenant', about: 'about'
+    cov: 'covenant', covenant: 'covenant', team: 'team', about: 'about'
   };
+
+  var TEAM_SIZE = 8;
+  var TEAM_MAX = 9;
+  var ITEMS_MAX = 2;
 
   var DEFAULTS = {
     view: 'op',
@@ -36,7 +40,8 @@
     ranks: [],
     sort: 'default',
     hidden: false,
-    sel: null
+    sel: null,
+    team: { size: TEAM_SIZE, slots: [], layers: {} }
   };
 
   var state = clone(DEFAULTS);
@@ -165,6 +170,7 @@
 
     if (!query) return next;
     var pairs = query.split('&');
+    var rawT = null, rawBs = null, rawL = null, rawE = null, rawIt = null, rawM = null, rawC = null;
     for (var p = 0; p < pairs.length; p++) {
       if (!pairs[p]) continue;
       var idx = pairs[p].indexOf('=');
@@ -183,10 +189,184 @@
         case 'rank': next.ranks = splitList(val); break;
         case 'sort': next.sort = val || 'default'; break;
         case 'hidden': next.hidden = oflag(val); break;
+        case 't': rawT = val; break;
+        case 'bs': rawBs = val; break;
+        case 'L': rawL = val; break;
+        case 'e': rawE = val; break;
+        case 'it': rawIt = val; break;
+        case 'm': rawM = val; break;
+        case 'c': rawC = val; break;
         default: break;
       }
     }
+
+    // 配队：先定席位数，再按位解析（空位用空串占位，保持位置）
+    var size = clampSize(toInt(rawBs));
+    var slots = parseSlots(rawT, size);
+    applyElites(rawE, slots);
+    applyItems(rawIt, slots);
+    applyMorph(rawM, slots);
+    next.team = {
+      size: Math.max(size, slots.length),
+      slots: slots,
+      layers: parseLayers(rawL)
+    };
+
+    // ?c=GSPA2.xxx：分享链接直接带整队，优先级最高
+    if (rawC && global.Code && data) {
+      var dec = global.Code.decode(safeDecode(rawC), data);
+      if (dec && dec.team) next.team = dec.team;
+    }
     return next;
+  }
+
+  function clampSize(n) {
+    if (n === null || n === undefined) return TEAM_SIZE;
+    if (n < 1) return 1;
+    if (n > TEAM_MAX) return TEAM_MAX;
+    return n;
+  }
+
+  function parseSlots(value, size) {
+    var out = [];
+    if (value) {
+      var parts = String(value).split(',');
+      for (var i = 0; i < parts.length && i < TEAM_MAX; i++) {
+        var raw = parts[i];
+        if (!raw) { out.push(null); continue; }
+        var elite = false;
+        if (raw.charAt(raw.length - 1) === '*') { elite = true; raw = raw.slice(0, -1); }
+        var name = safeDecode(raw);
+        out.push(name ? { k: name, e: elite } : null);
+      }
+    }
+    var n = Math.min(TEAM_MAX, Math.max(size || TEAM_SIZE, out.length));
+    while (out.length < n) out.push(null);
+    return out.slice(0, n);
+  }
+
+  function parseLayers(value) {
+    var out = {};
+    if (!value) return out;
+    var parts = String(value).split(',');
+    for (var i = 0; i < parts.length; i++) {
+      var raw = parts[i];
+      if (!raw) continue;
+      var idx = raw.lastIndexOf(':');
+      if (idx <= 0) continue;
+      var name = safeDecode(raw.slice(0, idx));
+      var n = toInt(raw.slice(idx + 1));
+      if (name && n !== null && n > 0) out[name] = n;
+    }
+    return out;
+  }
+
+  function encodeSlots(slots) {
+    var out = [];
+    for (var i = 0; i < slots.length; i++) {
+      var s = slots[i];
+      out.push(s && s.k ? encodeURIComponent(String(s.k)) : '');
+    }
+    // 末尾空位可以省掉；解析时按 bs 补齐
+    while (out.length && out[out.length - 1] === '') out.pop();
+    return out.join(',');
+  }
+
+  function applyElites(value, slots) {
+    if (!value) return;
+    var parts = String(value).split(',');
+    for (var i = 0; i < parts.length; i++) {
+      var idx = toInt(parts[i]);
+      if (idx !== null && idx >= 0 && idx < slots.length && slots[idx]) slots[idx].e = true;
+    }
+  }
+
+  function applyItems(value, slots) {
+    if (!value) return;
+    var parts = String(value).split(',');
+    for (var i = 0; i < parts.length; i++) {
+      var raw = parts[i];
+      if (!raw) continue;
+      var at = raw.indexOf(':');
+      if (at <= 0) continue;
+      var idx = toInt(raw.slice(0, at));
+      if (idx === null || idx < 0 || idx >= slots.length || !slots[idx]) continue;
+      var names = raw.slice(at + 1).split('+');
+      var out = [];
+      for (var j = 0; j < names.length && out.length < ITEMS_MAX; j++) {
+        var seg = names[j];
+        var elite = false;
+        if (seg.charAt(seg.length - 1) === '*') { elite = true; seg = seg.slice(0, -1); }
+        var n = safeDecode(seg);
+        if (!n) continue;
+        var dup = false;
+        for (var k = 0; k < out.length; k++) if (out[k].k === n) dup = true;
+        if (!dup) out.push({ k: n, e: elite });
+      }
+      if (out.length) slots[idx].it = out;
+    }
+  }
+
+  function applyMorph(value, slots) {
+    if (!value) return;
+    var parts = String(value).split(',');
+    for (var i = 0; i < parts.length; i++) {
+      var raw = parts[i];
+      if (!raw) continue;
+      var at = raw.indexOf(':');
+      if (at <= 0) continue;
+      var idx = toInt(raw.slice(0, at));
+      var cov = safeDecode(raw.slice(at + 1));
+      if (idx !== null && idx >= 0 && idx < slots.length && slots[idx] && cov) slots[idx].m = cov;
+    }
+  }
+
+  function encodeElites(slots) {
+    var out = [];
+    for (var i = 0; i < slots.length; i++) {
+      if (slots[i] && slots[i].e) out.push(i);
+    }
+    return out.join(',');
+  }
+
+  function encodeItems(slots) {
+    var out = [];
+    for (var i = 0; i < slots.length; i++) {
+      var s = slots[i];
+      if (!s || !s.it || !s.it.length) continue;
+      var names = [];
+      for (var j = 0; j < s.it.length && j < ITEMS_MAX; j++) {
+        var it = normItem(s.it[j]);
+        if (!it) continue;
+        names.push(encodeURIComponent(it.k) + (it.e ? '*' : ''));
+      }
+      if (names.length) out.push(i + ':' + names.join('+'));
+    }
+    return out.join(',');
+  }
+
+  function encodeMorph(slots) {
+    var out = [];
+    for (var i = 0; i < slots.length; i++) {
+      var s = slots[i];
+      if (s && s.m) out.push(i + ':' + encodeURIComponent(s.m));
+    }
+    return out.join(',');
+  }
+
+  function encodeLayers(layers) {
+    var out = [];
+    for (var k in layers) {
+      if (!layers.hasOwnProperty(k)) continue;
+      var n = toInt(layers[k]);
+      if (n !== null && n > 0) out.push(encodeURIComponent(k) + ':' + n);
+    }
+    return out.join(',');
+  }
+
+  function hasSlots(slots) {
+    for (var i = 0; i < slots.length; i++) if (slots[i] && slots[i].k) return true;
+    return false;
   }
 
   function onlyNums(list) {
@@ -220,6 +400,20 @@
     if (s.ranks && s.ranks.length) qs.push('rank=' + encodeList(s.ranks));
     if (s.sort !== 'default') qs.push('sort=' + encodeURIComponent(s.sort));
     if (s.hidden) qs.push('hidden=1');
+
+    // 配队状态在所有视图里都带上，切视图 / 刷新 / 分享都不会丢队
+    if (s.team) {
+      if (hasSlots(s.team.slots)) qs.push('t=' + encodeSlots(s.team.slots));
+      if (s.team.size === TEAM_MAX) qs.push('bs=' + TEAM_MAX);
+      var el = encodeElites(s.team.slots);
+      if (el) qs.push('e=' + el);
+      var its = encodeItems(s.team.slots);
+      if (its) qs.push('it=' + its);
+      var mo = encodeMorph(s.team.slots);
+      if (mo) qs.push('m=' + mo);
+      var ly = encodeLayers(s.team.layers || {});
+      if (ly) qs.push('L=' + ly);
+    }
 
     return '#' + path + (qs.length ? '?' + qs.join('&') : '');
   }
@@ -294,6 +488,7 @@
     var next = clone(DEFAULTS);
     next.view = view;
     next.q = state.q;
+    next.team = clone(state.team);
     return commit(next, opts);
   }
 
@@ -301,6 +496,7 @@
     var next = clone(DEFAULTS);
     next.view = state.view;
     next.q = '';
+    next.team = clone(state.team);
     return commit(next, { push: false });
   }
 
@@ -348,14 +544,82 @@
     return n;
   }
 
+  /* ---------------- 队伍 ---------------- */
+  /**
+   * 深拷贝一个席位。
+   * 注意：getTeam() 必须返回深拷贝 —— 曾经直接返回 state 里的对象引用，
+   * 于是「切精锐 / 改层数」先改了 state 再提交，commit 判定「没变化」就不通知，
+   * 界面不重渲染，看起来就像精锐无效。
+   */
+  function normItem(v) {
+    if (!v) return null;
+    if (typeof v === 'string') return { k: v, e: false };
+    if (v.k) return { k: String(v.k), e: !!v.e };
+    return null;
+  }
+
+  function cloneSlot(s) {
+    if (!s || !s.k) return null;
+    var out = { k: String(s.k), e: !!s.e };
+    if (s.it && s.it.length) {
+      out.it = [];
+      for (var i = 0; i < s.it.length && out.it.length < ITEMS_MAX; i++) {
+        var it = normItem(s.it[i]);
+        if (!it) continue;
+        var dup = false;
+        for (var j = 0; j < out.it.length; j++) if (out.it[j].k === it.k) dup = true;
+        if (!dup) out.it.push(it);
+      }
+    }
+    if (s.m) out.m = String(s.m);
+    return out;
+  }
+
+  function cloneLayers(src) {
+    var out = {};
+    src = src || {};
+    for (var k in src) {
+      if (!src.hasOwnProperty(k)) continue;
+      var n = toInt(src[k]);
+      if (n !== null && n > 0) out[k] = n;
+    }
+    return out;
+  }
+
+  function getTeam() {
+    var t = state.team || DEFAULTS.team;
+    var size = clampSize(t.size);
+    var slots = [];
+    for (var i = 0; i < size; i++) slots.push(cloneSlot(t.slots[i]));
+    return { size: size, slots: slots, layers: cloneLayers(t.layers) };
+  }
+
+  function normalizeTeam(team) {
+    var size = clampSize(team && team.size);
+    var slots = [];
+    for (var i = 0; i < size; i++) {
+      slots.push(cloneSlot(team && team.slots ? team.slots[i] : null));
+    }
+    return { size: size, slots: slots, layers: cloneLayers(team && team.layers) };
+  }
+
+  function setTeam(team, opts) {
+    return set({ team: normalizeTeam(team) }, opts);
+  }
+
   global.Store = {
     VIEWS: VIEWS,
     DEFAULTS: DEFAULTS,
+    TEAM_SIZE: TEAM_SIZE,
+    TEAM_MAX: TEAM_MAX,
+    ITEMS_MAX: ITEMS_MAX,
     init: init,
     getData: getData,
     entity: entity,
     listOf: listOf,
     covenantByName: covenantByName,
+    getTeam: getTeam,
+    setTeam: setTeam,
     parseHash: parseHash,
     buildUrl: buildUrl,
     subscribe: subscribe,

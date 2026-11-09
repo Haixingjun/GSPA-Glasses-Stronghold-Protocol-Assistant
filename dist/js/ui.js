@@ -103,12 +103,12 @@
    * @param {number} size 像素
    * @param {boolean} full 是否优先用大图
    */
-  function avatarHtml(entry, name, size, full) {
+  function avatarHtml(entry, name, size, full, eager) {
     if (NO_AVATARS) return '';
     var src = entry ? (full ? (entry.avatarFull || entry.avatar) : entry.avatar) : null;
     var img = src
       ? '<img class="avatar-img" src="' + esc(src) + '" alt="" width="' + size + '" height="' + size +
-        '" loading="lazy" decoding="async">'
+        '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async">'
       : '';
     return '<span class="avatar' + (src ? ' has-img' : '') + '" style="--h:' + hue(name) +
       ';--size:' + size + 'px" aria-hidden="true">' +
@@ -119,12 +119,12 @@
    * 三套图标都来自本期「卫戍协议·规程」的 PRTS 页面，透明底白色线稿居多，
    * 因此统一放在深色底座上（浅色主题也清楚）；缺图/坏图回退「色块 + 首字」。
    */
-  function iconHtml(entry, name, size, kind, full) {
+  function iconHtml(entry, name, size, kind, full, eager) {
     if (NO_ICONS) return '';
     var src = entry ? (full ? (entry.iconFull || entry.icon) : entry.icon) : null;
     var img = src
       ? '<img class="icon-img" src="' + esc(src) + '" alt="" width="' + size + '" height="' + size +
-        '" loading="lazy" decoding="async">'
+        '" loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async">'
       : '';
     return '<span class="icon icon-' + kind + (src ? ' has-img' : '') + '" style="--h:' + hue(name) +
       ';--size:' + size + 'px" aria-hidden="true">' +
@@ -140,6 +140,11 @@
 
     renderTabs(st);
     document.body.classList.toggle('view-about', st.view === 'about');
+    document.body.classList.toggle('view-team', st.view === 'team');
+    if (st.view !== 'team' && global.Team) {
+      global.Team.closeSheet();
+      global.Team.hideTip();
+    }
 
     if (st.view === 'about') {
       currentList = [];
@@ -160,6 +165,21 @@
     refs.toolbar.hidden = false;
     refs.cards.className = 'cards';
 
+    if (st.view === 'team') {
+      currentList = [];
+      refs.filters.hidden = true;
+      refs.filters.innerHTML = '';
+      refs.toolbar.hidden = true;
+      refs.toolbar.innerHTML = '';
+      refs.empty.hidden = true;
+      refs.cards.hidden = false;
+      refs.cards.className = 'cards is-team';
+      refs.cards.innerHTML = global.Team ? global.Team.render(st) : '';
+      renderDrawer(st, toks);
+      updateTitle(st);
+      return currentList;
+    }
+
     currentList = Search.filter(st.view, st);
     renderFilters(st);
     renderToolbar(st);
@@ -175,6 +195,7 @@
       item: '道具图鉴',
       strategy: '策略图鉴',
       covenant: '盟约图鉴',
+      team: '模拟配队',
       about: '关于'
     }[st.view] || 'GSPA · 眼镜卫戍协议小助手';
     document.title = t + ' · GSPA 眼镜卫戍协议小助手';
@@ -319,7 +340,7 @@
       });
       groups.push({
         id: 'hidden', title: '其他', wide: false, toggle: true,
-        items: [{ v: '1', label: '显示隐藏条目', count: false }],
+        items: [{ v: '1', label: '显示隐藏条目（特殊干员）', count: false }],
         countsFrom: 'none'
       });
       return groups;
@@ -484,7 +505,7 @@
       for (i = 0; i < st.ranks.length; i++) rl.push(rankLabel(st.ranks[i]));
       out.push(afChip('ranks', '分类 ' + rl.join('/')));
     }
-    if (st.hidden) out.push(afChip('hidden', '含隐藏'));
+    if (st.hidden) out.push(afChip('hidden', '含隐藏/特殊'));
 
     return out.join('');
   }
@@ -550,6 +571,67 @@
     return out;
   }
 
+  /* ---------------- 特殊干员 ---------------- */
+  function starText(n) {
+    if (!n) return '';
+    return n + '★';
+  }
+
+  function specialAliasLine(o) {
+    var s = o.special;
+    var bits = [];
+    var alias = [];
+    for (var i = 0; i < (s.aliases || []).length && alias.length < 2; i++) {
+      if (s.aliases[i] !== s.strategyName) alias.push(s.aliases[i]);
+    }
+    if (alias.length) bits.push('又称 ' + alias.join(' / '));
+    if (s.strategyName) bits.push('由策略「' + s.strategyName + '」召唤');
+    return esc(bits.join(' · '));
+  }
+
+  function prtsMetaLine(p) {
+    var bits = [];
+    if (p.class) bits.push(p.class + (p.branch ? ' / ' + p.branch : ''));
+    if (p.rarity) bits.push(starText(p.rarity));
+    if (p.position) bits.push(p.position);
+    return bits.join(' · ');
+  }
+
+  function statTable(p) {
+    var rows = p.stats || [];
+    if (!rows.length) return '';
+    var html = '<table class="d-table"><thead><tr>' +
+      '<th>阶段</th><th>生命</th><th>攻击</th><th>防御</th><th>法抗</th>' +
+      '</tr></thead><tbody>';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      html += '<tr><td>' + esc(r.phase) +
+        ((r.level && r.phase.indexOf('1级') < 0) ? '（' + r.level + '）' : '') + '</td>' +
+        '<td>' + (r.hp == null ? '—' : r.hp) + '</td>' +
+        '<td>' + (r.atk == null ? '—' : r.atk) + '</td>' +
+        '<td>' + (r.def == null ? '—' : r.def) + '</td>' +
+        '<td>' + (r.res == null ? '—' : r.res) + '</td></tr>';
+    }
+    html += '</tbody></table>';
+    return html;
+  }
+
+  function moduleTable(m) {
+    var rows = (m && m.stats) || [];
+    if (!rows.length) return '';
+    var html = '<table class="d-table"><thead><tr>' +
+      '<th>模组等级</th><th>生命</th><th>攻击</th><th>防御</th></tr></thead><tbody>';
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      html += '<tr><td>' + r.level + ' 级</td>' +
+        '<td>' + (r.hp == null ? '—' : '+' + r.hp) + '</td>' +
+        '<td>' + (r.atk == null ? '—' : '+' + r.atk) + '</td>' +
+        '<td>' + (r.def == null ? '—' : '+' + r.def) + '</td></tr>';
+    }
+    html += '</tbody></table>';
+    return html;
+  }
+
   function opCard(o, toks, st) {
     var active = st.sel === o.name ? 'is-active' : '';
     var label = '干员 ' + o.name + '，' + o.tierLabel + ' 阶，售价 ' + o.price +
@@ -564,6 +646,7 @@
       '<span class="price">' + o.price + '</span>' +
       '</div></div>' +
       '<div class="card-tags">' + tagsHtml(o.tags) + '</div>' +
+      (o.special ? '<div class="card-sub">' + specialAliasLine(o) + '</div>' : '') +
       '<div class="eff">' +
       '<div class="eff-col"><div class="eff-h"><b>普通</b>' + trgHtml(o.normalTriggers) + '</div>' +
       '<p>' + Search.format(o.normalText, toks) + '</p></div>' +
@@ -572,6 +655,7 @@
       '</div>' +
       '<div class="card-foot">' +
       '<span class="pill">' + esc(o.type) + '</span>' +
+      (o.special ? '<span class="pill pill-special">特殊干员</span>' : '') +
       (o.hidden ? '<span class="pill pill-warn">隐藏条目</span>' : '') +
       '<span class="sp"></span><span>详情 ›</span>' +
       '</div>' +
@@ -730,17 +814,20 @@
       ' · 售价 ◈' + o.price + '</div></div>' + closeBtn() + '</div>';
 
     html += '<div class="d-meta">' +
+      (o.special ? '<span class="pill pill-special">特殊干员</span>' : '') +
       (o.hidden ? '<span class="pill pill-warn">隐藏条目</span>' : '') +
       '<span class="pill">普通 / 精锐 双形态</span>' +
       '</div>';
 
     html += '<div class="d-tags">' + tagsHtml(o.tags) + '</div>';
 
-    html += '<div class="d-sec"><h3>普通</h3><div class="d-box">' +
+    if (o.special) html += specialSection(o, toks);
+
+    html += '<div class="d-sec"><h3>' + (o.special ? '条目效果 · 普通' : '普通') + '</h3><div class="d-box">' +
       '<h4>' + (trgHtml(o.normalTriggers) || '<span style="color:var(--fg3)">无触发时机</span>') + '</h4>' +
       '<p>' + Search.format(o.normalText, toks) + '</p></div></div>';
 
-    html += '<div class="d-sec"><h3>精锐</h3><div class="d-box">' +
+    html += '<div class="d-sec"><h3>' + (o.special ? '条目效果 · 精锐' : '精锐') + '</h3><div class="d-box">' +
       '<h4>' + (trgHtml(o.eliteTriggers) || '<span style="color:var(--fg3)">无触发时机</span>') + '</h4>' +
       '<p>' + Search.format(o.eliteText, toks) + '</p></div></div>';
 
@@ -760,7 +847,124 @@
       html += '<div class="d-sec"><h3>所属盟约</h3><div class="d-box"><p>该条目没有盟约标签（自选配置槽位）。</p></div></div>';
     }
 
+    if (o.special) {
+      html += '<div class="d-sec"><h3>外部资料</h3><div class="d-box">' +
+        '<p>完整页面、语音与立绘见 PRTS；本站只离线保存查询所需字段，不发起外部请求。</p>' +
+        '<p style="margin-top:8px"><a class="btn" href="' + esc(o.special.prts.url) +
+        '" target="_blank" rel="noopener noreferrer">在 PRTS 查看「' + esc(o.special.prts.title) +
+        '」 ↗</a></p></div></div>';
+    }
+
     html += actionBar();
+    return html;
+  }
+
+  /* 特殊干员的「来源 + PRTS 档案 + 版本」区块 */
+  function specialSection(o, toks) {
+    var s = o.special;
+    var p = s.prts || {};
+    var st = Store.entity('strategy', s.strategyKey);
+    var html = '';
+
+    html += '<div class="d-sec"><h3>特殊干员来源</h3>' +
+      '<button type="button" class="d-box d-link" data-strategy="' + esc(s.strategyKey) + '">' +
+      '<h4>策略「' + esc(s.strategyName) + '」' +
+      '<span class="pill">' + esc(s.strategyRole) + '</span></h4>' +
+      '<p>' + (st ? Search.format(st.text, toks) : '第 1 回合获得该特殊干员') + '</p>' +
+      '</button>' +
+      '<p class="d-note">它不是普通干员池里的条目，默认不显示；直接搜索「' +
+      esc((s.aliases || []).slice(0, 3).join('」「')) + '」或从策略详情进入。</p>' +
+      (s.unpackNote ? '<p class="d-note">解包溯源：' + esc(s.unpackNote) + '</p>' : '') +
+      '</div>';
+
+    html += '<div class="d-sec"><h3>干员档案（PRTS）</h3><div class="d-box"><dl class="rule">' +
+      '<dt>职业</dt><dd>' + esc(p.class || '—') + (p.branch ? ' / ' + esc(p.branch) : '') + '</dd>' +
+      '<dt>星级</dt><dd>' + esc(starText(p.rarity) || '—') + '</dd>' +
+      '<dt>特性</dt><dd>' + Search.format(p.trait || '—', toks) + '</dd>' +
+      '<dt>位置</dt><dd>' + esc(p.position || '—') + '</dd>' +
+      '<dt>标签</dt><dd>' + esc((p.tags || []).join(' / ') || '—') + '</dd>' +
+      '<dt>上线</dt><dd>' + esc(s.debut || '—') + (s.debutSeason ? '（' + esc(s.debutSeason) + '）' : '') + '</dd>' +
+      '<dt>召唤 ID</dt><dd><code>' + esc(s.chessId || '—') + '</code></dd>' +
+      '</dl></div></div>';
+
+    if ((p.stats || []).length) {
+      html += '<div class="d-sec"><h3>属性</h3><div class="d-box">' + statTable(p) +
+        '<p class="d-note">再部署 ' + esc(p.redeploy || '—') + ' · 部署费用 ' + esc(p.deployCost || '—') +
+        ' · 阻挡 ' + esc(p.block || '—') + ' · 攻击间隔 ' + esc(p.attackInterval || '—') + '</p></div></div>';
+    }
+
+    var i, j;
+    if ((p.talents || []).length) {
+      html += '<div class="d-sec"><h3>天赋</h3>';
+      for (i = 0; i < p.talents.length; i++) {
+        var t = p.talents[i];
+        html += '<div class="d-box"><h4>' + esc(t.slot || '') + ' · ' + esc(t.name || '') + '</h4>';
+        for (j = 0; j < t.rows.length; j++) {
+          html += '<p><b>' + esc(t.rows[j].cond || '—') + '</b>：' +
+            Search.format(t.rows[j].effect, toks) + '</p>';
+        }
+        if (t.note) html += '<p class="d-note">' + Search.format(t.note, toks) + '</p>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    if ((p.skills || []).length) {
+      html += '<div class="d-sec"><h3>技能</h3>';
+      for (i = 0; i < p.skills.length; i++) {
+        var sk = p.skills[i];
+        var rows = sk.rows || [];
+        var show = [];
+        for (j = 0; j < rows.length; j++) {
+          if (rows[j].level === '7' || rows[j].level === '专精3') show.push(rows[j]);
+        }
+        if (!show.length && rows.length) show = rows.slice(-2);
+        html += '<div class="d-box"><h4>' + esc(sk.name) +
+          (sk.recovery ? '<span class="pill">' + esc(sk.recovery) + '</span>' : '') +
+          (sk.trigger ? '<span class="pill">' + esc(sk.trigger) + '</span>' : '') +
+          '</h4>';
+        for (j = 0; j < show.length; j++) {
+          var r = show[j];
+          var lv = r.level === '专精3' ? '专精 3' : (r.level + ' 级');
+          html += '<div class="skill-line"><b>' + esc(lv) + '</b>' +
+            '<p>' + Search.format(r.desc, toks) + '</p>' +
+            '<small>初始 ' + esc(r.init || '—') + ' · 消耗 ' + esc(r.cost || '—') +
+            ' · 持续 ' + esc(r.dur || '—') + '</small></div>';
+        }
+        if (sk.note) html += '<p class="d-note">' + Search.format(sk.note, toks) + '</p>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    if (p.module) {
+      var m = p.module;
+      html += '<div class="d-sec"><h3>模组</h3><div class="d-box"><h4>' + esc(m.name || '') +
+        (m.type ? '<span class="pill">' + esc(m.type) + '</span>' : '') + '</h4>' +
+        moduleTable(m) +
+        (m.trait ? '<p><b>特性追加</b>：' + Search.format(m.trait, toks) + '</p>' : '') +
+        (m.talent ? '<p><b>天赋更新</b>：' + Search.format(m.talent, toks) + '</p>' : '') +
+        '<p class="d-note">解锁等级 ' + esc(m.unlock || '—') + '；以上为模组 1–3 级增量。</p>' +
+        '</div></div>';
+    }
+
+    var versions = (data.specialMeta && data.specialMeta.versions) || [];
+    var meta = data.specialMeta || {};
+    html += '<div class="d-sec"><h3>版本说明</h3><div class="d-box">' +
+      '<p><b>本期主表</b>：' + esc(meta.season || data.version) + '（V3_1）</p>' +
+      '<p>' + esc(s.versionNote || '') + '</p>' +
+      '<p class="d-note">PRTS 页面修订 ' + esc((p.revAt || '').slice(0, 10)) +
+      '（revid ' + esc(p.revid || '—') + '）。特殊干员档案只作补充，条目数值仍以解包主表为准。</p>';
+    if (versions.length) {
+      html += '<h4 style="margin-top:10px">卫戍协议版本对照</h4><dl class="rule">';
+      for (i = 0; i < versions.length; i++) {
+        html += '<dt>' + esc(versions[i].season) + (versions[i].date ? '（' + esc(versions[i].date) + '）' : '') +
+          '</dt><dd>' + esc(versions[i].special || '') + '</dd>';
+      }
+      html += '</dl>';
+    }
+    html += '</div></div>';
+
     return html;
   }
 
@@ -839,6 +1043,35 @@
     html += '<div class="d-sec"><h3>策略描述</h3><div class="d-box">' +
       '<p>' + Search.format(s.text, toks) + '</p></div></div>';
 
+    if (s.specialOperator) {
+      var sp = opByName[s.specialOperator];
+      html += '<div class="d-sec"><h3>召唤的特殊干员</h3>' +
+        '<button type="button" class="d-box d-link" data-op="' + esc(s.specialOperator) + '">' +
+        '<div class="d-special">' + avatarHtml(sp, s.specialOperator, 44) +
+        '<div><h4 style="margin:0 0 2px">' + esc(s.specialOperator) + '</h4>' +
+        '<p>' + esc(sp && sp.special ? prtsMetaLine(sp.special.prts) : '') +
+        ' · 点击查看干员档案</p></div></div></button>' +
+        '<p class="d-note">策略角色「' + esc(s.role) + '」是策略发起人，不等于被召唤的干员；' +
+        '该干员默认是隐藏条目，从这里进入可直接打开完整档案。</p></div>';
+    }
+
+    if (s.fixedUnits && s.fixedUnits.units.length) {
+      html += '<div class="d-sec"><h3>' + esc(s.fixedUnits.label) + '</h3>';
+      for (var fu = 0; fu < s.fixedUnits.units.length; fu++) {
+        var u = s.fixedUnits.units[fu];
+        html += '<div class="d-box"><h4>' + esc(u.name) +
+          (u.star ? '<span class="pill">' + u.star + '★</span>' : '') +
+          (u.class ? '<span class="pill">' + esc(u.class) + '</span>' : '') +
+          '</h4><p>' + esc(u.note || '') + '</p>' +
+          '<p style="margin-top:6px"><a href="' + esc(u.prtsUrl) +
+          '" target="_blank" rel="noopener noreferrer">在 PRTS 查看「' + esc(u.name) + '」 ↗</a></p></div>';
+      }
+      if (s.fixedUnits.note) {
+        html += '<p class="d-note">' + esc(s.fixedUnits.note) + '</p>';
+      }
+      html += '</div>';
+    }
+
     html += '<div class="d-sec"><h3>解锁条件</h3><div class="d-box"><p>' +
       (s.unlock === '未配置额外解锁条件' ? '<span style="color:var(--fg3)">无额外解锁条件</span>' : Search.format(s.unlock, toks)) +
       '</p></div></div>';
@@ -862,7 +1095,7 @@
     }
 
     if (opByName[s.role]) {
-      html += '<div class="d-sec"><h3>相关干员</h3>' +
+      html += '<div class="d-sec"><h3>策略发起人</h3>' +
         '<button type="button" class="btn" data-op="' + esc(s.role) + '">' +
         '查看干员「' + esc(s.role) + '」</button></div>';
     }
@@ -963,6 +1196,7 @@
 
       '<div class="stats">' +
       '<div class="stat"><b>' + c.operators + '</b><span>干员条目</span></div>' +
+      (c.specials ? '<div class="stat"><b>' + c.specials + '</b><span>特殊干员</span></div>' : '') +
       '<div class="stat"><b>' + c.items + '</b><span>道具</span></div>' +
       '<div class="stat"><b>' + c.strategies + '</b><span>策略</span></div>' +
       '<div class="stat"><b>' + c.covenants + '</b><span>盟约</span></div>' +
@@ -990,7 +1224,13 @@
       '不混用 2024 / 2025-11「盟约」/ 2026-03「盟约 下半」的素材。游戏美术版权归鹰角网络所有，' +
       '此处仅作非商业的玩家查询用途；如果权利人提出异议，关闭图片显示或删除对应文件即可。</p>' +
       '<p>已知限制：自选配置条目没有盟约与触发时机；「绝技」没有固定成员，按精锐数量判定；' +
-      '「盟约·辅助干员」与「“暴躁铁皮”」默认隐藏，可在筛选里打开。</p>' +
+      '「盟约·辅助干员」与「“暴躁铁皮”」默认隐藏，可搜索「优等生」「Pith」「森蚺」「暴躁铁皮」直接命中，' +
+      '也可从策略详情跳转，或在筛选里打开隐藏条目。</p>' +
+      '<p>特殊干员的职业、属性、天赋与技能补充自 ' +
+      '<a href="https://prts.wiki" target="_blank" rel="noopener noreferrer">PRTS wiki</a> 干员页。' +
+      '同名单位跨版本很多：2024「卫戍协议β」的 Pith 是 6★ 术师，2025「盟约」的【优等生】召唤的是 4★ 辅助' +
+      '「盟约·辅助干员」，2026「规程」的【暴躁铁皮】召唤的是 6★ 重装「“暴躁铁皮”」；' +
+      '本站按「策略 → 召唤干员 → 所属版本」分别记录，不把同名单位合并。PRTS 页面修订号与抓取时间保存在数据里。</p>' +
 
       '<h3>免责声明</h3>' +
       '<p>本站为非官方工具，与鹰角网络无关。干员名、数值与技能文本的著作权归原权利人所有，' +
@@ -1030,6 +1270,8 @@
     init: init,
     render: render,
     hue: hue,
+    avatarHtml: avatarHtml,
+    iconHtml: iconHtml,
     getList: function () { return currentList; },
     refs: function () { return refs; }
   };

@@ -16,12 +16,20 @@
   function init(payload) {
     data = payload;
 
+    // 特殊干员档案只挂在干员上；策略索引需要反查，方便「优等生」「Pith」也能命中。
+    var specialByStrategy = {};
+    for (var s = 0; s < payload.operators.length; s++) {
+      var sp = payload.operators[s];
+      if (sp.special && sp.special.strategyKey) specialByStrategy[sp.special.strategyKey] = sp;
+    }
+
     index.op = payload.operators.map(function (o) {
       return {
         e: o,
         h: low([
           o.name, o.tierLabel, o.type, (o.tags || []).join(' '),
-          o.normalText, o.eliteText, o.normalTrigger, o.eliteTrigger, o.price
+          o.normalText, o.eliteText, o.normalTrigger, o.eliteTrigger, o.price,
+          specialText(o)
         ].join(SEP))
       };
     });
@@ -41,9 +49,16 @@
       for (var i = 0; i < o.stages.length; i++) {
         st.push(o.stages[i].effect, o.stages[i].state, o.stages[i].rule);
       }
+      var sp = o.specialOperator ? specialByStrategy[o.key] : null;
+      var spText = '';
+      if (sp) spText = sp.name + ' ' + (sp.special.aliases || []).join(' ');
+      var fuText = '';
+      if (o.fixedUnits) {
+        for (var q = 0; q < o.fixedUnits.units.length; q++) fuText += ' ' + o.fixedUnits.units[q].name;
+      }
       return {
         e: o,
-        h: low([o.role, o.name, o.category, o.text, o.unlock, o.banned]
+        h: low([o.role, o.name, o.category, o.text, o.unlock, o.banned, spText, fuText]
           .concat(st).join(SEP))
       };
     });
@@ -65,6 +80,23 @@
 
   function low(s) {
     return String(s == null ? '' : s).toLowerCase();
+  }
+
+  /** 特殊干员的别称 / 职业 / 技能名也进搜索索引（优等生、Pith、森蚺…） */
+  function specialText(o) {
+    if (!o.special) return '';
+    var s = o.special;
+    var p = s.prts || {};
+    var out = [
+      (s.aliases || []).join(' '),
+      s.strategyRole, s.strategyName, s.strategyKey,
+      s.chessId, s.debutSeason,
+      p.class, p.branch, p.trait, p.charId, (p.tags || []).join(' ')
+    ];
+    var i;
+    for (i = 0; i < (p.talents || []).length; i++) out.push(p.talents[i].name);
+    for (i = 0; i < (p.skills || []).length; i++) out.push(p.skills[i].name);
+    return out.join(' ');
   }
 
   function kindLabel(kind) {
@@ -148,7 +180,8 @@
           var trg = e.normalTriggers.concat(e.eliteTriggers);
           if (!anyOverlap(trg, st.triggers)) continue;
         }
-        if (!st.hidden && e.hidden) continue;
+        // 特殊干员默认也是隐藏条目，但直接搜名字/别称时要能命中
+        if (!st.hidden && e.hidden && !(e.special && toks.length)) continue;
         if (!opts.skipTags && st.tags.length) {
           if (st.tagMode === 'and' ? !allMatch(e.tags, st.tags) : !anyOverlap(e.tags, st.tags)) continue;
         }
