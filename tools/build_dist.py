@@ -3,7 +3,7 @@
 把 web/ 打成可部署的 dist/：
     1. dist/                 —— 目录版（服务器 / Cloudflare Pages / B站 Toy 静态包）
     2. dist/standalone.html  —— 单文件版（微信里发、本地双击、压缩包直传）
-    3. build/garrison-web.zip—— 目录版的 zip（B站 Toy 上传用）
+    3. build/gspa-web.zip    —— 目录版的 zip（B站 Toy 上传用）
 
 用法：
     python tools/build_dist.py            # 全量
@@ -13,7 +13,7 @@
     · 资源 URL 自动加 ?v=<指纹>，配合 nginx / Pages 的长缓存策略，改版后不必清缓存。
     · 单文件版把所有 CSS / JS / 数据内联，零外部请求，file:// 双击可开。
     · 产物里没有绝对路径（没有 /assets 这种），所以可以部署在任意子目录
-      （https://example.com/garrison/、B站 Toy 的沙箱路径都没问题）。
+      （https://example.com/gspa/、B站 Toy 的沙箱路径都没问题）。
 """
 import sys, io, os, re, json, time, gzip, shutil, hashlib, zipfile
 
@@ -24,7 +24,7 @@ WEB = os.path.join(ROOT, "web")
 DIST = os.path.join(ROOT, "dist")
 BUILD = os.path.join(ROOT, "build")
 DEPLOY = os.path.join(ROOT, "deploy")
-ZIP_PATH = os.path.join(BUILD, "garrison-web.zip")
+ZIP_PATH = os.path.join(BUILD, "gspa-web.zip")
 BUDGET_KB = 100.0
 
 
@@ -154,7 +154,7 @@ def main():
     )
     standalone = standalone.replace(
         "</head>",
-        "<script>window.GARRISON_NO_AVATARS = true; window.GARRISON_NO_ICONS = true;</script>\n</head>",
+        "<script>window.GSPA_NO_AVATARS = true; window.GSPA_NO_ICONS = true;</script>\n</head>",
         1,
     )
     write_text(os.path.join(DIST, "standalone.html"), standalone)
@@ -217,7 +217,7 @@ def main():
                                len(icon_files), human(sum(s for _r, s in icon_files))))
 
     info = "\n".join([
-        "卫戍协议小助手 · 构建产物说明",
+        "GSPA · 眼镜卫戍协议小助手 · 构建产物说明",
         "=" * 40,
         "构建时间：%s" % time.strftime("%Y-%m-%d %H:%M:%S"),
         "数据版本：%s" % data_meta.get("version", "?"),
@@ -261,11 +261,11 @@ def main():
         problems.append("standalone.html 存在外部资源请求")
     if re.search(r'url\(\s*["\']?https?://', sa_html):
         problems.append("standalone.html 的样式里引用了外部图片/字体")
-    if "window.GARRISON_DATA" not in sa_html:
+    if "window.GSPA_DATA" not in sa_html:
         problems.append("standalone.html 未内联数据")
-    if "window.GARRISON_NO_AVATARS" not in sa_html:
+    if "window.GSPA_NO_AVATARS" not in sa_html:
         problems.append("standalone.html 缺少关闭头像的标记（单文件版不应引用外部头像）")
-    if "window.GARRISON_NO_ICONS" not in sa_html:
+    if "window.GSPA_NO_ICONS" not in sa_html:
         problems.append("standalone.html 缺少关闭图标的标记（单文件版不应引用外部图标）")
     if re.search(r'(?:src|href)="/(?!/)', sa_html):
         problems.append("standalone.html 出现绝对路径")

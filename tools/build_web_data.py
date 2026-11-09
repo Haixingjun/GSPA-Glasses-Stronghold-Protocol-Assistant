@@ -581,7 +581,7 @@ with open(os.path.join(BUILD_DIR, "diff_report.md"), "w", encoding="utf-8") as f
 with open(os.path.join(OUT_DIR, "data.json"), "w", encoding="utf-8") as f:
     json.dump(payload, f, ensure_ascii=False, indent=1)
 
-js = "/* 由 tools/build_web_data.py 生成，请勿手改 */\nwindow.GARRISON_DATA = " + \
+js = "/* 由 tools/build_web_data.py 生成，请勿手改 */\nwindow.GSPA_DATA = " + \
      json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n"
 with open(os.path.join(OUT_DIR, "data.js"), "w", encoding="utf-8") as f:
     f.write(js)

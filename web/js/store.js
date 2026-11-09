@@ -5,7 +5,7 @@
    · 所有状态可序列化，URL 即状态：复制地址栏即可还原视图 / 搜索 / 筛选 / 详情。
    · 只依赖 location.hash，不依赖 history API 的服务端回退，所以：
        - file:// 双击可开
-       - 部署在任意子目录（/garrison/、B站 Toy 静态包）都能用
+       - 部署在任意子目录（/gspa/、B站 Toy 静态包）都能用
        - 不需要 nginx try_files 重写
    · history.replaceState 在 file:// (origin null) 会抛 SecurityError，
      这里统一 try/catch 回退到 location.hash，保证双击打开也能分享。

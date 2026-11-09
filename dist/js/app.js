@@ -35,7 +35,7 @@
 
     initTheme();
 
-    var data = global.GARRISON_DATA;
+    var data = global.GSPA_DATA;
     if (!data || !data.operators) {
       showFatal();
       return;
@@ -110,12 +110,12 @@
   /* ---------------- 头像开关（纯展示偏好，不进 URL） ---------------- */
   function initAvatarPref() {
     var btn = els.avatars;
-    if (global.GARRISON_NO_AVATARS || global.GARRISON_NO_ICONS) {
+    if (global.GSPA_NO_AVATARS || global.GSPA_NO_ICONS) {
       document.body.classList.add('no-avatars');
       if (btn) btn.hidden = true;
       return;
     }
-    var data = global.GARRISON_DATA || {};
+    var data = global.GSPA_DATA || {};
     var groups = [data.operators || [], data.items || [], data.strategies || [], data.covenants || []];
     var hasAny = false;
     for (var g = 0; g < groups.length && !hasAny; g++) {

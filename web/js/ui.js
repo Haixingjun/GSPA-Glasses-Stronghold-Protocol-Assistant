@@ -15,8 +15,8 @@
   var currentList = [];
   var hueCache = {};
   var opByName = {};
-  var NO_AVATARS = !!global.GARRISON_NO_AVATARS;
-  var NO_ICONS = !!global.GARRISON_NO_ICONS;
+  var NO_AVATARS = !!global.GSPA_NO_AVATARS;
+  var NO_ICONS = !!global.GSPA_NO_ICONS;
 
   var KIND_LABEL = {
     count: '人数',
@@ -176,8 +176,8 @@
       strategy: '策略图鉴',
       covenant: '盟约图鉴',
       about: '关于'
-    }[st.view] || '卫戍协议小助手';
-    document.title = t + ' · 卫戍协议小助手';
+    }[st.view] || 'GSPA · 眼镜卫戍协议小助手';
+    document.title = t + ' · GSPA 眼镜卫戍协议小助手';
   }
 
   function renderTabs(st) {
@@ -956,7 +956,8 @@
   function aboutHtml(st) {
     var c = data.counts;
     return '<article class="about">' +
-      '<h2>卫戍协议小助手</h2>' +
+      '<h2>GSPA · 眼镜卫戍协议小助手</h2>' +
+      '<p>GSPA 是 <b>G</b>lasses-<b>S</b>tronghold-<b>P</b>rotocol-<b>A</b>ssistant 的缩写，即「眼镜卫戍协议小助手」。</p>' +
       '<p>把《明日方舟》卫戍协议的数据表做成一个<b>打开即用、用完即走</b>的查询工具。' +
       '没有后端、没有登录、没有任何外部请求：整站就是一份静态文件，数据已经内嵌在页面里。</p>' +
 

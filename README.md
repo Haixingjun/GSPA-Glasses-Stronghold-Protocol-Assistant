@@ -1,154 +1,129 @@
-# 卫戍协议小助手
+# GSPA · 眼镜卫戍协议小助手
 
-> 《明日方舟》卫戍协议的数据查询工具 —— **手机一打开就能查，链接一发就能看**。
-> 纯静态、零依赖、可离线；数据源自 Excel，改表 → 重跑脚本 → 1 分钟上线。
+**GSPA** = **G**lasses **S**tronghold **P**rotocol **A**ssistant（眼镜卫戍协议小助手）。
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![素材](https://img.shields.io/badge/%E7%B4%A0%E6%9D%90-%E9%9D%9E%E5%95%86%E4%B8%9A%20%C2%B7%20%E9%9D%9E%E5%AE%98%E6%96%B9-orange.svg)
-![无构建](https://img.shields.io/badge/%E5%89%8D%E7%AB%AF-%E6%97%A0%E6%9E%84%E5%BB%BA%E3%80%81%E9%9B%B6%E4%BE%9D%E8%B5%96-brightgreen.svg)
+本网页由 [@眼镜](https://space.bilibili.com/20597523) 提议，[@海星君](https://space.bilibili.com/341607034) 开发。
 
-![桌面端](docs/screenshot-desktop.png)
+关注眼镜谢谢喵　关注海星谢谢喵　关注星海攻略组谢谢喵
 
-<p align="center"><img src="docs/screenshot-mobile.png" width="320" alt="手机端"></p>
+在线访问地址：<https://haixingjun.github.io/GSPA-Glasses-Stronghold-Protocol-Assistant/>
 
-## 这是什么
+《明日方舟》卫戍协议的数据速查工具：纯静态网页，手机与电脑通用，打开即用、无需登录、不发起任何外部请求。
 
-把《明日方舟》卫戍协议（Garrison Protocol）的官方数据表，做成一款**响应式网页查询工具**：
+## 功能介绍
 
-- 电脑打游戏时用手机查，或双开在副屏；
-- 筛选后的结果就是一条 URL，复制发给群友，对方点开即还原同样的筛选；
-- 没有后端、没有数据库、没有登录，一个静态目录扔到任何托管处就能用。
+- **图鉴**：快速查找干员、盟约、装备/道具、策略
+- **搜索**：快速搜索想查找的干员、道具、策略、盟约
+- **筛选**：按阶数、盟约、触发时机、售价等组合筛选
+- **模拟配队**：开发中
+- **模拟叠层**：开发中
 
-**数据规模**：干员 155 · 道具 70 · 策略 61 · 盟约 26 · 头像 143 名（96/180px WebP）·
-道具/策略/盟约图标 157 个（本期「规程」，WebP）。
+## 界面预览
 
-## 功能
+<p align="center">
+  <img src="docs/screenshot-desktop.png" alt="桌面端截图" width="68%">
+  <img src="docs/screenshot-mobile.png" alt="手机端截图" width="26%">
+</p>
 
-- **四个视图**：干员 / 道具 / 策略 / 盟约，外加「关于」页（数据版本、来源、免责声明）。
-- **盟约分类**：按官方口径分「核心（主）/ 附加（副）」，附加再分阵营 / 战斗 / 成长 / 特殊；筛选支持「层级 / 大类 / 功能定位（输出·生存·续航·叠层·经济·召唤·规则）」，同一盟约可多选功能。
-- **搜索**：空格分词、全部命中（AND）、80ms 防抖、命中高亮；`/` 聚焦、`Esc` 清空。
-- **分面筛选**：阶数、盟约、触发时机、售价、类型、类别……每个 chip 显示「当前结果集里的数量」，点下去不会筛成 0 条。
-- **图标**：道具 / 策略发起人 / 盟约徽记使用本期「规程」官方图标，透明底白线稿配深色底座，深浅主题都清楚。
-- **盟约 AND / OR**：默认全部命中，可一键切「任一命中」。
-- **详情**：桌面是右侧常驻栏，手机是底部抽屉；详情内可点盟约、成员、合成材料继续跳转。
-- **状态全在 URL 里**：筛选、排序、详情都是 hash 参数，前进/后退、刷新、分享都成立，不需要服务端重写。
-- **响应式**：< 640 单列 + 底部 Tab；640–1023 两列；≥ 1024 三栏（筛选 / 列表 / 详情）。
-- **深色 / 浅色**主题、**头像 / 图标开关**（纯色块 + 首字回退）、键盘导航、系统分享面板。
-- **离线可用**：`dist/standalone.html` 是单文件版（CSS/JS/数据全内联），微信里直接发文件、双击即开。
+## 快速开始
 
-## 三种用法
+### 在线使用
 
-| 场景 | 用什么 |
-| --- | --- |
-| 手机 / 群友 | 打开发布网址（见下方「部署」） |
-| 自己电脑离线看 | 双击 `web/index.html`（或 `dist/index.html`） |
-| 发单个文件给别人 | `dist/standalone.html`（约 308 KB，不含头像与图标） |
+直接打开 <https://haixingjun.github.io/GSPA-Glasses-Stronghold-Protocol-Assistant/>。支持手机与电脑，可切换深色 / 浅色主题。
 
-## 目录结构
+### 本地运行
 
-```
-卫戍协议小助手/
-├── 卫戍协议数据表.xlsx          # ★ 唯一可编辑数据源（7 张表）
-├── 开发说明.md                  # 工程约定、交互细则、字段字典（唯一开发文档）
-├── deploy/README.md             # 部署手册（Cloudflare / 服务器 / B站 Toy）
-├── tools/
-│   ├── build_web_data.py         # Excel → JSON，含表头/行数/枚举校验
-│   ├── build_dist.py             # web/ → dist/，含单文件版、zip、体积自检
-│   ├── prepare_avatars.py        # PRTS → 干员头像（增量抓取 + 清单）
-│   └── prepare_icons.py          # PRTS → 道具/策略/盟约图标（本期规程锚定）
-├── data/
-│   ├── avatars.json              # 头像清单：文件、来源、许可、抓取日期
-│   ├── covenant_meta.json        # 盟约分类：核心/附加、阵营/战斗/成长/特殊、功能标签
-│   └── icons.json                # 图标清单：赛季、文件、来源、许可
-├── web/                          # 源码，可直接双击 index.html 预览
-│   ├── index.html
-│   ├── assets/app.css
-│   ├── assets/{avatars,icons}/   # 头像 / 图标 WebP（生成物）
-│   ├── js/{store,search,ui,app}.js
-│   └── data/{data.js,data.json}  # 生成物，勿手改
-├── deploy/                       # nginx.conf / _headers / robots.txt / Dockerfile
-├── build/                        # 校验报告、数据 diff、头像/图标缓存（缓存不入库）
-└── dist/                         # ★ 发布产物，GitHub Pages 直接发布它
-```
-
-## 数据更新流程
+项目没有构建步骤，`web/` 就是可直接运行的源码：
 
 ```bash
-# 1. 改根目录的 卫戍协议数据表.xlsx（先备份成 source/卫戍协议数据表_YYYYMMDD.xlsx）
-# 2. 有新增/改名的干员、道具、策略、盟约时才重新抓素材（增量，已缓存的不重下）
-python tools/prepare_avatars.py
-python tools/prepare_icons.py
-# 3. Excel → JSON（校验不过会直接中止，不产出数据）
-python tools/build_web_data.py
-# 4. 生成发布产物 dist/（含单文件版与体积自检）
-python tools/build_dist.py
+git clone https://github.com/Haixingjun/GSPA-Glasses-Stronghold-Protocol-Assistant.git
+cd GSPA-Glasses-Stronghold-Protocol-Assistant
 ```
 
-依赖：`build_web_data.py` 需要 `openpyxl`，`prepare_avatars.py` / `prepare_icons.py`
-需要 `openpyxl` + `Pillow`，`build_dist.py` **只用标准库**。
+- 直接双击 `web/index.html` 即可打开（`file://` 下深链会退化为 hash，功能不受影响）；
+- 或在 `web/` 下起一个静态服务器，方便手机在同一局域网访问：
 
 ```bash
-pip install openpyxl pillow
+cd web
+python -m http.server 8080
+# 打开 http://127.0.0.1:8080/
 ```
 
-数据改动后提交前建议看一眼 `build/validation_report.md`、`build/diff_report.md`、`build/icon_report.md`。
+## 数据说明
 
-## 本地预览
+- 数据取自官方 Android 热更新解包（本期 V3_1），并经过构建期校验：表头守卫、行数断言、枚举校验、引用完整性检查。
+- 共收录 155 条干员条目（默认展示 153 条，2 条隐藏条目可在筛选里打开）、70 件道具、61 个策略、26 个盟约。
+- 干员头像与道具 / 策略 / 盟约图标来自 [PRTS Wiki](https://prts.wiki)，锚定本期「卫戍协议·规程」页面，美术版权归鹰角网络所有。
+- 页脚会显示数据版本与生成时间，可据此确认看到的是不是最新一版。
+- 游戏更新后数据可能滞后，具体数值请以游戏内为准。
 
-任选一种，**不要**用 `file://` 以外的绝对路径（资源全是相对路径，子目录部署才不会 404）：
+## 数据更新
+
+数据源是根目录的 `卫戍协议数据表.xlsx`（改前先备份为 `source/卫戍协议数据表_YYYYMMDD.xlsx`）。有新干员、道具、策略或盟约时，先增量抓取素材，再重新生成前端数据与发布产物：
 
 ```bash
-python -m http.server 8080      # 然后开 http://localhost:8080
-# 或者直接双击 web/index.html
+python tools/prepare_avatars.py  # 头像：PRTS → WebP + data/avatars.json（有新增/改名时才跑）
+python tools/prepare_icons.py    # 图标：PRTS → WebP + data/icons.json（有新增/改名时才跑）
+python tools/build_web_data.py   # Excel → web/data/data.js + data.json（含校验与变更报告）
+python tools/build_dist.py       # 生成 dist/、单文件版和发布包
+```
+
+依赖 Python 3 与 `openpyxl`；抓取头像 / 图标还需要 `Pillow`。`build_web_data.py` 校验不通过会直接中止、不产出数据；提交前建议先看 `build/validation_report.md` 与 `build/diff_report.md`。完整流程与工程约定见 [开发说明.md](开发说明.md)。
+
+## 项目结构
+
+```text
+GSPA-Glasses-Stronghold-Protocol-Assistant/
+├── 卫戍协议数据表.xlsx   # 唯一可编辑的数据源
+├── web/                  # 前端源码，可直接双击 index.html 预览
+├── tools/                # 数据构建与素材抓取脚本
+├── data/                 # 头像、图标清单与盟约分类
+├── dist/                 # 发布产物（由脚本生成，勿手改）
+├── deploy/               # Nginx / Docker / 各托管平台的部署配置
+└── docs/                 # 截图
 ```
 
 ## 部署
 
-`dist/` 就是全部产物：丢到任何能发静态文件的地方即可。
+站点是纯静态的，构建后把 `dist/` 整个目录上传到任意能托管静态文件的地方即可（GitHub Pages、Cloudflare Pages、Nginx、对象存储等）。
+推送到 `main` 后，GitHub Actions 会自动把 `dist/` 发布到 GitHub Pages（首次使用需在仓库 Settings → Pages → Source 选择 `GitHub Actions`）；详细步骤与各平台注意事项见 [deploy/README.md](deploy/README.md)。
 
-### GitHub Pages（本仓库已配好）
+另外，`dist/standalone.html` 是单文件版（约 314 KB，CSS、JS、数据全部内联），不含头像与图标，可离线双击打开或直接发给别人。
 
-推送到 `main` 后，`.github/workflows/pages.yml` 会把 `dist/` 发布到 Pages。
-**首次需要在仓库 Settings → Pages → Source 选 `GitHub Actions`。**
+## 项目更名说明
 
-访问地址：<https://haixingjun.github.io/ASA-Amiya-Stronghold-Assistant/>
+本项目原名 `ASA-Amiya-Stronghold-Assistant`，现更名为 **`GSPA-Glasses-Stronghold-Protocol-Assistant`**（GSPA = Glasses-Stronghold-Protocol-Assistant）。
 
-> 国内访问 GitHub Pages 可能不稳，想要稳定地址可换 Cloudflare Pages。
-
-### Cloudflare Pages（0 元、免备案、国内可用）
-
-Workers & Pages → Create → Pages → 连接 Git 仓库 → 构建命令**留空**、输出目录填 `dist`。
-或直接本地跑 `build_dist.py` 后把 `dist/` 拖上去（Upload assets）。
-
-### 自己的服务器
-
-```bash
-python tools/build_dist.py
-rsync -avz --delete dist/ root@<IP>:/var/www/garrison/
-```
-
-Nginx 配置见 [`deploy/nginx.conf`](deploy/nginx.conf)（根目录 / 子目录两种），完整步骤见 [`deploy/README.md`](deploy/README.md)。
-
-### B站 Toy（第二渠道）
-
-上传 `build/garrison-web.zip` 或 `dist/standalone.html`，具体限制以官方最新文档为准。
+- 仓库地址：<https://github.com/Haixingjun/GSPA-Glasses-Stronghold-Protocol-Assistant>
+- 在线站点：<https://haixingjun.github.io/GSPA-Glasses-Stronghold-Protocol-Assistant/>
+- GitHub 会把旧仓库地址自动重定向到新地址；旧的书签、群聊链接建议逐步替换为新地址。
 
 ## 版权与免责
 
-- 本项目是**非官方、非商业**的玩家工具，与鹰角网络无关。
-- 《明日方舟》的干员美术、图标、名称、数值与技能文本归**鹰角网络**所有；头像与图标原文件取自 **PRTS Wiki**（其文本授权为 CC BY-NC-SA，**非商业**）。
-  逐条溯源见 [`data/avatars.json`](data/avatars.json) 与 [`data/icons.json`](data/icons.json)。
-- 图标只取本期「卫戍协议·规程」页面实际渲染的文件；PRTS 上 2024 / 2025-11「盟约」/ 2026-03「盟约 下半」的同名旧素材不使用。
-- 因此**本项目整体不得用于商业用途**。若权利人提出异议，会立即移除相关内容。
-- 详见 [NOTICE.md](NOTICE.md)。
+本项目是**非官方、非商业**的玩家自用查询工具，与鹰角网络（Hypergryph）无任何隶属或合作关系。
+
+- **游戏内容**：游戏名称、干员名、数值、技能与盟约文本，以及头像、道具 / 策略 / 盟约图标等美术素材，著作权均归**鹰角网络**所有。本项目仅作非商业的玩家查询与交流用途，不主张任何版权。
+- **素材来源**：头像与图标抓取自 [PRTS Wiki](https://prts.wiki)，仅下载后本地使用，不热链。PRTS 的内容采用 **CC BY-NC-SA**（署名—非商业性使用—相同方式共享），**因此本项目整体不得用于任何商业用途**。
+- **数据来源**：`source/` 中的完整数据表来自官方热更包解包，仅用于核对与溯源；可编辑的唯一主表是根目录的 `卫戍协议数据表.xlsx`。
+- **仅供参考**：本站数据由玩家整理，可能存在遗漏、笔误或版本滞后，不构成任何官方说明，一切以游戏内实际内容为准。因使用本站产生的任何后果由使用者自行承担。
+- **无担保**：本项目按「现状」提供，不提供任何明示或默示的担保，包括但不限于准确性、完整性与特定用途适用性。
+- **隐私**：本站不收集个人信息，没有账号体系，也不接入第三方统计；仅在浏览器本地保存主题与图片显示偏好（`localStorage`），清除浏览器数据即可移除。
+- **权利人诉求**：如果权利人认为本仓库中的任何内容构成侵权，请通过 [GitHub Issue](https://github.com/Haixingjun/GSPA-Glasses-Stronghold-Protocol-Assistant/issues) 联系，会**立即删除**相关内容或整个仓库，无需任何前置条件。
+
+完整的第三方素材清单与逐项授权说明见 [NOTICE.md](NOTICE.md)。
 
 ## 许可证
 
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+- **代码**：`tools/`、`web/` 下的 HTML / CSS / JS、`deploy/`、`.github/` 等本项目代码，以 [MIT License](LICENSE) 发布，Copyright (c) 2026 Haixingjun。
+- **数据与素材**：游戏数据、文本、头像与图标的权利归鹰角网络所有，PRTS 相关内容遵循 CC BY-NC-SA。**这些内容不在 MIT 许可范围内**，不得单独提取或用于商业用途。
+- 转载、二次开发或分发时，请保留本 README 中的版权与免责说明，以及 [LICENSE](LICENSE) 和 [NOTICE.md](NOTICE.md)。
 
-代码（脚本、前端、构建与部署配置）以 **MIT** 发布。
-MIT **不覆盖**上述第三方素材与数据 —— 它们仍归原作者，见 [NOTICE.md](NOTICE.md)。
+## 反馈与致谢
+
+- 发现数据错误、缺图或页面问题，欢迎提 [Issue](https://github.com/Haixingjun/GSPA-Glasses-Stronghold-Protocol-Assistant/issues)。数据类问题请附上干员 / 道具名称与游戏内截图，方便核对。
+- 感谢 [PRTS Wiki](https://prts.wiki) 提供的素材与资料，感谢星海攻略组和各位测试者的反馈。
 
 ---
 
-其他文档：[开发说明.md](开发说明.md)（工程细节）· [deploy/README.md](deploy/README.md)（部署）· [卫戍协议小助手-方案.md](卫戍协议小助手-方案.md)（早期选型，已归档）
+祝使用愉快
+Haixingjun

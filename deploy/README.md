@@ -1,4 +1,4 @@
-# 部署说明
+# GSPA · 部署说明
 
 站点是**纯静态**的：一个 `index.html` + 几个 CSS/JS + 一份数据，没有后端、没有数据库、没有构建工具依赖。
 所以「部署」= 把 `dist/` 里的文件放到任意能发静态文件的地方。
@@ -15,7 +15,7 @@ python tools/build_dist.py
 | `dist/standalone.html` | 单文件版，CSS+JS+数据全内联，双击即开、单文件发送（不含头像与图标） |
 | `dist/assets/avatars/` | 143 名干员头像（96px / 180px WebP，共约 2.7 MB，懒加载） |
 | `dist/assets/icons/` | 157 个道具/策略/盟约图标（两档 WebP，共约 2.0 MB，懒加载） |
-| `build/garrison-web.zip` | 目录版的 zip，B站 Toy 上传用 |
+| `build/gspa-web.zip` | 目录版的 zip，B站 Toy 上传用 |
 | `dist/BUILD_INFO.txt` | 本次构建的版本、指纹、体积报告 |
 
 三条硬约束（代码已保证，改代码时别破坏）：
@@ -65,14 +65,14 @@ cd web && python -m http.server 8080
 ```bash
 # 服务器（Ubuntu 22.04 / Debian 12）
 apt update && apt install -y nginx
-mkdir -p /var/www/garrison
+mkdir -p /var/www/gspa
 
 # 本机（Windows PowerShell / Git Bash 均可）
 python tools/build_dist.py
-scp -r dist/* root@<服务器IP>:/var/www/garrison/
+scp -r dist/* root@<服务器IP>:/var/www/gspa/
 
 # 服务器：套用配置
-#   把 deploy/nginx.conf 复制到 /etc/nginx/conf.d/garrison.conf
+#   把 deploy/nginx.conf 复制到 /etc/nginx/conf.d/gspa.conf
 #   把 server_name 与 root 改成自己的
 nginx -t && systemctl reload nginx
 ```
@@ -90,18 +90,18 @@ certbot --nginx -d your-domain.com
 # 有新干员 / 道具 / 策略 / 盟约时才需要先抓素材（需要 Pillow；系统 Python 没装就用工作区自带的）
 python tools/prepare_avatars.py
 python tools/prepare_icons.py
-python tools/build_dist.py && scp -r dist/* root@<IP>:/var/www/garrison/
+python tools/build_dist.py && scp -r dist/* root@<IP>:/var/www/gspa/
 ```
 
 或者用 `rsync`（更干净，会删掉旧文件）：
 
 ```bash
-rsync -avz --delete dist/ root@<IP>:/var/www/garrison/
+rsync -avz --delete dist/ root@<IP>:/var/www/gspa/
 ```
 
 > 备案：服务器在境内 + 绑域名就必须 ICP 备案（1–2 周）。备案期间可以先用 `http://IP:8080/` 给朋友试，80 端口未备案会被拦。
 
-**子目录部署**（`https://example.com/garrison/`）：直接用 `deploy/nginx.conf` 末尾的 `location /garrison/` 版本，**不需要改一行前端代码**，因为资源全是相对路径。
+**子目录部署**（`https://example.com/gspa/`）：直接用 `deploy/nginx.conf` 末尾的 `location /gspa/` 版本，**不需要改一行前端代码**，因为资源全是相对路径。
 
 ---
 
@@ -113,7 +113,7 @@ Toy 的定位是「绑在视频/动态上的互动小玩具」，不是独立站
 
 | 平台要求 | 用哪个 |
 | --- | --- |
-| 上传 zip / 目录，入口是根目录 `index.html` | `build/garrison-web.zip` |
+| 上传 zip / 目录，入口是根目录 `index.html` | `build/gspa-web.zip` |
 | 只接受单个 HTML 文件 | `dist/standalone.html` |
 
 上传前自查（这些是我们能保证的）：
@@ -153,7 +153,7 @@ Toy 的定位是「绑在视频/动态上的互动小玩具」，不是独立站
 | GitHub Pages | 把 `dist/` 推到 `gh-pages` 分支 | 已生成 `.nojekyll`；国内访问不稳定 |
 | Vercel / Netlify | 输出目录 `dist` | `_headers` 由 Netlify 识别 |
 | 对象存储 + CDN（OSS/COS） | 上传 `dist/`，开启静态网站托管 | 绑自定义域名需备案 |
-| Docker | `docker build -f deploy/Dockerfile -t garrison .` | 内置 Nginx，`-p 8080:80` |
+| Docker | `docker build -f deploy/Dockerfile -t gspa .` | 内置 Nginx，`-p 8080:80` |
 
 ---
 
@@ -206,10 +206,10 @@ http://<电脑局域网IP>:8080/
   用**管理员** PowerShell 补一条规则（只开 8080，测试完可删）：
 
 ```powershell
-New-NetFirewallRule -DisplayName "Garrison Test 8080" -Direction Inbound `
+New-NetFirewallRule -DisplayName "GSPA Test 8080" -Direction Inbound `
   -Protocol TCP -LocalPort 8080 -Action Allow -Profile Private
 # 测试结束删除：
-# Remove-NetFirewallRule -DisplayName "Garrison Test 8080"
+# Remove-NetFirewallRule -DisplayName "GSPA Test 8080"
 ```
 
 - 电脑休眠 / 关掉这个终端，链接就失效。它只是临时测试服务器。
@@ -246,8 +246,8 @@ cloudflared tunnel --url http://127.0.0.1:8080
 | 给谁 | 发什么 | 说明 |
 | --- | --- | --- |
 | 安卓 / 电脑 | `dist/standalone.html`（约 308 KB，无头像与图标） | 对方保存后用浏览器打开，断网也能用 |
-| 微信 / QQ | `build/garrison-standalone.zip`（约 59 KB） | 单文件压缩包；微信对 `.html` 直传不友好，zip 更稳 |
-| 想连数据 + 头像 + 图标一起给 | `build/garrison-web.zip`（约 4.9 MB） | 整站目录版，解压后打开 `index.html` |
+| 微信 / QQ | `build/gspa-standalone.zip`（约 59 KB） | 单文件压缩包；微信对 `.html` 直传不友好，zip 更稳 |
+| 想连数据 + 头像 + 图标一起给 | `build/gspa-web.zip`（约 4.9 MB） | 整站目录版，解压后打开 `index.html` |
 | iPhone | 建议发**链接**而不是文件 | iOS「文件」App 打开本地 HTML 的体验较差 |
 
 ### 8.6 让测试者怎么反馈
