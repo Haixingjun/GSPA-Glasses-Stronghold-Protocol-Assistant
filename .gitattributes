@@ -1,0 +1,21 @@
+# 换行统一成 LF，避免 Windows / macOS 协作时整个文件都被标成改动
+* text=auto eol=lf
+
+# 明确标成二进制的文件，git 不做任何转换、不尝试 diff
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.xlsx binary
+*.zip  binary
+
+# 生成物：在 GitHub 上折叠 diff，PR 里不展开噪音
+web/data/data.js    linguist-generated=true
+web/data/data.json  linguist-generated=true
+dist/**             linguist-generated=true
+data/avatars.json   linguist-generated=true
