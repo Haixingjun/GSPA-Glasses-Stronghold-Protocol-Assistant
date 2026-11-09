@@ -212,6 +212,10 @@
         (t.classList.contains('avatar-img') || t.classList.contains('icon-img'))) {
       t.classList.add('is-broken');
       t.removeAttribute('src');
+      var box = t.parentNode;
+      if (box && (box.classList.contains('avatar') || box.classList.contains('icon'))) {
+        box.classList.remove('has-img');
+      }
     }
   }
 

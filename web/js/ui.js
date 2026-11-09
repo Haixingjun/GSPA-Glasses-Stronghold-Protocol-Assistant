@@ -94,7 +94,8 @@
       ? '<img class="avatar-img" src="' + esc(src) + '" alt="" width="' + size + '" height="' + size +
         '" loading="lazy" decoding="async">'
       : '';
-    return '<span class="avatar" style="--h:' + hue(name) + ';--size:' + size + 'px" aria-hidden="true">' +
+    return '<span class="avatar' + (src ? ' has-img' : '') + '" style="--h:' + hue(name) +
+      ';--size:' + size + 'px" aria-hidden="true">' +
       '<span class="avatar-letter">' + esc(initial(name)) + '</span>' + img + '</span>';
   }
 
@@ -109,7 +110,8 @@
       ? '<img class="icon-img" src="' + esc(src) + '" alt="" width="' + size + '" height="' + size +
         '" loading="lazy" decoding="async">'
       : '';
-    return '<span class="icon icon-' + kind + '" style="--h:' + hue(name) + ';--size:' + size + 'px" aria-hidden="true">' +
+    return '<span class="icon icon-' + kind + (src ? ' has-img' : '') + '" style="--h:' + hue(name) +
+      ';--size:' + size + 'px" aria-hidden="true">' +
       '<span class="icon-letter">' + esc(initial(name)) + '</span>' + img + '</span>';
   }
 

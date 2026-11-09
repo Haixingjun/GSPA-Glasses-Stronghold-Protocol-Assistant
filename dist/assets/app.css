@@ -518,6 +518,8 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
   background: var(--bg2);
 }
 .avatar-img.is-broken { display: none; }
+/* 有图时隐藏底层首字：透明底图标不会再把首字透出来；坏图时 JS 移除 has-img 恢复 */
+.avatar.has-img .avatar-letter { visibility: hidden; }
 body.no-avatars .avatar { display: none; }
 
 /* 道具 / 策略 / 盟约图标：透明底白色线稿统一放在深色底座上，浅色主题也清楚 */
@@ -544,10 +546,11 @@ body.no-avatars .avatar { display: none; }
   width: 100%; height: 100%; object-fit: contain;
 }
 .icon-img.is-broken { display: none; }
+.icon.has-img .icon-letter { visibility: hidden; }
 .icon-strategy { border-radius: 12px; }
 .icon-strategy .icon-img { object-fit: cover; }
+/* 盟约徽记：让方形透明画布铺满圆形底座；留白已在生成图里，不再用 inset 缩一次 */
 .icon-covenant { border-radius: 50%; border-color: hsla(var(--h, 210), 62%, 62%, 0.42); }
-.icon-covenant .icon-img { inset: 9%; width: auto; height: auto; }
 body.no-avatars .icon { display: none; }
 
 .card-badges { display: flex; align-items: center; gap: 5px; flex: none; }
