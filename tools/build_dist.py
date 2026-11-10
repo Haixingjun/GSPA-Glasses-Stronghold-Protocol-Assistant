@@ -25,7 +25,7 @@ DIST = os.path.join(ROOT, "dist")
 BUILD = os.path.join(ROOT, "build")
 DEPLOY = os.path.join(ROOT, "deploy")
 ZIP_PATH = os.path.join(BUILD, "gspa-web.zip")
-BUDGET_KB = 115.0   # 2026-11 自选干员并入干员查询后首屏 110.2 KB，预算从 100 调到 115
+BUDGET_KB = 120.0   # 2026-11 功能累积（盟约图标标签 / 移动端输入防缩放 / 词条栏拖动）后首屏 117.5 KB；预算留约 2.5 KB 余量
 
 
 def read_text(p):
