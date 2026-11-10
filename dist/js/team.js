@@ -39,6 +39,12 @@
   };
   // 词条栏展开状态：首次进入窄屏默认收起，桌面默认展开；用户手动切换后保持
   var traitsOpen = null;
+  // 词条栏收起时的位置：top 为视口内像素，side 为吸附方向（left / right）
+  var TRAITS_POS_KEY = 'gspa-traits-pos';
+  var traitsPos = { top: null, side: 'right' };
+  var traitsDrag = null;
+  var traitsClickSuppressed = false;
+  var traitsClickTimer = null;
   // 词条栏筛选：只看会增加盟约层数的「叠层手段」
   var traitsLayerOnly = false;
   // 词条按触发时机排列：从休整期结束（备战完成）走到下一次休整期开始
@@ -66,8 +72,39 @@
     }
   }
 
+  /* ---------------- 词条栏收起位置（仅展示偏好，不进 URL） ---------------- */
+  function loadTraitsPos() {
+    try {
+      var raw = global.localStorage && global.localStorage.getItem(TRAITS_POS_KEY);
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      if (!o) return;
+      if (o.side === 'left' || o.side === 'right') traitsPos.side = o.side;
+      if (o.top != null && isFinite(o.top)) traitsPos.top = Math.max(0, Number(o.top));
+    } catch (e) { /* 隐私模式 / 坏数据：用默认位置 */ }
+  }
+
+  function saveTraitsPos() {
+    try {
+      if (global.localStorage) {
+        global.localStorage.setItem(TRAITS_POS_KEY, JSON.stringify(traitsPos));
+      }
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function applyTraitsPos(panel) {
+    if (!panel) return;
+    panel.classList.toggle('is-left', traitsPos.side === 'left');
+    if (!traitsOpen && traitsPos.top != null) {
+      panel.style.setProperty('--traits-top', Math.round(traitsPos.top) + 'px');
+    } else {
+      panel.style.removeProperty('--traits-top');
+    }
+  }
+
   function init() {
     ensure();
+    loadTraitsPos();
     els.cards = document.getElementById('cards');
     els.sheet = document.getElementById('sheet');
     els.tip = document.getElementById('tip');
@@ -189,7 +226,8 @@
     var tags = '';
     var list = op.tags || [];
     for (var t = 0; t < list.length && t < 2; t++) {
-      tags += '<span class="slot-tag" style="--h:' + UI.hue(list[t]) + '">' + esc(list[t]) + '</span>';
+      tags += '<span class="slot-tag" style="--h:' + UI.hue(list[t]) + '">' +
+        UI.covSigil(list[t], 11) + esc(list[t]) + '</span>';
     }
     if (so.pick) tags += '<span class="slot-tag slot-tag-pick">自选</span>';
 
@@ -248,7 +286,7 @@
     if (!piece || !piece.morph) return '';
     if (piece.morph.covenant) {
       return '<div class="slot-morph"><span>转职</span><b style="--h:' + UI.hue(piece.morph.covenant) + '">' +
-        esc(piece.morph.covenant) + '</b></div>';
+        UI.covSigil(piece.morph.covenant, 12) + esc(piece.morph.covenant) + '</b></div>';
     }
     var opts = '<option value="">选择盟约…</option>';
     for (var k = 0; k < data.covenants.length; k++) {
@@ -469,7 +507,13 @@
         : '只看叠层 · 当前词条均为叠层手段')
       : '按触发时机排序：休整期结束时 → … → 休整期开始时';
 
-    return '<aside class="tm-traits' + (open ? '' : ' is-collapsed') + '" aria-label="配队词条汇总">' +
+    var sideCls = traitsPos.side === 'left' ? ' is-left' : '';
+    // 收起时才使用拖动后的 top；展开时仍从默认高度展开
+    var posStyle = (!open && traitsPos.top != null)
+      ? ' style="--traits-top:' + Math.round(traitsPos.top) + 'px"' : '';
+
+    return '<aside class="tm-traits' + (open ? '' : ' is-collapsed') + sideCls + '"' + posStyle +
+      ' aria-label="配队词条汇总">' +
       '<div class="tm-traits-panel">' +
       '<div class="tm-traits-head">' +
       '<div class="tm-traits-title"><b>词条</b>' +
@@ -486,7 +530,8 @@
       '</div>' +
       '<button type="button" class="tm-traits-rail" data-traits-toggle' +
       ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tm-traits-body"' +
-      ' title="展开词条栏">' +
+      ' title="上下拖动可移动；拖到屏幕左半边松手吸附左侧；点击展开词条栏">' +
+      '<span class="tm-traits-rail-grip" aria-hidden="true">⠿</span>' +
       '<span class="tm-traits-rail-text">词条</span>' +
       '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
       '<span class="tm-traits-rail-arrow" aria-hidden="true">‹</span>' +
@@ -507,7 +552,10 @@
   function toggleTraits() {
     traitsOpen = !isTraitsOpen();
     var panel = els.cards && els.cards.querySelector('.tm-traits');
-    if (panel) panel.classList.toggle('is-collapsed', !traitsOpen);
+    if (panel) {
+      panel.classList.toggle('is-collapsed', !traitsOpen);
+      applyTraitsPos(panel);
+    }
     var btns = els.cards ? els.cards.querySelectorAll('[data-traits-toggle]') : [];
     for (var i = 0; i < btns.length; i++) {
       btns[i].setAttribute('aria-expanded', traitsOpen ? 'true' : 'false');
@@ -530,7 +578,7 @@
       var fac = pk ? (pk.factions || []).join(' / ') : '';
       return '<div class="tip-head"><b>' + esc(key) + '</b>' +
         '<span class="pill ' + (pk ? 'pill-pick' : '') + '">' + esc(meta) + '</span></div>' +
-        '<div class="tip-sec"><h4>盟约</h4><p>' + esc(tags.join('、') || '无') + '</p></div>' +
+        '<div class="tip-sec"><h4>盟约</h4><p class="tip-covs">' + covChips(tags) + '</p></div>' +
         '<div class="tip-sec"><h4>普通</h4><p>' + Search.format(normal) + '</p></div>' +
         (elite !== normal ? '<div class="tip-sec"><h4>精锐</h4><p>' + Search.format(elite) + '</p></div>' : '') +
         (fac ? '<div class="tip-sec"><h4>阵营</h4><p>' + esc(fac) + '</p></div>' : '') +
@@ -539,13 +587,17 @@
     if (kind === 'item') {
       var it = itemByName[key];
       if (!it) return '';
-      var cov = it.covenant ? '所属盟约：' + it.covenant : '所属盟约：未收录';
+      var cov = '<span class="tip-cov is-muted">所属盟约：未收录</span>';
+      if (it.covenant) {
+        cov = '所属盟约：<span class="tip-cov" style="--h:' + UI.hue(it.covenant) + '">' +
+          UI.covSigil(it.covenant, 13) + esc(it.covenant) + '</span>';
+      }
       if (it.name === Calc.MORPH_ITEM) cov = '在配队里按「另一件装备的所属盟约」给携带者转职';
       return '<div class="tip-head"><b>' + esc(it.name) + '</b>' +
         '<span class="pill">' + esc(it.type) + ' · ' + it.tier + ' 阶</span></div>' +
         '<div class="tip-sec"><h4>基础</h4><p>' + Search.format(it.normalText) + '</p></div>' +
         (it.hasElite ? '<div class="tip-sec"><h4>进阶</h4><p>' + Search.format(it.eliteText) + '</p></div>' : '') +
-        '<div class="tip-foot">' + esc(cov) + '　售价 ◈' + it.price + '</div>';
+        '<div class="tip-foot">' + cov + '　售价 ◈' + it.price + '</div>';
     }
 
     var c = covByName[key];
@@ -577,7 +629,8 @@
 
     var num = c.valueText ? renderValue(c.valueText, row.layer) : '';
 
-    return '<div class="tip-head"><b>' + esc(c.name) + '</b>' +
+    return '<div class="tip-head">' + UI.covSigil(c.name, 18) +
+      '<b>' + esc(c.name) + '</b>' +
       '<span class="pill ' + (c.rank === 'core' ? 'pill-core' : 'pill-add') + '">' +
       (c.rank === 'core' ? '主盟约' : '副盟约') + '</span></div>' +
       '<div class="tip-sec"><h4>条件</h4><p>' + esc(cond) + '</p>' +
@@ -698,10 +751,16 @@
     els.sheet.hidden = false;
     document.body.classList.add('sheet-open');
     syncScrim();
-    setTimeout(function () {
-      var q = document.getElementById('pq');
-      if (q) q.focus();
-    }, 30);
+    // 触屏设备不要自动聚焦搜索框：会立刻弹出键盘并把 iOS 页面放大。
+    // 桌面（精确指针）保留键盘直达搜索的便利。
+    var touch = (global.navigator && global.navigator.maxTouchPoints > 0) ||
+      (global.matchMedia && global.matchMedia('(pointer: coarse)').matches);
+    if (!touch) {
+      setTimeout(function () {
+        var q = document.getElementById('pq');
+        if (q) q.focus();
+      }, 30);
+    }
   }
 
   function closeSheet() {
@@ -976,10 +1035,10 @@
         h += '<span class="chip-break" aria-hidden="true"></span>';
       }
       var on = picker.tags.indexOf(name) >= 0;
-      var icon = UI.iconHtml(c, name, 18, 'covenant');
+      var icon = UI.covSigil(name, 18);
       h += '<button type="button" class="chip chip-tag" data-ptag="' + esc(name) + '"' +
         ' style="--h:' + UI.hue(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
-        (icon || '<i class="dot"></i>') + esc(name) + '</button>';
+        icon + esc(name) + '</button>';
     }
     return h;
   }
@@ -1176,9 +1235,20 @@
   function pickTags(tags) {
     var h = '';
     for (var i = 0; i < (tags || []).length; i++) {
-      h += '<span class="pick-tag" style="--h:' + UI.hue(tags[i]) + '">' + esc(tags[i]) + '</span>';
+      h += '<span class="pick-tag" style="--h:' + UI.hue(tags[i]) + '">' +
+        UI.covSigil(tags[i], 11) + esc(tags[i]) + '</span>';
     }
     return h || '<span class="pick-tag is-muted">无盟约</span>';
+  }
+
+  /** 提示气泡里的盟约：图标 + 名称；没有标签时退回「无盟约」 */
+  function covChips(tags) {
+    var h = '';
+    for (var i = 0; i < (tags || []).length; i++) {
+      h += '<span class="tip-cov" style="--h:' + UI.hue(tags[i]) + '">' +
+        UI.covSigil(tags[i], 13) + esc(tags[i]) + '</span>';
+    }
+    return h || '<span class="tip-cov is-muted">无盟约</span>';
   }
 
   function refreshList(keepScroll) {
@@ -1464,6 +1534,9 @@
   var tip = { pinned: false };
 
   function onPointerDown(e) {
+    var rail = e.target && e.target.closest ? e.target.closest('.tm-traits-rail') : null;
+    if (rail && startTraitsDrag(e, rail)) return;
+
     var grip = e.target && e.target.closest ? e.target.closest('[data-grip]') : null;
     if (!grip) return;
     e.preventDefault();
@@ -1476,7 +1549,42 @@
     try { grip.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
   }
 
+  /** 收起状态的词条栏：上下拖动改位置，松手时按指针在屏幕左右半边吸附 */
+  function startTraitsDrag(e, rail) {
+    var aside = rail.closest('.tm-traits');
+    if (!aside || !aside.classList.contains('is-collapsed')) return false;
+    if (e.button != null && e.button !== 0) return false;
+    // 新的按下视为新交互：清掉上一次拖动遗留的 click 抑制
+    traitsClickSuppressed = false;
+    var r = aside.getBoundingClientRect();
+    traitsDrag = {
+      el: aside, rail: rail, pointerId: e.pointerId,
+      x0: e.clientX, y0: e.clientY, top0: r.top, h: r.height,
+      started: false, nextTop: r.top, nextSide: traitsPos.side, side0: traitsPos.side
+    };
+    try { rail.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+    return true;
+  }
+
   function onPointerMove(e) {
+    if (traitsDrag) {
+      var tdx = e.clientX - traitsDrag.x0;
+      var tdy = e.clientY - traitsDrag.y0;
+      if (!traitsDrag.started) {
+        var limit = e.pointerType === 'touch' ? 8 : 5;
+        if (Math.abs(tdx) < limit && Math.abs(tdy) < limit) return;
+        traitsDrag.started = true;
+        document.body.classList.add('is-traits-dragging');
+        traitsDrag.el.classList.add('is-dragging');
+      }
+      if (e.cancelable) e.preventDefault();
+      var maxTop = Math.max(8, (global.innerHeight || 0) - traitsDrag.h - 8);
+      var top = Math.max(8, Math.min(traitsDrag.top0 + tdy, maxTop));
+      traitsDrag.nextTop = top;
+      traitsDrag.nextSide = e.clientX < (global.innerWidth || 0) / 2 ? 'left' : 'right';
+      traitsDrag.el.style.setProperty('--traits-top', Math.round(top) + 'px');
+      return;
+    }
     if (!drag) return;
     var dx = e.clientX - drag.x0;
     var dy = e.clientY - drag.y0;
@@ -1510,6 +1618,28 @@
   }
 
   function onPointerUp(e) {
+    if (traitsDrag) {
+      var td = traitsDrag;
+      traitsDrag = null;
+      document.body.classList.remove('is-traits-dragging');
+      td.el.classList.remove('is-dragging');
+      try { td.rail.releasePointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+      if (td.started) {
+        // 拖动结束会紧跟一个 click，拦掉它，避免“拖动后顺手把面板展开”
+        traitsClickSuppressed = true;
+        clearTimeout(traitsClickTimer);
+        traitsClickTimer = setTimeout(function () { traitsClickSuppressed = false; }, 400);
+        traitsPos.top = Math.round(td.nextTop);
+        traitsPos.side = td.nextSide;
+        td.el.classList.toggle('is-left', traitsPos.side === 'left');
+        td.el.style.setProperty('--traits-top', traitsPos.top + 'px');
+        saveTraitsPos();
+        if (td.nextSide !== td.side0) {
+          toast('词条栏已吸附到' + (traitsPos.side === 'left' ? '左' : '右') + '侧');
+        }
+      }
+      return;
+    }
     if (!drag) return;
     var d = drag;
     drag = null;
@@ -1574,7 +1704,12 @@
     if ((el = t.closest('[data-apply-import]'))) { e.preventDefault(); applyImport(); return; }
     if ((el = t.closest('[data-team-clear]'))) { e.preventDefault(); clearTeam(); return; }
     if ((el = t.closest('[data-traits-layer]'))) { e.preventDefault(); toggleTraitsLayer(); return; }
-    if ((el = t.closest('[data-traits-toggle]'))) { e.preventDefault(); toggleTraits(); return; }
+    if ((el = t.closest('[data-traits-toggle]'))) {
+      e.preventDefault();
+      if (traitsClickSuppressed) { traitsClickSuppressed = false; return; }
+      toggleTraits();
+      return;
+    }
     if ((el = t.closest('[data-batch-add]'))) { e.preventDefault(); openBatch(); return; }
     if ((el = t.closest('[data-sheet-filter-toggle]'))) {
       e.preventDefault();

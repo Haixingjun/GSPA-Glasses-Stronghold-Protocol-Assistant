@@ -299,6 +299,13 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
   box-shadow: 0 0 0 3px hsla(var(--h, 200), 68%, 60%, 0.16);
 }
 .chip[aria-pressed="true"] .dot { background: hsl(var(--h, 200), 72%, 66%); }
+/* 图标被隐藏时，盟约 chip 退回与旧版一致的色点 */
+.chip .cov-sig-dot {
+  width: 7px; height: 7px;
+  background: hsl(var(--h, 200), 68%, 60%);
+  box-shadow: 0 0 0 3px hsla(var(--h, 200), 68%, 60%, 0.16);
+}
+.chip[aria-pressed="true"] .cov-sig-dot { background: hsl(var(--h, 200), 72%, 66%); }
 .chip .icon { box-shadow: none; }
 /* 主盟约 / 副盟约在筛选里换行分隔 */
 .chip-break {
@@ -612,6 +619,27 @@ body.no-avatars .icon { display: none; }
   color: var(--fg3); background: var(--bg2); border-color: var(--line);
   --h: 210;
 }
+
+/* 盟约徽记：统一用「盟约图标 + 名称」，图标被隐藏（顶栏开关 / 单文件版）时退回色点 */
+.cov-sig { display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.cov-sig .icon { box-shadow: none; }
+.cov-sig-dot {
+  display: none; width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor; flex: none;
+}
+.cov-sig.is-dot .cov-sig-dot { display: block; }
+body.no-avatars .cov-sig .cov-sig-dot { display: block; }
+.tag-cov { gap: 4px; }
+/* 提示气泡里的盟约胶囊 */
+.tip-covs { display: flex; flex-wrap: wrap; gap: 4px; }
+.tip-cov {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 0 5px; border-radius: 5px; font-size: 11px; line-height: 1.7;
+  color: hsl(var(--h, 200), 66%, 70%);
+  background: hsla(var(--h, 200), 66%, 60%, 0.13);
+}
+[data-theme="light"] .tip-cov { color: hsl(var(--h, 200), 58%, 36%); }
+.tip-cov.is-muted { color: var(--fg3); background: var(--bg3); }
 
 .eff {
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
@@ -1028,6 +1056,15 @@ body.sheet-open { overflow: hidden; }
   transition: width 0.18s ease;
 }
 [data-theme="light"] .tm-traits { box-shadow: -14px 12px 34px rgba(20, 40, 60, 0.16); }
+/* 收起后吸附到左侧：整个面板镜像贴左，圆角 / 阴影方向跟着换 */
+.tm-traits.is-left {
+  left: 0; right: auto;
+  border-right: 1px solid var(--line); border-left: 0;
+  border-radius: 0 14px 14px 0;
+  box-shadow: 16px 14px 38px rgba(0, 0, 0, 0.34);
+}
+[data-theme="light"] .tm-traits.is-left { box-shadow: 14px 12px 34px rgba(20, 40, 60, 0.16); }
+.tm-traits.is-left .tm-traits-rail-arrow { transform: scaleX(-1); }
 .tm-traits-panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .tm-traits-head {
   display: flex; align-items: center; gap: 8px;
@@ -1078,9 +1115,19 @@ body.sheet-open { overflow: hidden; }
   flex-direction: column; align-items: center; justify-content: center; gap: 9px;
   padding: 14px 0;
   border: 0; background: transparent; color: var(--fg3);
-  font: inherit; cursor: pointer;
+  font: inherit; cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
 }
 .tm-traits-rail:hover { background: rgba(91, 209, 230, 0.06); color: var(--fg); }
+.tm-traits-rail.is-dragging,
+.tm-traits.is-collapsed .tm-traits-rail:active { cursor: grabbing; }
+.tm-traits-rail-grip {
+  display: block; font-size: 10px; line-height: 1;
+  color: var(--fg3); opacity: 0.62; letter-spacing: 1px;
+}
+body.is-traits-dragging { cursor: grabbing; -webkit-user-select: none; user-select: none; }
+body.is-traits-dragging .tm-traits { transition: none; }
 .tm-traits-rail-text {
   writing-mode: vertical-rl; text-orientation: upright;
   font-size: 12px; font-weight: 650; line-height: 1;
@@ -1094,8 +1141,10 @@ body.sheet-open { overflow: hidden; }
 
 .tm-traits.is-collapsed {
   width: 42px; max-height: none;
+  top: clamp(8px, var(--traits-top, 160px), calc(100vh - 176px));
   border-radius: 12px 0 0 12px;
 }
+.tm-traits.is-collapsed.is-left { border-radius: 0 12px 12px 0; }
 .tm-traits.is-collapsed .tm-traits-panel { display: none; }
 .tm-traits.is-collapsed .tm-traits-rail { display: flex; }
 
@@ -1105,7 +1154,10 @@ body.sheet-open { overflow: hidden; }
     width: min(320px, calc(100vw - 28px));
     max-height: calc(100vh - 280px);
   }
-  .tm-traits.is-collapsed { width: 42px; }
+  .tm-traits.is-collapsed {
+    width: 42px;
+    top: clamp(8px, var(--traits-top, 200px), calc(100vh - 176px));
+  }
 }
 
 .tm-tr-group { padding-top: 8px; }
@@ -1211,6 +1263,7 @@ body.sheet-open { overflow: hidden; }
 }
 .slot-tags { display: flex; flex-wrap: nowrap; gap: 3px; overflow: hidden; min-height: 14px; }
 .slot-tag {
+  display: inline-flex; align-items: center; gap: 3px;
   flex: none; padding: 0 3px; border-radius: 4px; font-size: 9.5px; line-height: 1.7;
   white-space: nowrap;
   color: hsl(var(--h, 200), 66%, 70%);
@@ -1427,6 +1480,7 @@ body.sheet-open { overflow: hidden; }
 }
 .pick-tags { display: flex; flex-wrap: wrap; gap: 3px; }
 .pick-tag {
+  display: inline-flex; align-items: center; gap: 3px;
   padding: 0 4px; border-radius: 4px; font-size: 10px; line-height: 1.6;
   color: hsl(var(--h, 200), 66%, 70%);
   background: hsla(var(--h, 200), 66%, 60%, 0.13);
@@ -1469,7 +1523,7 @@ body.view-team .search { display: none; }
 
 /* 转职（变形同构体） */
 .slot-morph { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--fg3); }
-.slot-morph b { font-weight: 650; color: hsl(var(--h, 200), 66%, 70%); }
+.slot-morph b { display: inline-flex; align-items: center; gap: 3px; font-weight: 650; color: hsl(var(--h, 200), 66%, 70%); }
 [data-theme="light"] .slot-morph b { color: hsl(var(--h, 200), 58%, 36%); }
 .slot-morph select {
   flex: 1 1 auto; min-width: 0; height: 22px; padding: 0 4px;
@@ -1675,3 +1729,15 @@ body.is-dragging .slot { pointer-events: none; }
 .team-toggle.is-in { border-color: rgba(64, 196, 140, 0.4); color: #55d6a2; background: rgba(64, 196, 140, 0.08); }
 [data-theme="light"] .team-toggle.is-in { color: #147a55; }
 .btn.team-toggle { font-size: 12px; padding: 6px 12px; }
+
+/* ---------- 18. 移动端输入框防自动放大 ----------
+   iOS Safari 聚焦字号 < 16px 的输入框 / 下拉框 / 文本域时会自动放大整页；
+   移动端统一提到 16px 即可避免，且保留双指缩放（不用 user-scalable=no）。
+   桌面端不受影响，仍使用原设计字号。 */
+@media (max-width: 1023px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea { font-size: 16px; }
+  .cov-layer input { width: 58px; height: 28px; }
+  .slot-morph select { height: 28px; }
+}

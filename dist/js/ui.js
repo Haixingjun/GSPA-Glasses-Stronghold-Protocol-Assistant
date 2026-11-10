@@ -131,6 +131,19 @@
       '<span class="icon-letter">' + esc(initial(name)) + '</span>' + img + '</span>';
   }
 
+  /**
+   * 盟约小徽记：盟约图标 + 名称的统一前缀。
+   * 有关闭图片 / 单文件版（NO_ICONS）时退回旧版的色点，保证仍有色彩区分。
+   * @param {string} name 盟约名
+   * @param {number} size 图标像素
+   */
+  function covSigil(name, size) {
+    var c = Store.covenantByName(name);
+    var icon = c ? iconHtml(c, name, size, 'covenant') : '';
+    return '<span class="cov-sig' + (icon ? '' : ' is-dot') + '">' +
+      icon + '<i class="cov-sig-dot" aria-hidden="true"></i></span>';
+  }
+
   /* ======================================================================
      总渲染
      ====================================================================== */
@@ -332,7 +345,7 @@
         items: data.covenants.map(function (c, ci) {
           return {
             v: c.name, label: c.name, hue: hue(c.name),
-            icon: iconHtml(c, c.name, 18, 'covenant'),
+            icon: covSigil(c.name, 18),
             // 主盟约排完后换行，再列副盟约
             breakBefore: c.rank !== 'core' && ci > 0 && data.covenants[ci - 1].rank === 'core'
           };
@@ -594,9 +607,9 @@
     }
     var out = '';
     for (var i = 0; i < tags.length; i++) {
-      out += '<button type="button" class="tag" data-tag="' + esc(tags[i]) + '"' +
+      out += '<button type="button" class="tag tag-cov" data-tag="' + esc(tags[i]) + '"' +
         ' style="--h:' + hue(tags[i]) + '" title="按【' + esc(tags[i]) + '】筛选">' +
-        '<i class="dot"></i>' + esc(tags[i]) + '</button>';
+        covSigil(tags[i], 14) + esc(tags[i]) + '</button>';
     }
     return out;
   }
@@ -810,8 +823,7 @@
     return cardOpen('covenant', c.name, label, active) +
       '<div class="card-top">' +
       iconHtml(c, c.name, 40, 'covenant') +
-      '<div class="card-title"><span class="tag" style="--h:' + hue(c.name) + ';font-size:13px">' +
-      '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></div>' +
+      '<div class="card-title">' + Search.highlight(c.name, toks) + '</div>' +
       '<div class="card-badges">' +
       '<span class="pill ' + (c.rank === 'core' ? 'pill-core' : 'pill-add') + '">' + esc(rankLabel(c.rank)) + '</span>' +
       '</div>' +
@@ -924,7 +936,7 @@
         var c = Store.covenantByName(p.tags[i]);
         if (!c) continue;
         html += '<button type="button" class="d-box d-link" data-cov="' + esc(c.name) + '">' +
-          '<h4><span class="tag" style="--h:' + hue(c.name) + '"><i class="dot"></i>' + esc(c.name) + '</span>' +
+          '<h4><span class="tag tag-cov" style="--h:' + hue(c.name) + '">' + covSigil(c.name, 16) + esc(c.name) + '</span>' +
           '<span style="color:var(--fg3);font-weight:400">' + esc(activationShort(c)) + '</span></h4>' +
           '<p>' + esc(firstLine(c.desc)) + '</p>' +
           '</button>';
@@ -975,7 +987,7 @@
         var c = Store.covenantByName(o.tags[i]);
         if (!c) continue;
         html += '<button type="button" class="d-box d-link" data-cov="' + esc(c.name) + '">' +
-          '<h4><span class="tag" style="--h:' + hue(c.name) + '"><i class="dot"></i>' + esc(c.name) + '</span>' +
+          '<h4><span class="tag tag-cov" style="--h:' + hue(c.name) + '">' + covSigil(c.name, 16) + esc(c.name) + '</span>' +
           '<span style="color:var(--fg3);font-weight:400">' + esc(activationShort(c)) + '</span></h4>' +
           '<p>' + esc(firstLine(c.desc)) + '</p>' +
           '</button>';
@@ -1246,9 +1258,8 @@
   function covenantDetail(c, toks) {
     var a = c.activation;
     var html = '<div class="d-head">' + iconHtml(c, c.name, 56, 'covenant', true) +
-      '<div class="d-head-main"><h2 class="d-title">' +
-      '<span class="tag" style="--h:' + hue(c.name) + ';font-size:16px;padding:2px 10px">' +
-      '<i class="dot"></i>' + Search.highlight(c.name, toks) + '</span></h2></div>' + closeBtn() + '</div>';
+      '<div class="d-head-main"><h2 class="d-title">' + Search.highlight(c.name, toks) +
+      '</h2></div>' + closeBtn() + '</div>';
 
     html += '<div class="d-sub">' + esc(rankLabel(c.rank)) + ' · ' +
       esc(familyLabel(c.family)) + ' · 成员 ' + c.memberCount + ' 名' +
@@ -1364,8 +1375,8 @@
       '<li><b>筛选</b>：阶数、盟约、触发时机、售价可多选；盟约支持「全部（AND）／任一（OR）」切换。</li>' +
       '<li><b>深链</b>：地址栏就是状态。点右上角分享按钮复制链接，发给别人打开即还原视图、筛选和详情。</li>' +
       '<li><b>键盘</b>：<code>/</code> 聚焦搜索框，<code>Esc</code> 关闭详情，<code>←</code> <code>→</code> 在结果间切换。</li>' +
-      '<li><b>标题</b>：卡片上的色块是盟约标签，颜色由盟约名哈希固定，全站一致；点击标签直接筛该盟约。</li>' +
-      '<li><b>图片</b>：顶栏的人像按钮可一键隐藏干员头像与道具 / 策略 / 盟约图标，隐藏后只用色块 + 首字；偏好会记住。</li>' +
+      '<li><b>标题</b>：卡片上的盟约标签统一用「盟约图标 + 名称」显示，底色由盟约名哈希固定，全站一致；点击标签直接筛该盟约。</li>' +
+      '<li><b>图片</b>：顶栏的人像按钮可一键隐藏干员头像与道具 / 策略 / 盟约图标，隐藏后干员用色块 + 首字，盟约标签退回色点 + 名称；偏好会记住。</li>' +
       '</ul>' +
 
       '<h3>数据来源</h3>' +
@@ -1425,6 +1436,7 @@
     hue: hue,
     avatarHtml: avatarHtml,
     iconHtml: iconHtml,
+    covSigil: covSigil,
     getList: function () { return currentList; },
     refs: function () { return refs; }
   };

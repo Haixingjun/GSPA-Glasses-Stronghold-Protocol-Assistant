@@ -1,37 +1,37 @@
 GSPA · 眼镜卫戍协议小助手 · 构建产物说明
 ========================================
-构建时间：2026-11-11 04:03:16
+构建时间：2026-11-11 04:57:16
 数据版本：2026-11-11 01:05
 数据生成：2026-11-11 01:38:50
-资源指纹：c53a3729
+资源指纹：d07babab
 
 部署：把整个 dist/ 目录上传到站点根目录或任意子目录即可。
 单文件：dist/standalone.html 可单独发送 / 双击打开，无需其他文件。
 头像：dist/assets/avatars 共 418 个 WebP（3951.5 KB），懒加载；单文件版不含头像。
 图标：dist/assets/icons 共 314 个 WebP（2027.7 KB，本期「规程」道具 / 策略 / 盟约）；单文件版不含图标。
-缓存：资源已带 ?v=c53a3729，index.html 建议 no-cache，静态资源可长缓存。
+缓存：资源已带 ?v=d07babab，index.html 建议 no-cache，静态资源可长缓存。
 
 首屏（gzip 前 → 后）：
   index.html           8.9 KB  →   3.1 KB
-  assets/app.css      63.1 KB  →  13.1 KB
+  assets/app.css      66.1 KB  →  13.9 KB
   js/store.js         21.7 KB  →   6.4 KB
   js/search.js        13.0 KB  →   4.3 KB
   js/calc.js          13.3 KB  →   5.0 KB
   js/code.js          11.5 KB  →   4.0 KB
-  js/ui.js            61.3 KB  →  15.4 KB
-  js/team.js          69.0 KB  →  18.6 KB
+  js/ui.js            61.8 KB  →  15.5 KB
+  js/team.js          74.6 KB  →  20.3 KB
   js/app.js           18.6 KB  →   5.6 KB
   data/data.js       244.6 KB  →  39.1 KB
-  合计                 525.1 KB  →  114.4 KB
-  预算 115 KB（gzip）：通过
+  合计                 534.1 KB  →  117.1 KB
+  预算 120 KB（gzip）：通过
 
-单文件版 standalone.html：524.8 KB（gzip 109.6 KB）
+单文件版 standalone.html：533.8 KB（gzip 112.3 KB）
 
 dist 文件清单：
   .nojekyll                    0.0 KB
   _headers                     0.7 KB
-  assets/app.css              63.1 KB
-  assets/enemies.css          37.8 KB
+  assets/app.css              66.1 KB
+  assets/enemies.css          38.1 KB
   assets/enemies/boss_alistair-160.webp  13.1 KB
   assets/enemies/boss_alistair-96.webp   5.1 KB
   assets/enemies/boss_beast-160.webp  12.0 KB
@@ -451,9 +451,9 @@ dist 文件清单：
   js/enemies.js               38.4 KB
   js/search.js                13.0 KB
   js/store.js                 21.7 KB
-  js/team.js                  69.0 KB
-  js/ui.js                    61.3 KB
+  js/team.js                  74.6 KB
+  js/ui.js                    61.8 KB
   robots.txt                   0.0 KB
-  standalone.html            524.8 KB
+  standalone.html            533.8 KB
   assets/avatars/ (418 个)    3951.5 KB
   assets/icons/ (314 个)      2027.7 KB

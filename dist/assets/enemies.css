@@ -679,3 +679,11 @@ html[data-theme="light"] .field-tabs button[aria-pressed="true"] { color: #fff; 
 
 .map-filters .mode-btn { padding: 0; border: 0; background: transparent; color: var(--muted-2); font: inherit; letter-spacing: 0; }
 .map-filters .mode-btn:hover { color: var(--accent); }
+
+/* iOS Safari 聚焦字号 < 16px 的输入 / 下拉框时会自动放大整页；移动端统一 16px，
+   不关闭双指缩放。桌面端仍用原字号。 */
+@media (max-width: 1023px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea { font-size: 16px; }
+}
