@@ -191,6 +191,8 @@ h1 em { color: var(--accent); font-style: normal; }
   border: 1px solid var(--line); border-radius: var(--radius);
 }
 .filter-block { min-width: 0; }
+.map-filters { grid-template-columns: 1.6fr 1fr; }
+.mode-btn:disabled { cursor: default; }
 .filter-head {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; margin-bottom: 8px;

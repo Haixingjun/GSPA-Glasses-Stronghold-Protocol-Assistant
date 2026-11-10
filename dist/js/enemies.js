@@ -20,6 +20,12 @@
   var ROLE_LABEL = { special: '特殊敌人', normal: '普通随从', elite: '精英随从' };
   var ROLE_ORDER = ['special', 'normal', 'elite'];
   var THEME_KEY = 'gs-theme';
+  var MAP_MODES = ['入门协议', '极速模拟', '标准模拟', '险境模拟', '绝境模拟', '终极模拟'];
+  var MAP_LEVELS = [
+    { key: '1-4', label: '规程等级 1–4', from: 1, to: 4 },
+    { key: '5-8', label: '规程等级 5–8', from: 5, to: 8 },
+    { key: '5-20', label: '规程等级 5–20', from: 5, to: 20 }
+  ];
 
   var byId = {};
   var tagByKey = {};
@@ -30,7 +36,16 @@
     byId[e.id] = e;
   });
   TAGS.forEach(function (t) { tagByKey[t.key] = t; });
-  MAPS.forEach(function (m) { mapById[m.id] = m; });
+  MAPS.forEach(function (m) {
+    mapById[m.id] = m;
+    m._modes = [];
+    m._ranges = [];
+    m.difficulties.forEach(function (d) {
+      var range = String(d).match(/^规程等级\s*(\d+)\s*[–—-]\s*(\d+)$/);
+      if (range) m._ranges.push([Number(range[1]), Number(range[2])]);
+      else m._modes.push(d);
+    });
+  });
   CONFIGS.forEach(function (c) {
     addRef(c.special, c, 'special');
     c.normal.forEach(function (id) { addRef(id, c, 'normal'); });
@@ -41,7 +56,7 @@
     if (e) e._refs.push({ c: config, role: role });
   }
 
-  var state = { view: 'enemy', q: '', tags: [], mode: 'or', roles: [], dual: false, cross: false, sort: 'index' };
+  var state = { view: 'enemy', q: '', tags: [], mode: 'or', roles: [], dual: false, cross: false, sort: 'index', mapDiffs: [] };
   var els = {};
   var currentEnemy = null;
   var currentMap = null;
@@ -82,6 +97,7 @@
       empty: $('empty'), emptyText: $('emptyText'), emptyReset: $('emptyReset'),
       viewEnemy: $('viewEnemy'), viewMap: $('viewMap'), tabEnemy: $('tabEnemy'), tabMap: $('tabMap'),
       mapCount: $('mapCount'), mapCards: $('mapCards'), mapEmpty: $('mapEmpty'), mapClear: $('mapClear'),
+      mapModeChips: $('mapModeChips'), mapLevelChips: $('mapLevelChips'), mapDiffClear: $('mapDiffClear'),
       heroStats: $('heroStats'),
       enemyDialog: $('enemyDialog'), mapDialog: $('mapDialog')
     };
@@ -90,6 +106,7 @@
     buildHero();
     buildTagChips();
     buildRoleChips();
+    buildMapDiffChips();
     bindEvents();
     applyHash();
     render();
@@ -345,14 +362,66 @@
   }
 
   /* ---------------- 地图 ---------------- */
+  function mapMatchesDiff(m, tag) {
+    if (tag.indexOf('M:') === 0) return m._modes.indexOf(tag.slice(2)) >= 0;
+    if (tag.indexOf('L:') === 0) {
+      var parts = tag.slice(2).split('-');
+      var from = Number(parts[0]);
+      var to = Number(parts[1]);
+      return m._ranges.some(function (r) { return r[0] <= from && to <= r[1]; });
+    }
+    return false;
+  }
+
+  function buildMapDiffChips() {
+    renderDiffChips(els.mapModeChips, MAP_MODES.map(function (name) {
+      return { tag: 'M:' + name, label: name };
+    }));
+    renderDiffChips(els.mapLevelChips, MAP_LEVELS.map(function (level) {
+      return { tag: 'L:' + level.key, label: level.label };
+    }));
+    syncMapDiffChips();
+  }
+
+  function renderDiffChips(container, items) {
+    container.innerHTML = items.map(function (item) {
+      var count = MAPS.filter(function (m) { return mapMatchesDiff(m, item.tag); }).length;
+      return '<button type="button" class="chip" data-diff="' + esc(item.tag) + '" aria-pressed="false">' +
+        esc(item.label) + '<span class="n">' + count + '</span></button>';
+    }).join('');
+    var buttons = container.querySelectorAll('[data-diff]');
+    Array.prototype.forEach.call(buttons, function (btn) {
+      btn.addEventListener('click', function () {
+        state.mapDiffs = toggleIn(state.mapDiffs, btn.getAttribute('data-diff'));
+        syncMapDiffChips();
+        renderMaps();
+      });
+    });
+  }
+
+  function syncMapDiffChips() {
+    [els.mapModeChips, els.mapLevelChips].forEach(function (container) {
+      var buttons = container.querySelectorAll('[data-diff]');
+      Array.prototype.forEach.call(buttons, function (btn) {
+        btn.setAttribute('aria-pressed', state.mapDiffs.indexOf(btn.getAttribute('data-diff')) >= 0 ? 'true' : 'false');
+      });
+    });
+    if (els.mapDiffClear) {
+      els.mapDiffClear.disabled = state.mapDiffs.length === 0;
+      els.mapDiffClear.style.opacity = state.mapDiffs.length ? '1' : '.45';
+    }
+  }
+
   function renderMaps() {
     var q = state.q.trim().toLowerCase();
     var list = MAPS.filter(function (m) {
+      if (state.mapDiffs.length && !state.mapDiffs.some(function (tag) { return mapMatchesDiff(m, tag); })) return false;
       if (!q) return true;
       var hay = [m.label, m.note, m.difficulties.join(' '), m.terrain.map(function (t) { return t.name + ' ' + t.desc; }).join(' '), m.devices.map(function (d) { return d.name + ' ' + d.desc; }).join(' ')].join(' ').toLowerCase();
       return hay.indexOf(q) >= 0;
     });
-    els.mapCount.innerHTML = '显示 <b>' + list.length + '</b> / ' + MAPS.length + ' 张地图';
+    els.mapCount.innerHTML = '显示 <b>' + list.length + '</b> / ' + MAPS.length + ' 张地图' +
+      (state.mapDiffs.length ? ' · 已选 ' + state.mapDiffs.length + ' 个难度' : '');
     els.mapEmpty.hidden = list.length > 0;
     els.mapCards.innerHTML = list.map(mapCardHtml).join('');
   }
@@ -509,7 +578,14 @@
     els.mapClear.addEventListener('click', function () {
       els.q.value = '';
       state.q = '';
+      state.mapDiffs = [];
       els.qclear.hidden = true;
+      syncMapDiffChips();
+      renderMaps();
+    });
+    els.mapDiffClear.addEventListener('click', function () {
+      state.mapDiffs = [];
+      syncMapDiffChips();
       renderMaps();
     });
 

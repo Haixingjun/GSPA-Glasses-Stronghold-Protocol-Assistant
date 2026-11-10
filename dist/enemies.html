@@ -8,7 +8,7 @@
 <title>敌人图鉴 · 卫戍协议小助手</title>
 <meta name="description" content="《明日方舟》卫戍协议·规程特殊敌人图鉴：179 个敌人、9 类词条、93 条特殊敌人配置、10 张战场地图，支持搜索、词条组合筛选、身份筛选与地图机制速查。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5 4.5 7.3v8.6c0 6.6 4.7 11.5 11.5 13.6 6.8-2.1 11.5-7 11.5-13.6V7.3z' fill='%235bd1e6'/%3E%3Cpath d='M10 11.6h12M16 11.6v10.2' stroke='%230b0f14' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/enemies.css?v=0182060b">
+<link rel="stylesheet" href="assets/enemies.css?v=a41697d1">
 </head>
 <body>
 <a class="skip" href="#main">跳到主要内容</a>
@@ -45,7 +45,7 @@
     <div>
       <p class="kicker">STRONGHOLD PROTOCOL / V3_1 / ENEMY CODEX</p>
       <h1>特殊敌人<em>图鉴</em></h1>
-      <p class="intro">按词条、身份和名称查询 179 个敌人；每个特殊敌人带普通 / 精英随从。另附 10 张战场地图的场地、地形与装置速查。</p>
+      <p class="intro">按词条、身份和名称查询 179 个敌人；每个特殊敌人带普通 / 精英随从。另附 10 张战场地图的场地、地形与装置速查，可按难度模式 / 规程等级筛选。</p>
     </div>
     <div class="hero-stats" id="heroStats"></div>
   </section>
@@ -110,14 +110,27 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.4v5.4M12 16.4v.4"/></svg>
       <div><b>地图 ≠ 敌人列表。</b> 卫戍协议的每局地图与敌方势力随机搭配，PRTS 也没有「地图 → 敌人」的固定表；这里做的是地图机制速查，不能按地图限定敌人。要查敌人请回到「敌人」页按词条筛选。</div>
     </div>
+    <div class="filters map-filters" aria-label="按难度筛选地图">
+      <div class="filter-block">
+        <div class="filter-head">
+          <span>难度模式</span>
+          <button type="button" class="mode-btn" id="mapDiffClear" title="清除难度筛选">清除</button>
+        </div>
+        <div class="chips" id="mapModeChips"></div>
+      </div>
+      <div class="filter-block">
+        <div class="filter-head"><span>规程等级</span></div>
+        <div class="chips" id="mapLevelChips"></div>
+      </div>
+    </div>
     <div class="toolbar">
       <span class="count" id="mapCount"></span>
     </div>
     <div class="map-grid" id="mapCards"></div>
     <div class="empty" id="mapEmpty" hidden>
       <b>没有匹配的地图</b>
-      <p>试试地图编号、地形或装置名。</p>
-      <button type="button" id="mapClear">清空搜索</button>
+      <p>试试地图编号、地形、装置名，或减少难度条件。</p>
+      <button type="button" id="mapClear">清空筛选</button>
     </div>
   </section>
 </main>
@@ -179,7 +192,7 @@
 
 <noscript><div class="empty"><b>需要启用 JavaScript</b><p>数据已内嵌在本地文件中，不会发起网络请求。</p></div></noscript>
 
-<script src="data/enemies.js?v=0182060b"></script>
-<script src="js/enemies.js?v=0182060b"></script>
+<script src="data/enemies.js?v=a41697d1"></script>
+<script src="js/enemies.js?v=a41697d1"></script>
 </body>
 </html>
