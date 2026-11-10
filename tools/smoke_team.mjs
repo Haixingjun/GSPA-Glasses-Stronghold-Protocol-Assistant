@@ -309,6 +309,71 @@ check('配队页有「批量添加」入口（未满时）', () => {
   assert.doesNotMatch(cards.innerHTML, /data-batch-add/);
 });
 
+check('词条栏：空队伍显示入口与说明', () => {
+  Store.setTeam(Calc.emptyTeam(8));
+  const html = Team.render();
+  assert.match(html, /class="tm-traits"/);
+  assert.match(html, /class="tm-traits-panel"/);
+  assert.match(html, /class="tm-traits-rail"/);
+  assert.match(html, /tm-traits-rail-text">词条/);
+  assert.match(html, /class="tm-traits-layer" data-traits-layer aria-pressed="false"/);
+  assert.match(html, /只看叠层/);
+  assert.match(html, /data-traits-toggle/);
+  assert.match(html, /aria-expanded="true"/);
+  assert.match(html, /休整期结束时 → … → 休整期开始时/);
+  assert.match(html, /加入干员后/);
+});
+
+check('词条栏：全队词条按触发时机排序，并含无触发时机', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '慕斯', e: false };      // 休整期结束时
+  team.slots[1] = { k: '烈夏', e: false };      // 战斗开始时
+  team.slots[2] = { k: '艾丝黛尔', e: false };  // 战斗中
+  team.slots[3] = { k: '流明', e: false };      // 战斗结束时
+  team.slots[4] = { k: '拜松', e: false };      // 获得时
+  team.slots[5] = { k: '寒檀', e: false };      // 休整期结束时 + 休整期开始时
+  team.slots[6] = { k: '星极', e: false };      // 无触发时机
+  Store.setTeam(team);
+  const html = Team.render();
+  const at = (label) => html.indexOf('>' + label + '<span class="tm-tr-n"');
+  const seq = ['休整期结束时', '战斗开始时', '战斗中', '战斗结束时', '获得时', '休整期开始时'];
+  const idx = seq.map(at);
+  idx.forEach((v, i) => assert.ok(v >= 0, '缺少分组：' + seq[i]));
+  for (let i = 1; i < idx.length; i++) {
+    assert.ok(idx[i - 1] < idx[i], seq[i - 1] + ' 应排在 ' + seq[i] + ' 之前');
+  }
+  assert.match(html, /无触发时机/);
+  assert.match(html, /同一词条含多个触发时机会重复出现在多个分组/);
+  assert.match(html, /第 6 席 · 普通/, '寒檀应同时出现在两个时机分组');
+});
+
+check('词条栏：精锐形态取精锐词条，并去掉重复的触发标签', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '寒檀', e: true };
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /tm-tr-elite/);
+  assert.match(html, /层数\+6/);
+  assert.doesNotMatch(html, /层数\+3/);
+  assert.doesNotMatch(html, /&lt;休整期结束时&gt;/);
+});
+
+check('词条栏：叠层手段判定', () => {
+  const f = Team._isLayerTrait;
+  assert.equal(f('<战斗中>每次开启技能时使已激活的【萨尔贡】层数+1（每回合至多叠加2层）'), true);
+  assert.equal(f('<获得时>【炎】层数+2'), true);
+  assert.equal(f('<获得时>获得等同于当前调度中心等级的【炎】层数'), true);
+  assert.equal(f('<休整期结束时>使自身及身前一格干员已激活的盟约叠加等同于其售出价格的层数'), true);
+  assert.equal(f('<进入休整期时>转化2层【乌萨斯】临时层数为固定层数'), true);
+  assert.equal(f('<战斗中>击倒单位时叠加的临时层数提升至4层'), true);
+  assert.equal(f('<战斗中>身前一格干员提升盟约层数时，每次提升的层数额外+1'), true);
+  // 「每叠加 N 层加攻击」是层数收益，不是叠层手段
+  assert.equal(f('<战斗中>【伊比利亚】每叠加2层，本干员攻击力+1%'), false);
+  assert.equal(f('<战斗中>部署时【阿戈尔】盟约每叠加20层，使自身及周围四格的干员攻击速度+1'), false);
+  assert.equal(f('<获得时>获得一件精准狙击镜'), false);
+  assert.equal(f('购买价格为1'), false);
+});
+
 check('装备面板：列出装备，替换时出现「卸下」', () => {
   Team.openSheet(0, 'item', -1);
   assert.match(sheet.innerHTML, /data-gear=/);
@@ -327,6 +392,26 @@ check('装备面板：有阶数筛选、名称后不再带「N 阶」、每件�
   assert.doesNotMatch(sheet.innerHTML, /pick-tier/, '名称后不该再出现阶数标签');
   assert.match(sheet.innerHTML, /data-gear-elite=/, '每件装备应有进阶开关');
   assert.match(sheet.innerHTML, /data-gear-elite="[^"]+" aria-pressed="false"/);
+  Team.closeSheet();
+});
+
+check('装备面板：加号是独立的添加按钮，整行只负责看详情', () => {
+  Team.openSheet(0, 'item', -1);
+  // 回归：加号曾经是装饰性 span，点它没反应，必须点整行
+  assert.match(sheet.innerHTML, /class="pick-add" data-gear="[^"]+"/, '加号应带 data-gear 且可点击');
+  assert.doesNotMatch(sheet.innerHTML, /class="pick-hit"[^>]*data-gear="/, '整行不再承担添加');
+  assert.match(sheet.innerHTML, /data-gear-info="[^"]+" data-tip-item="[^"]+"/, '整行悬停 / 点按看详情');
+  assert.match(sheet.innerHTML, />进阶<\/button>/, '进阶按钮文案');
+  Team.closeSheet();
+});
+
+check('装备面板：更换进阶装备时按钮显示「取消进阶」', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '拜松', e: false, it: [{ k: '维式重锤', e: true }] };
+  Store.setTeam(team);
+  Team.openSheet(0, 'item', 0);
+  assert.match(sheet.innerHTML, /data-gear-elite="维式重锤" aria-pressed="true"/);
+  assert.match(sheet.innerHTML, /取消进阶/);
   Team.closeSheet();
 });
 

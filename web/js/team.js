@@ -37,6 +37,18 @@
     open: false, mode: 'op', slot: -1, gear: -1,
     q: '', tiers: [], tags: [], batch: true, pending: null, eliteMode: {}, filtersOpen: true
   };
+  // 词条栏展开状态：首次进入窄屏默认收起，桌面默认展开；用户手动切换后保持
+  var traitsOpen = null;
+  // 词条栏筛选：只看会增加盟约层数的「叠层手段」
+  var traitsLayerOnly = false;
+  // 词条按触发时机排列：从休整期结束（备战完成）走到下一次休整期开始
+  var TRAIT_TRIGGER_ORDER = [
+    '休整期结束时', '战斗开始时', '战斗中', '战斗结束时',
+    '进入休整期时', '获得时', '刷新时', '售出时', '休整期开始时'
+  ];
+  var NO_TRIGGER = '';
+  // 判断一条词条是否在「增加 / 转化 / 增幅盟约层数」；只按层数获得，不把「每叠加 N 层加攻击」算进来
+  var LAYER_TRAIT_RE = /层数\s*(?:额外)?\s*[+＋]|获得等同于[^。；\n]*层数|叠加等同于[^。；\n]*层数|转化\s*\d+\s*层[^。；\n]*固定层数|临时层数提升至/;
   var els = {};
   var qTimer = null;
 
@@ -80,8 +92,11 @@
     var res = Calc.evaluate(team, data);
     return '<section class="team">' +
       headHtml(team, res) +
+      traitsHtml(team) +
+      '<div class="tm-main">' +
       slotsHtml(team, res) +
       covHtml(res) +
+      '</div>' +
       '</section>';
   }
 
@@ -224,7 +239,7 @@
     }
     if (items.length < Store.ITEMS_MAX) {
       h += '<button type="button" class="gear-add" data-gear-add="' + i + '"' +
-        ' aria-label="添加装备">＋</button>';
+        ' aria-label="添加装备" title="添加装备">＋</button>';
     }
     h += '</div>';
     return h;
@@ -331,6 +346,177 @@
       '</div>';
   }
 
+  /* ---------------- 词条栏：全队词条按触发时机汇总 ---------------- */
+  function isTraitsOpen() {
+    if (traitsOpen === null) traitsOpen = (global.innerWidth || 0) >= 1024;
+    return traitsOpen;
+  }
+
+  function stripTriggerTags(text) {
+    var s = String(text == null ? '' : text);
+    var cleaned = s.replace(/^\s*(?:<[^<>]{1,24}>\s*)+/, '');
+    return cleaned || s;
+  }
+
+  function isLayerTrait(text) {
+    return LAYER_TRAIT_RE.test(String(text == null ? '' : text));
+  }
+
+  /** 按当前形态（普通 / 精锐）收集词条，并按触发时机分组；重复干员只算一次 */
+  function traitGroups(team) {
+    var groups = {};
+    var seen = {};
+    var total = 0;
+    var other = 0;
+    var picks = 0;
+    var multi = 0;
+
+    for (var i = 0; i < team.slots.length; i++) {
+      var s = team.slots[i];
+      if (!s) continue;
+      var so = slotOperator(s);
+      var op = so.op;
+      if (!op) continue;
+      if (so.pick) { picks++; continue; }   // 自选干员没有词条说明
+      if (seen[op.name]) continue;
+      seen[op.name] = 1;
+
+      var elite = !!s.e;
+      var text = elite ? (op.eliteText || op.normalText) : op.normalText;
+      if (!text) continue;
+      var layer = isLayerTrait(text);
+      if (!layer) other++;
+      if (traitsLayerOnly && !layer) continue;
+
+      var triggers = (elite && op.eliteTriggers && op.eliteTriggers.length)
+        ? op.eliteTriggers : (op.normalTriggers || []);
+      var uniq = [];
+      for (var t = 0; t < triggers.length; t++) {
+        if (uniq.indexOf(triggers[t]) < 0) uniq.push(triggers[t]);
+      }
+      if (!uniq.length) uniq.push(NO_TRIGGER);
+      if (uniq.length > 1) multi++;
+
+      total++;
+      for (var k = 0; k < uniq.length; k++) {
+        var g = uniq[k];
+        if (!groups[g]) groups[g] = [];
+        groups[g].push({ name: op.name, op: op, elite: elite, text: text, slot: i });
+      }
+    }
+
+    return { groups: groups, total: total, other: other, allTotal: total + other, picks: picks, multi: multi };
+  }
+
+  function traitsHtml(team) {
+    var bag = traitGroups(team);
+    var open = isTraitsOpen();
+    var body = '';
+
+    if (!bag.total) {
+      var msg = [];
+      if (traitsLayerOnly && bag.other) {
+        msg.push('当前队伍没有叠层词条（已隐藏 ' + bag.other + ' 条非叠层）');
+      }
+      if (bag.picks) msg.push('自选干员暂无词条数据');
+      body = '<p class="tm-tr-empty">' +
+        (msg.length ? msg.join('；') + '。' : '加入干员后，这里会按触发时机汇总全队词条。') +
+        '</p>';
+    } else {
+      var keys = [];
+      for (var g in bag.groups) if (bag.groups.hasOwnProperty(g)) keys.push(g);
+      keys.sort(function (a, b) {
+        if (a === NO_TRIGGER) return 1;
+        if (b === NO_TRIGGER) return -1;
+        var ia = TRAIT_TRIGGER_ORDER.indexOf(a);
+        var ib = TRAIT_TRIGGER_ORDER.indexOf(b);
+        if (ia < 0) ia = TRAIT_TRIGGER_ORDER.length;
+        if (ib < 0) ib = TRAIT_TRIGGER_ORDER.length;
+        return ia - ib || a.localeCompare(b, 'zh-Hans-CN');
+      });
+
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var list = bag.groups[key];
+        var label = key === NO_TRIGGER ? '无触发时机' : key;
+        body += '<section class="tm-tr-group' + (key === NO_TRIGGER ? ' is-none' : '') + '">' +
+          '<h3 class="tm-tr-grouphead" style="--h:' + UI.hue(label) + '">' +
+          '<i class="dot" aria-hidden="true"></i>' + esc(label) +
+          '<span class="tm-tr-n" title="' + list.length + ' 条">' + list.length + '</span></h3>' +
+          '<ul class="tm-tr-list">';
+        for (var j = 0; j < list.length; j++) {
+          var it = list[j];
+          body += '<li class="tm-tr-item" title="第 ' + (it.slot + 1) + ' 席 · ' + (it.elite ? '精锐' : '普通') + '">' +
+            UI.avatarHtml(it.op, it.name, 24) +
+            '<div class="tm-tr-main">' +
+            '<div class="tm-tr-name">' + esc(it.name) +
+            (it.elite ? '<span class="tm-tr-elite">精锐</span>' : '') +
+            '</div>' +
+            '<p class="tm-tr-text">' + Search.format(stripTriggerTags(it.text)) + '</p>' +
+            '</div></li>';
+        }
+        body += '</ul></section>';
+      }
+      if (bag.multi) {
+        body += '<p class="tm-tr-note">同一词条含多个触发时机会重复出现在多个分组。</p>';
+      }
+      if (bag.picks) {
+        body += '<p class="tm-tr-note">另有 ' + bag.picks + ' 名自选干员暂无词条数据。</p>';
+      }
+    }
+
+    var sub = traitsLayerOnly
+      ? (bag.other
+        ? '只看叠层 · 已隐藏 ' + bag.other + ' 条非叠层词条'
+        : '只看叠层 · 当前词条均为叠层手段')
+      : '按触发时机排序：休整期结束时 → … → 休整期开始时';
+
+    return '<aside class="tm-traits' + (open ? '' : ' is-collapsed') + '" aria-label="配队词条汇总">' +
+      '<div class="tm-traits-panel">' +
+      '<div class="tm-traits-head">' +
+      '<div class="tm-traits-title"><b>词条</b>' +
+      '<span class="tm-traits-count" title="共 ' + bag.total + ' 条词条">' + bag.total + '</span></div>' +
+      '<button type="button" class="tm-traits-layer" data-traits-layer' +
+      ' aria-pressed="' + (traitsLayerOnly ? 'true' : 'false') + '"' +
+      ' title="隐藏不增加盟约层数的词条">只看叠层</button>' +
+      '<button type="button" class="tm-traits-toggle" data-traits-toggle' +
+      ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tm-traits-body"' +
+      ' title="收起词条栏">收起</button>' +
+      '</div>' +
+      '<p class="tm-traits-sub">' + sub + '</p>' +
+      '<div class="tm-traits-body" id="tm-traits-body">' + body + '</div>' +
+      '</div>' +
+      '<button type="button" class="tm-traits-rail" data-traits-toggle' +
+      ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tm-traits-body"' +
+      ' title="展开词条栏">' +
+      '<span class="tm-traits-rail-text">词条</span>' +
+      '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
+      '<span class="tm-traits-rail-arrow" aria-hidden="true">‹</span>' +
+      '<span class="tm-traits-rail-more">展开</span>' +
+      '</button>' +
+      '</aside>';
+  }
+
+  function refreshTraitsPanel() {
+    var old = els.cards && els.cards.querySelector('.tm-traits');
+    if (old) old.outerHTML = traitsHtml(Store.getTeam());
+  }
+
+  function toggleTraitsLayer() {
+    traitsLayerOnly = !traitsLayerOnly;
+    refreshTraitsPanel();
+  }
+
+  function toggleTraits() {
+    traitsOpen = !isTraitsOpen();
+    var panel = els.cards && els.cards.querySelector('.tm-traits');
+    if (panel) panel.classList.toggle('is-collapsed', !traitsOpen);
+    var btns = els.cards ? els.cards.querySelectorAll('[data-traits-toggle]') : [];
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-expanded', traitsOpen ? 'true' : 'false');
+    }
+  }
+
   /* ---------------- 盟约 / 装备详情（#tip） ---------------- */
   function tipHtmlFor(kind, key) {
     if (kind === 'op') {
@@ -405,6 +591,20 @@
       '<div class="tip-sec"><h4>原文</h4><p>' + Search.format(c.desc) + '</p></div>';
   }
 
+  function tipKeyFor(el) {
+    if (el.getAttribute('data-tip-cov')) return 'cov:' + el.getAttribute('data-tip-cov');
+    if (el.getAttribute('data-tip-item')) return 'item:' + el.getAttribute('data-tip-item');
+    if (el.getAttribute('data-tip-op')) return 'op:' + el.getAttribute('data-tip-op');
+    return '';
+  }
+
+  /** 点按固定详情：点同一条再点一次收起，点另一条则切换过去 */
+  function togglePinTip(el) {
+    var same = tip.pinned && els.tip && els.tip.getAttribute('data-for') === tipKeyFor(el);
+    tip.pinned = !same;
+    if (tip.pinned) showTip(el); else hideTip();
+  }
+
   function showTip(el) {
     if (!els.tip) return;
     var html = '';
@@ -416,7 +616,10 @@
     els.tip.innerHTML = html;
     els.tip.hidden = false;
     els.tip.setAttribute('data-pinned', tip.pinned ? '1' : '0');
-    var r = el.getBoundingClientRect();
+    els.tip.setAttribute('data-for', tipKeyFor(el));
+    // 面板里的装备行按整行定位，气泡落在行外，不挡住右侧的进阶 / 加号
+    var anchor = (el.closest && el.closest('.pick')) || el;
+    var r = anchor.getBoundingClientRect();
     var tw = els.tip.offsetWidth || 320;
     var th = els.tip.offsetHeight || 200;
     var pad = 10, gap = 12;
@@ -447,7 +650,8 @@
   }
 
   function onHover(e) {
-    if (picker.open) return;
+    // 面板打开时只给面板内的装备行显示详情，避免和底层配队卡抢事件
+    if (picker.open && (!e.target || !e.target.closest || !e.target.closest('.sheet [data-tip-item]'))) return;
     // 鼠标进到层数输入框时收起气泡，别挡住输入
     if (e.target && e.target.closest && e.target.closest('.cov-layer')) { hideTip(); return; }
     var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-item],[data-tip-op]') : null;
@@ -466,7 +670,8 @@
 
   function onFocusIn(e) {
     if (e.target && e.target.closest && e.target.closest('.cov-layer')) { hideTip(); return; }
-    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-op]') : null;
+    if (picker.open && (!e.target || !e.target.closest || !e.target.closest('.sheet [data-tip-item]'))) return;
+    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-item],[data-tip-op]') : null;
     if (el) showTip(el);
   }
 
@@ -483,6 +688,12 @@
     picker.q = '';
     picker.tiers = onlyPick ? [0] : [];
     picker.tags = [];
+    // 进阶开关只对本次面板生效；更换已有装备时按它当前的形态点亮
+    picker.eliteMode = {};
+    if (picker.mode === 'item' && picker.gear >= 0 && cur && cur.it) {
+      var editing = normItem(cur.it[picker.gear]);
+      if (editing) picker.eliteMode[editing.k] = !!editing.e;
+    }
     // 矮屏（手机横屏）先收起筛选，保证列表还有足够高度；普通竖屏默认展开
     picker.filtersOpen = picker.mode === 'item' || global.innerHeight >= 560;
     hideTip();
@@ -786,6 +997,7 @@
     var toks = Search.tokens(picker.q);
     var out = '';
     var shown = 0;
+    var slotNo = picker.slot + 1;
 
     if (picker.gear >= 0) {
       out += '<button type="button" class="pick pick-unequip" data-unequip="' + picker.gear + '">' +
@@ -804,12 +1016,16 @@
 
       var wornAt = worn.indexOf(it.name);
       var dup = wornAt >= 0 && wornAt !== picker.gear;
+      var current = wornAt >= 0 && wornAt === picker.gear;
       var elite = !!picker.eliteMode[it.name];
       var eff = elite && it.hasElite ? it.eliteText : it.normalText;
 
+      // 一行三块：左侧看详情（悬停 / 点按固定），中间进阶开关，右侧加号添加。
+      // 加号必须是真按钮，不能只靠整行点击。
       out += '<div class="pick pick-gear' + (dup ? ' is-used' : '') + '">' +
-        '<button type="button" class="pick-hit"' +
-        (dup ? ' disabled aria-disabled="true"' : ' data-gear="' + esc(it.name) + '"') + '>' +
+        '<button type="button" class="pick-hit" data-gear-info="' + esc(it.name) + '"' +
+        ' data-tip-item="' + esc(it.name) + '"' +
+        ' aria-label="查看装备 ' + esc(it.name) + ' 的详细效果">' +
         UI.iconHtml(it, it.name, 34, 'item', false, true) +
         '<span class="pick-main">' +
         '<span class="pick-name">' + Search.highlight(it.name, toks) + '</span>' +
@@ -818,9 +1034,19 @@
         '</button>' +
         (it.hasElite
           ? '<button type="button" class="gear-mode" data-gear-elite="' + esc(it.name) + '"' +
-            ' aria-pressed="' + (elite ? 'true' : 'false') + '" title="以进阶形态装备">进阶</button>'
+            ' aria-pressed="' + (elite ? 'true' : 'false') + '"' +
+            ' title="' + (elite ? '取消进阶，按普通形态装备' : '以进阶形态装备') + '">' +
+            (elite ? '取消进阶' : '进阶') + '</button>'
           : '') +
-        '<span class="pick-act">' + (dup ? '已装' : '＋') + '</span>' +
+        (current
+          ? '<button type="button" class="pick-add" disabled aria-disabled="true"' +
+            ' title="第 ' + slotNo + ' 席当前装备的就是这件">当前</button>'
+          : dup
+            ? '<button type="button" class="pick-add is-used" disabled aria-disabled="true"' +
+              ' title="第 ' + slotNo + ' 席已经装着这件装备">已装</button>'
+            : '<button type="button" class="pick-add" data-gear="' + esc(it.name) + '"' +
+              ' title="添加到第 ' + slotNo + ' 席' + (it.hasElite && elite ? '（进阶形态）' : '') + '"' +
+              ' aria-label="添加装备 ' + esc(it.name) + (it.hasElite && elite ? '（进阶）' : '') + '">＋</button>') +
         '</div>';
     }
     if (!shown) out += '<p class="pick-empty">没有匹配的装备</p>';
@@ -957,6 +1183,7 @@
     if (!picker.open || !els.sheet) return;
     var box = els.sheet.querySelector('.sheet-list');
     if (!box) return;
+    hideTip();  // 列表重绘后旧气泡的锚点已经不存在了
     var top = keepScroll ? box.scrollTop : 0;
     box.innerHTML = listHtml(Store.getTeam());
     box.scrollTop = top;
@@ -1088,6 +1315,32 @@
     picker.slot = next.slot;
     picker.gear = next.gear;
     refreshAfterChoice();
+  }
+
+  /** 进阶开关：已装在本席就直接进阶 / 取消进阶，否则作为下一次添加的形态 */
+  function toggleGearElite(name) {
+    var on = !picker.eliteMode[name];
+    picker.eliteMode[name] = on;
+
+    var team = Store.getTeam();
+    var s = picker.slot >= 0 ? team.slots[picker.slot] : null;
+    var applied = false;
+    if (s && s.it) {
+      for (var i = 0; i < s.it.length; i++) {
+        var entry = normItem(s.it[i]);
+        if (!entry || entry.k !== name) continue;
+        s.it[i] = { k: name, e: on };
+        applied = true;
+      }
+    }
+
+    if (applied) {
+      Store.setTeam(team);
+      toast(name + (on ? '：已进阶' : '：已取消进阶'));
+    } else {
+      toast(name + (on ? '：本次添加为进阶形态' : '：本次添加为普通形态'));
+    }
+    refreshList(true);
   }
 
   /** 谁还能再装：优先当前干员，其次按席位顺序找下一位有空位的 */
@@ -1305,8 +1558,8 @@
 
     var el;
 
-    // 点空白处收起固定的详情
-    if (tip.pinned && !t.closest('.tip') && !t.closest('[data-tip-cov]')) {
+    // 点空白处收起固定的详情（点同一类条目时交给下面的开关处理）
+    if (tip.pinned && !t.closest('.tip') && !t.closest('[data-tip-cov]') && !t.closest('[data-gear-info]')) {
       tip.pinned = false;
       hideTip();
     }
@@ -1318,6 +1571,8 @@
     if ((el = t.closest('[data-copy-share]'))) { e.preventDefault(); copyShare(); return; }
     if ((el = t.closest('[data-apply-import]'))) { e.preventDefault(); applyImport(); return; }
     if ((el = t.closest('[data-team-clear]'))) { e.preventDefault(); clearTeam(); return; }
+    if ((el = t.closest('[data-traits-layer]'))) { e.preventDefault(); toggleTraitsLayer(); return; }
+    if ((el = t.closest('[data-traits-toggle]'))) { e.preventDefault(); toggleTraits(); return; }
     if ((el = t.closest('[data-batch-add]'))) { e.preventDefault(); openBatch(); return; }
     if ((el = t.closest('[data-sheet-filter-toggle]'))) {
       e.preventDefault();
@@ -1345,14 +1600,12 @@
     }
     if ((el = t.closest('[data-gear-elite]'))) {
       e.preventDefault();
-      var gname = el.getAttribute('data-gear-elite');
-      picker.eliteMode[gname] = !picker.eliteMode[gname];
-      var modeBtns = els.sheet ? els.sheet.querySelectorAll('[data-gear-elite]') : [];
-      for (var mb = 0; mb < modeBtns.length; mb++) {
-        var mn = modeBtns[mb].getAttribute('data-gear-elite');
-        modeBtns[mb].setAttribute('aria-pressed', picker.eliteMode[mn] ? 'true' : 'false');
-      }
-      refreshList(true);
+      toggleGearElite(el.getAttribute('data-gear-elite'));
+      return;
+    }
+    if ((el = t.closest('[data-gear-info]'))) {
+      e.preventDefault();
+      togglePinTip(el);
       return;
     }
     if ((el = t.closest('[data-gear]'))) {
@@ -1395,8 +1648,7 @@
     // 盟约块：手机端点按 = 钉住详情；点层数输入框不算
     if (t.closest('.cov-layer')) return;
     if ((el = t.closest('[data-tip-cov]'))) {
-      tip.pinned = !tip.pinned;
-      if (tip.pinned) showTip(el); else hideTip();
+      togglePinTip(el);
       return;
     }
   }
@@ -1496,6 +1748,7 @@
     toggleFromList: toggleFromList,
     // 供测试 / 调试
     shareText: shareText,
-    parseShareText: parseShareText
+    parseShareText: parseShareText,
+    _isLayerTrait: isLayerTrait
   };
 })(window);
