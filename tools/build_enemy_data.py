@@ -29,6 +29,9 @@ ROOT = Path(__file__).resolve().parents[1]
 XLSX = ROOT / "卫戍协议-特殊敌人数据表.xlsx"
 HTML = ROOT / "卫戍协议-规程-特殊敌人图鉴.html"
 MAPS = ROOT / "data" / "maps.json"
+BOSSES = ROOT / "data" / "bosses.json"
+SCALE = ROOT / "data" / "enemy_scale.json"
+BOSS_PORTRAITS = ROOT / "source" / "prts" / "boss_portraits"
 OUT_JS = ROOT / "web" / "data" / "enemies.js"
 OUT_IMG = ROOT / "web" / "assets" / "enemies"
 
@@ -128,6 +131,63 @@ def main():
     if missing:
         raise SystemExit("缺少头像：" + "、".join(missing))
 
+    # ---------------- 领袖（PRTS 领袖表 + 敌人页基础属性） ----------------
+    boss_data = json.loads(BOSSES.read_text(encoding="utf-8"))
+    boss_missing = []
+    for boss in boss_data["bosses"]:
+        eid = boss["id"]
+        levels = [{
+            "level": 0,
+            "hp": boss["base"]["hp"],
+            "atk": boss["base"]["atk"],
+            "def": boss["base"]["def"],
+            "res": boss["base"]["res"],
+        }]
+        if boss.get("hiddenBase"):
+            levels.append({
+                "level": 1,
+                "hp": boss["hiddenBase"]["hp"],
+                "atk": boss["hiddenBase"]["atk"],
+                "def": boss["hiddenBase"]["def"],
+                "res": boss["hiddenBase"]["res"],
+                "hidden": True,
+            })
+        enemies[eid] = {
+            "id": eid,
+            "name": boss["name"],
+            "desc": "领袖单位；生命值随难度 / 规程等级变化，攻击力按回合倍率缩放。",
+            "tags": [],
+            "roles": ["boss"],
+            "levelCount": len(levels),
+            "relatedCount": 0,
+            "levels": levels,
+            "prtsName": boss["prtsTitle"],
+            "boss": True,
+            "bossIndex": boss["index"],
+            "slug": boss["slug"],
+            "bossHp": {
+                "byMode": boss["hpByMode"],
+                "hiddenByMode": boss.get("hiddenHpByMode", {}),
+                "byLevel": boss["hpByLevel"],
+                "hiddenByLevel": boss.get("hiddenHpByLevel", {}),
+            },
+        }
+        src = BOSS_PORTRAITS / f"{boss['slug']}.png"
+        if not src.exists():
+            boss_missing.append(boss["name"])
+            continue
+        image = Image.open(src).convert("RGBA").resize((160, 160), Image.LANCZOS)
+        image.save(OUT_IMG / f"{eid}-160.webp", "WEBP", quality=90, method=6)
+        thumb = image.resize((96, 96), Image.LANCZOS)
+        thumb.save(OUT_IMG / f"{eid}-96.webp", "WEBP", quality=86, method=6)
+        enemies[eid]["img"] = f"assets/enemies/{eid}-96.webp"
+        enemies[eid]["imgLarge"] = f"assets/enemies/{eid}-160.webp"
+    if boss_missing:
+        raise SystemExit("缺少领袖头像：" + "、".join(boss_missing))
+
+    # ---------------- 难度 / 回合倍率 ----------------
+    scale_data = json.loads(SCALE.read_text(encoding="utf-8"))
+
     # ---------------- 词条 / 地图 ----------------
     tag_counts = {t: 0 for t in TYPE_ORDER}
     for enemy in enemies.values():
@@ -143,21 +203,23 @@ def main():
         "meta": {
             "version": "V3_1",
             "generatedAt": time.strftime("%Y-%m-%d %H:%M"),
-            "source": "卫戍协议-特殊敌人数据表.xlsx + 图鉴 HTML 头像 + PRTS 战场一览",
+            "source": "卫戍协议-特殊敌人数据表.xlsx + 图鉴 HTML 头像 + PRTS 战场一览 + PRTS 领袖表 + 官方回合倍率表",
             "counts": {
                 "enemies": len(enemies),
+                "bosses": len(boss_data["bosses"]),
                 "configs": len(configs),
                 "tags": len(tags),
                 "maps": len(maps_data["maps"]),
                 "levels": sum(len(e["levels"]) for e in enemies.values()),
                 "images": len(list(OUT_IMG.glob("*-96.webp"))),
             },
-            "note": "地图与敌方势力随机搭配；地图数据不能用于限定敌人。",
+            "note": "地图与敌方势力随机搭配；地图数据不能用于限定敌人。领袖生命值来自 PRTS 领袖表。",
         },
         "typeNames": TYPE_NAME,
         "tags": tags,
         "enemies": [enemies[k] for k in sorted(enemies)],
         "configs": configs,
+        "difficulty": scale_data,
         "maps": maps_data,
     }
     js = "/* 由 tools/build_enemy_data.py 生成，请勿手改 */\nwindow.GSPA_ENEMIES = " + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n"

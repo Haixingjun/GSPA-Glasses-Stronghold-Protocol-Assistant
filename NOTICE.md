@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 游戏名称、干员名、数值、技能与盟约文本 | `卫戍协议数据表.xlsx`、`source/`、`web/data/` | 归**鹰角网络**所有。本项目仅作非商业的玩家查询用途，不主张任何版权。 |
 | 干员头像（286 个 WebP） | `web/assets/avatars/`、`dist/assets/avatars/` | 游戏美术版权归**鹰角网络**所有；原始文件取自 **PRTS Wiki**。 |
-| 敌人头像（179 个，96 / 160 两档） | `web/assets/enemies/`、`dist/assets/enemies/` | 游戏美术版权归**鹰角网络**所有；原始 160×160 WebP 内嵌在 `卫戍协议-规程-特殊敌人图鉴.html`，图源为 PRTS / 本地解包。 |
+| 敌人头像（189 个，96 / 160 两档） | `web/assets/enemies/`、`dist/assets/enemies/` | 游戏美术版权归**鹰角网络**所有；179 个原始 160×160 WebP 内嵌在 `卫戍协议-规程-特殊敌人图鉴.html`，10 名领袖头像取自 **PRTS Wiki** 敌人页；图源均为 PRTS / 本地解包。 |
 | 战场地图（10 图 × 3 场地） | `web/assets/maps/`、`dist/assets/maps/` | 游戏美术版权归**鹰角网络**所有；取自 **PRTS Wiki**「卫戍协议·规程/战场一览」。 |
 | 道具 / 策略 / 盟约图标（314 个 WebP） | `web/assets/icons/`、`dist/assets/icons/` | 游戏美术版权归**鹰角网络**所有；原始文件取自 **PRTS Wiki** 的本期「卫戍协议·规程」页面。 |
 | 特殊干员档案（职业/属性/天赋/技能文本） | `data/special_operators.json`、`web/data/` | 游戏内容版权归**鹰角网络**所有；字段补充自 **PRTS Wiki** 干员页，原始 wikitext 快照在 `source/prts/`。 |
@@ -58,11 +58,15 @@
 `pageid` / `revid` / 修订时间与所属版本；原始 wikitext 保存在 `source/prts/<pageid>.json`。
 重新抓取方式是 `python tools/fetch_special_operators.py`（`--offline` 可只用已有快照重解析）。
 
+领袖数据在 [`data/bosses.json`](data/bosses.json)：生命值来自 PRTS「卫戍协议·规程/PRTS盟约记录」敌方资料·领袖表，
+攻击/防御/法抗来自 PRTS 敌人页级别 0；表格快照在 `source/prts/guicheng_leader_table.txt`，头像原图在
+`source/prts/boss_portraits/`。重新抓取方式是 `python tools/fetch_boss_data.py`。
+
 ## 3. 数据来源
 
 `source/` 中的 `卫戍协议_完整数据表.xlsx` 来自官方热更包解包，仅用于核对与溯源；
-可编辑的唯一主表是根目录的 `卫戍协议数据表.xlsx`。`source/prts/` 是 PRTS 特殊干员页的 wikitext 快照，
-仅用于生成 `data/special_operators.json`，不参与页面热链。
+可编辑的唯一主表是根目录的 `卫戍协议数据表.xlsx`。`source/prts/` 是 PRTS 特殊干员页的 wikitext 快照、
+领袖表快照与领袖头像原图，仅用于生成 `data/special_operators.json` / `data/bosses.json`，不参与页面热链。
 
 ## 4. 权利人诉求
 
