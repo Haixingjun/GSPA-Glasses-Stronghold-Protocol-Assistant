@@ -242,17 +242,21 @@
     var chips = '';
     for (var i = 0; i < opts.items.length; i++) {
       var it = opts.items[i];
+      if (it.breakBefore) {
+        chips += '<span class="chip-break" aria-hidden="true"></span>';
+      }
       var val = it.v;
       var pressed = opts.toggle ? !!sel : (isArr ? sel.indexOf(val) >= 0 : sel === val);
       var c = counts[String(val)];
       var count = (it.count === false) ? null : (c == null ? 0 : c);
       var extra = '';
       if (it.tier) extra += ' tier-chip" data-tier="' + it.tier;
+      var lead = it.icon || (it.hue != null ? '<i class="dot" style="--h:' + it.hue + '"></i>' : '');
       chips += '<button type="button" class="chip' + extra + '"' +
         ' data-fid="' + opts.id + '" data-fval="' + esc(String(val)) + '"' +
         ' aria-pressed="' + (pressed ? 'true' : 'false') + '"' +
         (it.hue != null ? ' title="' + esc(it.label) + '"' : '') + '>' +
-        (it.hue != null ? '<i class="dot" style="--h:' + it.hue + '"></i>' : '') +
+        lead +
         esc(it.label) +
         (count != null ? '<span class="chip-count">' + count + '</span>' : '') +
         '</button>';
@@ -325,8 +329,13 @@
       });
       groups.push({
         id: 'tags', title: '盟约', wide: true, mode: true,
-        items: data.covenants.map(function (c) {
-          return { v: c.name, label: c.name, hue: hue(c.name) };
+        items: data.covenants.map(function (c, ci) {
+          return {
+            v: c.name, label: c.name, hue: hue(c.name),
+            icon: iconHtml(c, c.name, 18, 'covenant'),
+            // 主盟约排完后换行，再列副盟约
+            breakBefore: c.rank !== 'core' && ci > 0 && data.covenants[ci - 1].rank === 'core'
+          };
         }),
         countOf: function (o) { return o.tags; }
       });
@@ -539,11 +548,32 @@
     refs.cards.hidden = false;
     refs.empty.hidden = true;
 
+    // 盟约视图：主盟约 / 副盟约分区显示，各自保留当前排序
+    if (st.view === 'covenant') {
+      var core = [];
+      var additional = [];
+      for (var c = 0; c < list.length; c++) {
+        var card = cardHtml(st.view, list[c], toks, st);
+        if (list[c].rank === 'core') core.push(card);
+        else additional.push(card);
+      }
+      var covHtml = '';
+      if (core.length) covHtml += cardsSection('主盟约', core.length) + core.join('');
+      if (additional.length) covHtml += cardsSection('副盟约', additional.length) + additional.join('');
+      refs.cards.innerHTML = covHtml;
+      return;
+    }
+
     var parts = [];
     for (var i = 0; i < list.length; i++) {
       parts.push(cardHtml(st.view, list[i], toks, st));
     }
     refs.cards.innerHTML = parts.join('');
+  }
+
+  function cardsSection(title, count) {
+    return '<div class="cards-sec"><h2>' + esc(title) + '</h2>' +
+      '<span>' + count + ' 个</span></div>';
   }
 
   function cardHtml(view, e, toks, st) {

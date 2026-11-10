@@ -92,11 +92,9 @@
     var res = Calc.evaluate(team, data);
     return '<section class="team">' +
       headHtml(team, res) +
-      traitsHtml(team) +
-      '<div class="tm-main">' +
       slotsHtml(team, res) +
       covHtml(res) +
-      '</div>' +
+      traitsHtml(team) +
       '</section>';
   }
 
@@ -492,7 +490,6 @@
       '<span class="tm-traits-rail-text">词条</span>' +
       '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
       '<span class="tm-traits-rail-arrow" aria-hidden="true">‹</span>' +
-      '<span class="tm-traits-rail-more">展开</span>' +
       '</button>' +
       '</aside>';
   }
@@ -973,11 +970,16 @@
   function tagChipsHtml() {
     var h = '';
     for (var i = 0; i < data.covenants.length; i++) {
-      var name = data.covenants[i].name;
+      var c = data.covenants[i];
+      var name = c.name;
+      if (c.rank !== 'core' && i > 0 && data.covenants[i - 1].rank === 'core') {
+        h += '<span class="chip-break" aria-hidden="true"></span>';
+      }
       var on = picker.tags.indexOf(name) >= 0;
+      var icon = UI.iconHtml(c, name, 18, 'covenant');
       h += '<button type="button" class="chip chip-tag" data-ptag="' + esc(name) + '"' +
         ' style="--h:' + UI.hue(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
-        '<i class="dot"></i>' + esc(name) + '</button>';
+        (icon || '<i class="dot"></i>') + esc(name) + '</button>';
     }
     return h;
   }
