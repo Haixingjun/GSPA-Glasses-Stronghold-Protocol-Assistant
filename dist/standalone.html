@@ -316,6 +316,13 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
   box-shadow: 0 0 0 3px hsla(var(--h, 200), 68%, 60%, 0.16);
 }
 .chip[aria-pressed="true"] .dot { background: hsl(var(--h, 200), 72%, 66%); }
+.chip .icon { box-shadow: none; }
+/* 主盟约 / 副盟约在筛选里换行分隔 */
+.chip-break {
+  flex: 0 0 100%; height: 0;
+  margin: 2px 0;
+  border-top: 1px dashed var(--line);
+}
 
 .chip-count {
   font-size: 10.5px; color: var(--fg3); font-variant-numeric: tabular-nums;
@@ -474,6 +481,18 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 292px), 1fr));
   align-items: start;
 }
+/* 盟约视图的主 / 副盟约分区标题 */
+.cards-sec {
+  grid-column: 1 / -1;
+  display: flex; align-items: baseline; gap: 8px;
+  margin-top: 2px; padding: 0 2px 6px;
+  border-bottom: 1px solid var(--line);
+}
+.cards-sec h2 {
+  margin: 0; font-size: 13px; font-weight: 650;
+  letter-spacing: 0.04em; color: var(--fg2);
+}
+.cards-sec span { font-size: 10.5px; color: var(--fg3); }
 .card {
   position: relative;
   content-visibility: auto;
@@ -1010,17 +1029,22 @@ body.sheet-open { overflow: hidden; }
 }
 
 .team { display: grid; gap: 14px; }
-.tm-main { display: grid; gap: 14px; min-width: 0; }
 
-/* 词条栏：展开是右侧面板，收起后缩成贴右侧的竖排工具栏 */
+/* 词条工具栏：固定悬浮在界面右侧，不占内容宽度；收起后缩成贴边的竖排工具栏 */
 .tm-traits {
+  position: fixed; top: 160px; right: 0; z-index: 55;
+  width: 320px; max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 180px);
+  display: flex; flex-direction: column;
   min-width: 0;
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  border: 1px solid var(--line); border-right: 0;
+  border-radius: 14px 0 0 14px;
   background: var(--bg1);
+  box-shadow: -16px 14px 38px rgba(0, 0, 0, 0.34);
   overflow: hidden;
   transition: width 0.18s ease;
 }
+[data-theme="light"] .tm-traits { box-shadow: -14px 12px 34px rgba(20, 40, 60, 0.16); }
 .tm-traits-panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .tm-traits-head {
   display: flex; align-items: center; gap: 8px;
@@ -1062,9 +1086,9 @@ body.sheet-open { overflow: hidden; }
   border-bottom: 1px solid var(--line);
   font-size: 10.5px; line-height: 1.5; color: var(--fg3);
 }
-.tm-traits-body { padding: 2px 12px 10px; overflow-y: auto; min-height: 0; }
+.tm-traits-body { flex: 1 1 auto; padding: 2px 12px 10px; overflow-y: auto; min-height: 0; }
 
-/* 收起后的竖排工具栏（窄屏改成横条） */
+/* 收起后的竖排工具栏 */
 .tm-traits-rail {
   display: none;
   width: 100%; min-height: 168px;
@@ -1084,10 +1108,22 @@ body.sheet-open { overflow: hidden; }
   color: var(--accent); font-variant-numeric: tabular-nums;
 }
 .tm-traits-rail-arrow { font-size: 13px; line-height: 1; color: var(--fg3); }
-.tm-traits-rail-more { display: none; }
 
+.tm-traits.is-collapsed {
+  width: 42px; max-height: none;
+  border-radius: 12px 0 0 12px;
+}
 .tm-traits.is-collapsed .tm-traits-panel { display: none; }
 .tm-traits.is-collapsed .tm-traits-rail { display: flex; }
+
+@media (max-width: 1023px) {
+  .tm-traits {
+    top: 200px;
+    width: min(320px, calc(100vw - 28px));
+    max-height: calc(100vh - 280px);
+  }
+  .tm-traits.is-collapsed { width: 42px; }
+}
 
 .tm-tr-group { padding-top: 8px; }
 .tm-tr-group + .tm-tr-group { margin-top: 7px; border-top: 1px solid var(--line); }
@@ -1127,35 +1163,6 @@ body.sheet-open { overflow: hidden; }
   font-size: 12px; line-height: 1.6; color: var(--fg3);
 }
 .tm-tr-note { margin: 9px 0 0; font-size: 10.5px; color: var(--fg3); }
-
-@media (max-width: 1023px) {
-  .tm-traits.is-collapsed { width: auto; }
-  .tm-traits.is-collapsed .tm-traits-rail {
-    flex-direction: row; justify-content: flex-start;
-    min-height: 0; padding: 10px 12px; gap: 7px;
-  }
-  .tm-traits-rail-text {
-    writing-mode: horizontal-tb; text-orientation: mixed;
-    letter-spacing: 0; font-size: 13.5px;
-  }
-  .tm-traits-rail-arrow { display: none; }
-  .tm-traits-rail-more { display: inline; margin-left: auto; font-size: 11px; color: var(--fg3); }
-}
-
-@media (min-width: 1024px) {
-  .team { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
-  .tm-head { grid-column: 1 / -1; }
-  .tm-main { grid-column: 1; grid-row: 2; }
-  .tm-traits {
-    grid-column: 2; grid-row: 2;
-    width: 320px; max-width: 100%;
-    position: sticky; top: 64px;
-    max-height: calc(100vh - 180px);
-    display: flex; flex-direction: column;
-  }
-  .tm-traits.is-collapsed { width: 42px; max-height: none; }
-  .tm-traits-body { flex: 1 1 auto; }
-}
 
 .tm-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .tm-stats { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 auto; }
@@ -3854,17 +3861,21 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var chips = '';
     for (var i = 0; i < opts.items.length; i++) {
       var it = opts.items[i];
+      if (it.breakBefore) {
+        chips += '<span class="chip-break" aria-hidden="true"></span>';
+      }
       var val = it.v;
       var pressed = opts.toggle ? !!sel : (isArr ? sel.indexOf(val) >= 0 : sel === val);
       var c = counts[String(val)];
       var count = (it.count === false) ? null : (c == null ? 0 : c);
       var extra = '';
       if (it.tier) extra += ' tier-chip" data-tier="' + it.tier;
+      var lead = it.icon || (it.hue != null ? '<i class="dot" style="--h:' + it.hue + '"></i>' : '');
       chips += '<button type="button" class="chip' + extra + '"' +
         ' data-fid="' + opts.id + '" data-fval="' + esc(String(val)) + '"' +
         ' aria-pressed="' + (pressed ? 'true' : 'false') + '"' +
         (it.hue != null ? ' title="' + esc(it.label) + '"' : '') + '>' +
-        (it.hue != null ? '<i class="dot" style="--h:' + it.hue + '"></i>' : '') +
+        lead +
         esc(it.label) +
         (count != null ? '<span class="chip-count">' + count + '</span>' : '') +
         '</button>';
@@ -3937,8 +3948,13 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       });
       groups.push({
         id: 'tags', title: '盟约', wide: true, mode: true,
-        items: data.covenants.map(function (c) {
-          return { v: c.name, label: c.name, hue: hue(c.name) };
+        items: data.covenants.map(function (c, ci) {
+          return {
+            v: c.name, label: c.name, hue: hue(c.name),
+            icon: iconHtml(c, c.name, 18, 'covenant'),
+            // 主盟约排完后换行，再列副盟约
+            breakBefore: c.rank !== 'core' && ci > 0 && data.covenants[ci - 1].rank === 'core'
+          };
         }),
         countOf: function (o) { return o.tags; }
       });
@@ -4151,11 +4167,32 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     refs.cards.hidden = false;
     refs.empty.hidden = true;
 
+    // 盟约视图：主盟约 / 副盟约分区显示，各自保留当前排序
+    if (st.view === 'covenant') {
+      var core = [];
+      var additional = [];
+      for (var c = 0; c < list.length; c++) {
+        var card = cardHtml(st.view, list[c], toks, st);
+        if (list[c].rank === 'core') core.push(card);
+        else additional.push(card);
+      }
+      var covHtml = '';
+      if (core.length) covHtml += cardsSection('主盟约', core.length) + core.join('');
+      if (additional.length) covHtml += cardsSection('副盟约', additional.length) + additional.join('');
+      refs.cards.innerHTML = covHtml;
+      return;
+    }
+
     var parts = [];
     for (var i = 0; i < list.length; i++) {
       parts.push(cardHtml(st.view, list[i], toks, st));
     }
     refs.cards.innerHTML = parts.join('');
+  }
+
+  function cardsSection(title, count) {
+    return '<div class="cards-sec"><h2>' + esc(title) + '</h2>' +
+      '<span>' + count + ' 个</span></div>';
   }
 
   function cardHtml(view, e, toks, st) {
@@ -5108,11 +5145,9 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var res = Calc.evaluate(team, data);
     return '<section class="team">' +
       headHtml(team, res) +
-      traitsHtml(team) +
-      '<div class="tm-main">' +
       slotsHtml(team, res) +
       covHtml(res) +
-      '</div>' +
+      traitsHtml(team) +
       '</section>';
   }
 
@@ -5508,7 +5543,6 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '<span class="tm-traits-rail-text">词条</span>' +
       '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
       '<span class="tm-traits-rail-arrow" aria-hidden="true">‹</span>' +
-      '<span class="tm-traits-rail-more">展开</span>' +
       '</button>' +
       '</aside>';
   }
@@ -5989,11 +6023,16 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
   function tagChipsHtml() {
     var h = '';
     for (var i = 0; i < data.covenants.length; i++) {
-      var name = data.covenants[i].name;
+      var c = data.covenants[i];
+      var name = c.name;
+      if (c.rank !== 'core' && i > 0 && data.covenants[i - 1].rank === 'core') {
+        h += '<span class="chip-break" aria-hidden="true"></span>';
+      }
       var on = picker.tags.indexOf(name) >= 0;
+      var icon = UI.iconHtml(c, name, 18, 'covenant');
       h += '<button type="button" class="chip chip-tag" data-ptag="' + esc(name) + '"' +
         ' style="--h:' + UI.hue(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
-        '<i class="dot"></i>' + esc(name) + '</button>';
+        (icon || '<i class="dot"></i>') + esc(name) + '</button>';
     }
     return h;
   }

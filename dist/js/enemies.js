@@ -1,7 +1,7 @@
 /* ==========================================================================
    enemies.js — 敌人图鉴 / 地图页
    数据：window.GSPA_ENEMIES（tools/build_enemy_data.py 生成）
-   无框架、无网络请求；179 个敌人全量线性过滤。
+   无框架、无网络请求；189 个敌人（179 特殊敌人 / 随从 + 10 领袖）全量线性过滤。
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -17,8 +17,10 @@
   var TAGS = DATA.tags;
   var MAPS = DATA.maps.maps;
   var TYPE_NAMES = DATA.typeNames;
-  var ROLE_LABEL = { special: '特殊敌人', normal: '普通随从', elite: '精英随从' };
-  var ROLE_ORDER = ['special', 'normal', 'elite'];
+  var DIFF = DATA.difficulty || { meta: { modes: [] } };
+  var DIFF_MODES = (DIFF.meta && DIFF.meta.modes) || [];
+  var ROLE_LABEL = { boss: '首领', special: '特殊敌人', normal: '普通随从', elite: '精英随从' };
+  var ROLE_ORDER = ['boss', 'special', 'normal', 'elite'];
   var THEME_KEY = 'gs-theme';
   var MAP_MODES = ['入门协议', '极速模拟', '标准模拟', '险境模拟', '绝境模拟', '终极模拟'];
   var MAP_LEVELS = [
@@ -56,7 +58,7 @@
     if (e) e._refs.push({ c: config, role: role });
   }
 
-  var state = { view: 'enemy', q: '', tags: [], mode: 'or', roles: [], dual: false, cross: false, sort: 'index', mapDiffs: [] };
+  var state = { view: 'enemy', q: '', tags: [], mode: 'or', roles: [], dual: false, cross: false, sort: 'index', mapDiffs: [], diffKey: 'mode:standard', diffRound: 0, scaleOn: true };
   var els = {};
   var currentEnemy = null;
   var currentMap = null;
@@ -87,18 +89,104 @@
   function statHtml(label, value) {
     return '<div class="card-stat"><span>' + label + '</span><b>' + fmt(value) + '</b></div>';
   }
+  function roundInt(v) { return v == null ? null : Math.round(Number(v)); }
+  function fmtMul(v) {
+    if (v == null) return '—';
+    return Number(v).toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+  }
+
+  /* ---------------- 难度 / 回合 ---------------- */
+  function modeByKey(key) {
+    var id = String(key || '').replace(/^mode:/, '');
+    for (var i = 0; i < DIFF_MODES.length; i++) if (DIFF_MODES[i].id === id) return DIFF_MODES[i];
+    return DIFF_MODES[0] || null;
+  }
+  function modeForLevel(level) {
+    for (var i = 0; i < DIFF_MODES.length; i++) {
+      var m = DIFF_MODES[i];
+      if (level >= m.levelFrom && level <= m.levelTo) return m;
+    }
+    return DIFF_MODES[0] || null;
+  }
+  function currentDiff() {
+    var key = state.diffKey || 'mode:standard';
+    if (key.indexOf('level:') === 0) {
+      var level = Number(key.slice(6)) || 1;
+      var mode = modeForLevel(level);
+      return {
+        kind: 'level', level: level, mode: mode,
+        lastRound: mode ? mode.lastRound : 14,
+        hiddenRound: level >= 5 ? 15 : null,
+        label: '规程等级 ' + level
+      };
+    }
+    var m = modeByKey(key);
+    return {
+      kind: 'mode', level: 0, mode: m,
+      lastRound: m ? m.lastRound : 14,
+      hiddenRound: m ? m.hiddenRound : null,
+      label: m ? m.name : '标准模拟'
+    };
+  }
+  function currentScale() {
+    if (!state.scaleOn || !state.diffRound) return null;
+    var d = currentDiff();
+    if (!d.mode) return null;
+    var r = Math.max(1, Math.min(15, Number(state.diffRound) || 1));
+    var hidden = d.hiddenRound === 15 && r === 15;
+    return {
+      mode: d.mode, level: d.level, round: r, hidden: hidden,
+      hp: d.mode.hp[r - 1], atk: d.mode.atk[r - 1], speed: d.mode.speed[r - 1]
+    };
+  }
+  function bossHpFor(e, s) {
+    if (!e.bossHp) return null;
+    var table = s.hidden ? (e.bossHp.hiddenByLevel || {}) : (e.bossHp.byLevel || {});
+    var v;
+    if (s.level) {
+      v = table[String(s.level)];
+      if (v == null && s.hidden) v = (e.bossHp.byLevel || {})[String(s.level)];
+    } else {
+      v = (s.hidden ? (e.bossHp.hiddenByMode || {}) : (e.bossHp.byMode || {}))[s.mode.name];
+      if (v == null && s.hidden) v = (e.bossHp.byMode || {})[s.mode.name];
+    }
+    return v == null ? null : v;
+  }
+  function actualStats(e) {
+    var base = baseLevel(e);
+    var s = currentScale();
+    if (!s) return { hp: base.hp, atk: base.atk, def: base.def, res: base.res, scaled: false };
+    var hiddenAvailable = !!(e.boss && s.hidden && (
+      s.level ? (e.bossHp.hiddenByLevel || {})[String(s.level)] != null
+        : (e.bossHp.hiddenByMode || {})[s.mode.name] != null
+    ));
+    var hiddenBase = hiddenAvailable && e.levels.length > 1 ? e.levels[1] : base;
+    var hp = e.boss ? bossHpFor(e, s) : roundInt(base.hp == null ? null : Number(base.hp) * s.hp);
+    var atk = roundInt(hiddenBase.atk == null ? null : Number(hiddenBase.atk) * s.atk);
+    return {
+      hp: hp, atk: atk, def: hiddenBase.def, res: hiddenBase.res,
+      scaled: true, hidden: hiddenAvailable, hpMul: s.hp, atkMul: s.atk, speed: s.speed
+    };
+  }
+  function scaleText(s) {
+    if (!s) return '';
+    return '生命 ×' + fmtMul(s.hp) + ' · 攻击 ×' + fmtMul(s.atk) + (Number(s.speed) !== 1 ? ' · 移速 ×' + fmtMul(s.speed) : '');
+  }
 
   /* ---------------- 初始化 ---------------- */
   function init() {
     els = {
       q: $('q'), qclear: $('qclear'), tagChips: $('tagChips'), roleChips: $('roleChips'),
       tagMode: $('tagMode'), dualOnly: $('dualOnly'), crossOnly: $('crossOnly'), reset: $('resetFilters'),
+      filtersClear: $('filtersClear'),
       count: $('count'), activeFilters: $('activeFilters'), sort: $('sort'), cards: $('cards'),
       empty: $('empty'), emptyText: $('emptyText'), emptyReset: $('emptyReset'),
       viewEnemy: $('viewEnemy'), viewMap: $('viewMap'), tabEnemy: $('tabEnemy'), tabMap: $('tabMap'),
       mapCount: $('mapCount'), mapCards: $('mapCards'), mapEmpty: $('mapEmpty'), mapClear: $('mapClear'),
       mapModeChips: $('mapModeChips'), mapLevelChips: $('mapLevelChips'), mapDiffClear: $('mapDiffClear'),
       heroStats: $('heroStats'),
+      diffMode: $('diffMode'), diffRound: $('diffRound'), scaleOn: $('scaleOn'), scaleNote: $('scaleNote'),
+      roundCap: $('roundCap'),
       enemyDialog: $('enemyDialog'), mapDialog: $('mapDialog')
     };
 
@@ -106,6 +194,7 @@
     buildHero();
     buildTagChips();
     buildRoleChips();
+    buildDiffControls();
     buildMapDiffChips();
     bindEvents();
     applyHash();
@@ -136,14 +225,60 @@
   function buildHero() {
     var counts = DATA.meta.counts;
     var items = [
-      [counts.enemies, '个敌人'],
+      [counts.enemies, '个敌人（含领袖）'],
+      [counts.bosses || 0, '名领袖'],
       [counts.tags, '类词条'],
-      [counts.configs, '条特殊敌人配置'],
       [counts.maps, '张战场地图']
     ];
     els.heroStats.innerHTML = items.map(function (it) {
       return '<div class="hero-stat"><b>' + it[0] + '</b><span>' + it[1] + '</span></div>';
     }).join('');
+  }
+
+  function buildDiffControls() {
+    if (!els.diffMode) return;
+    var modeOpts = DIFF_MODES.map(function (m) {
+      return '<option value="mode:' + esc(m.id) + '">' + esc(m.name) + '（规程 ' + m.levelFrom + '–' + m.levelTo + '）</option>';
+    }).join('');
+    var levelOpts = '';
+    for (var n = 1; n <= 20; n++) levelOpts += '<option value="level:' + n + '">规程等级 ' + n + '</option>';
+    els.diffMode.innerHTML = '<optgroup label="难度模式">' + modeOpts + '</optgroup>' +
+      '<optgroup label="单人规程等级">' + levelOpts + '</optgroup>';
+    els.diffMode.value = state.diffKey;
+    rebuildRoundOptions();
+    syncScaleControls();
+  }
+
+  function rebuildRoundOptions() {
+    if (!els.diffRound) return;
+    var d = currentDiff();
+    var max = d.hiddenRound === 15 ? 15 : (d.lastRound || 14);
+    var html = '<option value="0">基础值（不计算）</option>';
+    for (var r = 1; r <= max; r++) {
+      html += '<option value="' + r + '">回合 ' + r + (d.hiddenRound === 15 && r === 15 ? '（隐秘核心）' : '') + '</option>';
+    }
+    els.diffRound.innerHTML = html;
+    if (Number(state.diffRound) > max) state.diffRound = 0;
+    els.diffRound.value = String(state.diffRound || 0);
+    if (els.roundCap) {
+      var cap = d.hiddenRound === 15
+        ? '共 ' + (d.lastRound || 14) + ' 回合 + 隐秘核心 15'
+        : '共 ' + max + ' 回合';
+      els.roundCap.textContent = cap;
+      els.diffRound.title = cap;
+    }
+  }
+
+  function syncScaleControls() {
+    if (!els.scaleOn) return;
+    els.scaleOn.checked = !!state.scaleOn;
+    var d = currentDiff();
+    var s = currentScale();
+    if (els.scaleNote) {
+      if (!state.scaleOn) els.scaleNote.textContent = '已关闭实际值换算，卡片与详情显示数据库基础值。';
+      else if (!s) els.scaleNote.textContent = '当前显示基础值；选择回合后自动换算。' + d.label + (d.kind === 'level' && d.mode ? ' 归入' + d.mode.name + '。' : '');
+      else els.scaleNote.textContent = d.label + ' · 回合 ' + s.round + '：普通敌人 ' + scaleText(s) + '；领袖生命取 PRTS 领袖表。';
+    }
   }
 
   function buildTagChips() {
@@ -163,7 +298,7 @@
   }
 
   function buildRoleChips() {
-    var counts = { special: 0, normal: 0, elite: 0 };
+    var counts = { boss: 0, special: 0, normal: 0, elite: 0 };
     ENEMIES.forEach(function (e) { e.roles.forEach(function (r) { if (counts[r] != null) counts[r] += 1; }); });
     els.roleChips.innerHTML = ROLE_ORDER.map(function (key) {
       return '<button type="button" class="chip" data-role="' + key + '" aria-pressed="false">' +
@@ -222,7 +357,7 @@
       out.sort(function (a, b) { return a.name.localeCompare(b.name, 'zh-Hans-CN'); });
     } else if (key === 'hp' || key === 'atk' || key === 'def' || key === 'res') {
       out.sort(function (a, b) {
-        var av = baseLevel(a)[key], bv = baseLevel(b)[key];
+        var av = actualStats(a)[key], bv = actualStats(b)[key];
         return (bv == null ? -1 : bv) - (av == null ? -1 : av);
       });
     } else if (key === 'related') {
@@ -247,20 +382,21 @@
   }
 
   function cardHtml(e) {
-    var base = baseLevel(e);
+    var stats = actualStats(e);
     var dual = e.levels.length > 1 ? '<span class="lv">双等级</span>' : '';
+    var scaled = stats.scaled ? '<span class="lv scaled">实际值</span>' : '';
     return '<button type="button" class="card" data-id="' + esc(e.id) + '" aria-label="查看 ' + esc(e.name) + ' 详情">' +
       '<span class="card-top">' +
         '<img class="card-avatar" src="' + esc(e.img) + '" alt="" loading="lazy" decoding="async">' +
         '<span class="card-main">' +
-          '<span class="card-name">' + esc(e.name) + dual + '</span>' +
+          '<span class="card-name">' + esc(e.name) + dual + scaled + '</span>' +
           '<code class="card-id">' + esc(e.id) + '</code>' +
           '<span class="badges">' + e.tags.map(function (t) { return tagHtml(t, false); }).join('') +
             e.roles.map(roleHtml).join('') + '</span>' +
         '</span>' +
       '</span>' +
       '<span class="card-desc">' + esc(e.desc) + '</span>' +
-      '<span class="card-stats">' + statHtml('生命', base.hp) + statHtml('攻击', base.atk) + statHtml('防御', base.def) + statHtml('法抗', base.res) + '</span>' +
+      '<span class="card-stats">' + statHtml('生命', stats.hp) + statHtml('攻击', stats.atk) + statHtml('防御', stats.def) + statHtml('法抗', stats.res) + '</span>' +
     '</button>';
   }
 
@@ -299,13 +435,19 @@
     $('enemyDesc').textContent = e.desc || '（没有描述）';
 
     $('enemyLevels').innerHTML = e.levels.map(function (lv) {
-      return '<tr><td>' + (lv.level === 0 ? '0（基础）' : esc(lv.level)) + '</td><td>' + fmt(lv.hp) + '</td><td>' + fmt(lv.atk) + '</td><td>' + fmt(lv.def) + '</td><td>' + fmt(lv.res) + '</td></tr>';
+      var label = lv.hidden ? '隐秘核心' : (lv.level === 0 ? '0（基础）' : esc(lv.level));
+      return '<tr><td>' + label + '</td><td>' + fmt(lv.hp) + '</td><td>' + fmt(lv.atk) + '</td><td>' + fmt(lv.def) + '</td><td>' + fmt(lv.res) + '</td></tr>';
     }).join('');
 
-    var counts = { special: 0, normal: 0, elite: 0 };
+    renderActual(e);
+    renderBossHp(e);
+
+    var counts = { boss: 0, special: 0, normal: 0, elite: 0 };
     e._refs.forEach(function (r) { counts[r.role] += 1; });
+    if (e.boss) counts.boss = 1;
     $('enemyMeta').innerHTML =
-      '<dt>等级条目</dt><dd>' + e.levels.length + ' 条' + (e.levels.length > 1 ? '（0 / 1）' : '（0）') + '</dd>' +
+      '<dt>等级条目</dt><dd>' + e.levels.length + ' 条' + (e.levels.length > 1 ? '（基础 / 隐秘核心）' : '（基础）') + '</dd>' +
+      (e.boss ? '<dt>定位</dt><dd>领袖（生命值按 PRTS 领袖表）</dd>' : '') +
       '<dt>关联配置</dt><dd>' + e._refs.length + ' 条</dd>' +
       '<dt>词条</dt><dd>' + (e.tags.length ? e.tags.map(function (t) { return esc(tagName(t)); }).join('、') : '—') + '</dd>';
 
@@ -333,6 +475,53 @@
 
     showDialog(els.enemyDialog);
     setHash('#/enemy/' + encodeURIComponent(e.id));
+  }
+
+  function renderActual(e) {
+    var box = $('enemyActual');
+    if (!box) return;
+    var s = currentScale();
+    var stats = actualStats(e);
+    var d = currentDiff();
+    if (!stats.scaled) {
+      box.innerHTML = '<h4>实际数值</h4><div class="actual-line">当前显示基础值。选择难度与回合后，这里会自动换算' +
+        (e.boss ? '领袖生命（取 PRTS 领袖表）与攻击力' : '生命、攻击与移动速度') + '。</div>';
+      return;
+    }
+    var hiddenNote = stats.hidden ? ' · 隐秘核心' : '';
+    var line = e.boss
+      ? '领袖生命直接取 PRTS 领袖表（不乘普通敌人倍率）' + (stats.hidden ? '，当前为隐秘核心数值' : '') + '；攻击力按回合 ×' + fmtMul(s.atk) + ' 缩放，防御 / 法抗不缩放。'
+      : '普通敌人：' + scaleText(s) + '；防御 / 法抗不随难度与回合变化。';
+    box.innerHTML = '<h4>实际数值 · ' + esc(d.label) + ' · 回合 ' + s.round + hiddenNote + '</h4>' +
+      '<div class="actual-grid">' +
+        '<div><b>' + fmt(stats.hp) + '</b><span>生命</span></div>' +
+        '<div><b>' + fmt(stats.atk) + '</b><span>攻击</span></div>' +
+        '<div><b>' + fmt(stats.def) + '</b><span>防御</span></div>' +
+        '<div><b>' + fmt(stats.res) + '</b><span>法抗</span></div>' +
+      '</div><div class="actual-line">' + esc(line) + '</div>';
+  }
+
+  function renderBossHp(e) {
+    var box = $('enemyBossHp');
+    if (!box) return;
+    if (!e.boss) { box.innerHTML = ''; return; }
+    var d = currentDiff();
+    var modeRows = DIFF_MODES.map(function (m) {
+      var hit = d.kind === 'mode' && d.mode && d.mode.id === m.id;
+      var hp = e.bossHp.byMode[m.name];
+      var hidden = e.bossHp.hiddenByMode[m.name];
+      return '<tr' + (hit ? ' class="hit"' : '') + '><td>' + esc(m.name) + '</td><td>' + fmt(hp) + '</td><td>' + fmt(hidden) + '</td></tr>';
+    }).join('');
+    var levelRows = '';
+    for (var n = 1; n <= 20; n++) {
+      var hitLevel = d.kind === 'level' && d.level === n;
+      levelRows += '<tr' + (hitLevel ? ' class="hit"' : '') + '><td>规程等级 ' + n + '</td><td>' + fmt(e.bossHp.byLevel[String(n)]) + '</td><td>' + fmt(e.bossHp.hiddenByLevel[String(n)]) + '</td></tr>';
+    }
+    box.innerHTML = '<h4>领袖生命值（PRTS 领袖表）</h4>' +
+      '<table><thead><tr><th>难度模式</th><th>生命</th><th>隐秘核心</th></tr></thead><tbody>' + modeRows + '</tbody></table>' +
+      '<details><summary>展开规程等级 1–20 生命值</summary>' +
+      '<table><thead><tr><th>规程等级</th><th>生命</th><th>隐秘核心</th></tr></thead><tbody>' + levelRows + '</tbody></table></details>' +
+      '<div class="actual-line">标准 / 险境 / 绝境 / 终极模式的生命值为固定档位；规程等级 1–20 为逐级数值。险境以上与规程等级 5 起另有隐秘核心生命值。</div>';
   }
 
   function minionName(id) {
@@ -561,6 +750,27 @@
       syncFilterButtons();
       render();
     });
+    if (els.diffMode) {
+      els.diffMode.addEventListener('change', function () {
+        state.diffKey = els.diffMode.value;
+        rebuildRoundOptions();
+        syncScaleControls();
+        render();
+        if (currentEnemy && els.enemyDialog.open) renderActual(currentEnemy), renderBossHp(currentEnemy);
+      });
+      els.diffRound.addEventListener('change', function () {
+        state.diffRound = Number(els.diffRound.value) || 0;
+        syncScaleControls();
+        render();
+        if (currentEnemy && els.enemyDialog.open) renderActual(currentEnemy), renderBossHp(currentEnemy);
+      });
+      els.scaleOn.addEventListener('change', function () {
+        state.scaleOn = els.scaleOn.checked;
+        syncScaleControls();
+        render();
+        if (currentEnemy && els.enemyDialog.open) renderActual(currentEnemy), renderBossHp(currentEnemy);
+      });
+    }
     els.dualOnly.addEventListener('change', function () {
       state.dual = els.dualOnly.checked;
       render();
@@ -574,6 +784,7 @@
       render();
     });
     els.reset.addEventListener('click', resetFilters);
+    if (els.filtersClear) els.filtersClear.addEventListener('click', resetFilters);
     els.emptyReset.addEventListener('click', resetFilters);
     els.mapClear.addEventListener('click', function () {
       els.q.value = '';
