@@ -286,6 +286,9 @@ check('选人面板：搜索框、候选、筛选齐全，自选作为阶数 chi
   assert.match(sheet.innerHTML, /id="pq"/);
   assert.match(sheet.innerHTML, /data-pick=/);
   assert.match(sheet.innerHTML, /chip-tag/);
+  assert.equal((sheet.innerHTML.match(/icon-covenant/g) || []).length, 26, '选人面板的盟约 chip 也应使用盟约图标');
+  assert.equal((sheet.innerHTML.match(/class="chip-break"/g) || []).length, 1);
+  assert.doesNotMatch(sheet.innerHTML, /<i class="dot"/);
   assert.match(sheet.innerHTML, /data-ptier="0"[^>]*>自选/);
   assert.match(sheet.innerHTML, /data-choose-pick=/);
   assert.doesNotMatch(sheet.innerHTML, /data-pick="自选配置/);
@@ -618,6 +621,37 @@ check('自选干员并入干员查询：自选 + 炎 命中斩业星熊', () => 
   assert.doesNotMatch(cards.innerHTML, /拜松/);
 
   Store.set({ view: 'op', sel: null, q: '', tiers: [], tags: [] });
+});
+
+check('筛选：盟约 chip 用盟约图标，主盟约后换行显示副盟约', () => {
+  Store.set({
+    view: 'op', sel: null, q: '', tiers: [], tags: [], triggers: [], prices: [],
+    itypes: [], icats: [], otypes: [], ranks: [], tagMode: 'and', hidden: false
+  });
+  win.UI.render();
+  const f = doc.getElementById('filters').innerHTML;
+  assert.equal((f.match(/icon-covenant/g) || []).length, 26, '26 个盟约 chip 都应有图标');
+  assert.doesNotMatch(f, /<i class="dot"/, '盟约 chip 前不再使用彩色圆点');
+  assert.equal((f.match(/class="chip-break"/g) || []).length, 1, '主副盟约之间应有一条换行分隔');
+  const iCore = f.indexOf('data-fval="莱塔尼亚"');
+  const iBreak = f.indexOf('class="chip-break"');
+  const iAdd = f.indexOf('data-fval="精准"');
+  assert.ok(iCore >= 0 && iBreak > iCore && iAdd > iBreak, '主盟约应排在换行之前，副盟约排在后面');
+});
+
+check('盟约视图：主盟约 / 副盟约分区显示', () => {
+  Store.set({
+    view: 'covenant', sel: null, q: '', ranks: [], tags: [], tiers: [], triggers: [],
+    prices: [], itypes: [], icats: [], otypes: [], tagMode: 'and', sort: 'default'
+  });
+  win.UI.render();
+  const html = cards.innerHTML;
+  assert.match(html, /主盟约<\/h2><span>10 个/);
+  assert.match(html, /副盟约<\/h2><span>16 个/);
+  assert.ok(html.indexOf('主盟约') < html.indexOf('副盟约'), '主盟约分区应在副盟约之前');
+  assert.match(html, /data-sel="炎"/);
+  assert.match(html, /data-sel="精准"/);
+  Store.switchView('team');
 });
 
 check('图鉴：加入 / 移出配队', () => {
