@@ -34,6 +34,10 @@ build/*.zip
 # ---- 大图 / 历史截图（只留本地，避免仓库被几 MB 的截图撑大）----
 /*.jpg
 source/*.jpg
+build/*.png
+
+# ---- 手动备份包（web/ 的 zip 快照，只留本地；数据表备份见 source/*.xlsx）----
+source/*.zip
 
 # ---- Office 打开 Excel 时生成的临时锁文件 ----
 ~$*
