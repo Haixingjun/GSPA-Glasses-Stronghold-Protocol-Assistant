@@ -286,7 +286,9 @@ check('选人面板：搜索框、候选、筛选齐全，自选作为阶数 chi
   assert.match(sheet.innerHTML, /id="pq"/);
   assert.match(sheet.innerHTML, /data-pick=/);
   assert.match(sheet.innerHTML, /chip-tag/);
-  assert.equal((sheet.innerHTML.match(/icon-covenant/g) || []).length, 26, '选人面板的盟约 chip 也应使用盟约图标');
+  const chipTags = sheet.innerHTML.match(/class="chip chip-tag"[\s\S]*?<\/button>/g) || [];
+  assert.equal(chipTags.length, 26, '26 个盟约 chip');
+  assert.equal(chipTags.filter((x) => /icon-covenant/.test(x)).length, 26, '选人面板的盟约 chip 也应使用盟约图标');
   assert.equal((sheet.innerHTML.match(/class="chip-break"/g) || []).length, 1);
   assert.doesNotMatch(sheet.innerHTML, /<i class="dot"/);
   assert.match(sheet.innerHTML, /data-ptier="0"[^>]*>自选/);
@@ -325,6 +327,13 @@ check('词条栏：空队伍显示入口与说明', () => {
   assert.match(html, /aria-expanded="true"/);
   assert.match(html, /休整期结束时 → … → 休整期开始时/);
   assert.match(html, /加入干员后/);
+});
+
+check('词条栏：收起竖条带拖动提示与吸附说明', () => {
+  Store.setTeam(Calc.emptyTeam(8));
+  const html = Team.render();
+  assert.match(html, /class="tm-traits-rail-grip"/);
+  assert.match(html, /拖到屏幕左半边松手吸附左侧/);
 });
 
 check('词条栏：全队词条按触发时机排序，并含无触发时机', () => {
@@ -637,6 +646,15 @@ check('筛选：盟约 chip 用盟约图标，主盟约后换行显示副盟约'
   const iBreak = f.indexOf('class="chip-break"');
   const iAdd = f.indexOf('data-fval="精准"');
   assert.ok(iCore >= 0 && iBreak > iCore && iAdd > iBreak, '主盟约应排在换行之前，副盟约排在后面');
+});
+
+check('干员卡片：盟约标签用「图标 + 名称」', () => {
+  Store.set({ view: 'op', sel: null, q: '', tiers: [], tags: [] });
+  win.UI.render();
+  const tags = cards.innerHTML.match(/class="tag tag-cov"[\s\S]*?<\/button>/g) || [];
+  assert.ok(tags.length > 0, '干员卡片应有盟约标签');
+  assert.ok(tags.every((t) => /icon-covenant/.test(t)), '每个盟约标签都应带盟约图标');
+  assert.ok(tags.every((t) => !/<i class="dot"/.test(t)), '盟约标签前不再使用彩色圆点');
 });
 
 check('盟约视图：主盟约 / 副盟约分区显示', () => {
