@@ -30,7 +30,8 @@
     maxSize: 9,        // 人事部文档后可到 9
     itemsMax: 2,       // 每名干员最多携带装备数
     nearGap: 3,        // 缺 1–3 人算「待激活」
-    harmonyBonus: 1    // 调和给核心盟约的人数加成
+    harmonyBonus: 1,   // 调和给核心盟约的人数加成
+    pickLimit: 2       // 自选干员最多 2 名
   };
 
   var MORPH_ITEM = '变形同构体';
@@ -120,6 +121,7 @@
   function evaluate(team, data) {
     var ops = data._opIndex || (data._opIndex = indexBy(data.operators, 'name'));
     var items = data._itemIndex || (data._itemIndex = indexBy(data.items, 'name'));
+    var picks = data._pickIndex || (data._pickIndex = indexBy(data.picks || [], 'name'));
     var size = (team && team.size) || RULES.size;
     var slots = (team && team.slots) || [];
     var layers = (team && team.layers) || {};
@@ -132,13 +134,25 @@
 
     for (i = 0; i < size; i++) {
       var s = slots[i];
-      if (!s || !s.k) continue;
-      var op = ops[s.k];
-      if (!op) continue;
-      if (seen[s.k]) { dupes.push(s.k); continue; }   // 同一干员只计一次
-      seen[s.k] = 1;
+      if (!s || (!s.k && !s.p)) continue;
+      var op = s.k ? ops[s.k] : null;
+      var pick = s.p ? picks[s.p] : null;
+      if (!op && !pick) continue;
 
-      var piece = { op: op, elite: !!s.e, slot: i, items: [], extra: [] };
+      // 自选干员单独占席（不再有「自选配置」占位行）：
+      // 名字/头像/盟约来自 picks，售价固定 4。
+      var effective = pick ? {
+        name: pick.name, tags: pick.tags || [],
+        tier: op ? op.tier : 0, tierLabel: op ? op.tierLabel : '',
+        price: op ? op.price : (pick.price || 4),
+        avatar: pick.avatar, avatarFull: pick.avatarFull,
+        type: '自选干员', pick: true
+      } : op;
+      var name = effective.name;
+      if (seen[name]) { dupes.push(name); continue; }
+      seen[name] = 1;
+
+      var piece = { op: effective, pick: pick, elite: !!s.e, slot: i, items: [], extra: [] };
       var names = s.it || [];
       for (j = 0; j < names.length && j < RULES.itemsMax; j++) {
         var raw = names[j];
@@ -148,7 +162,7 @@
         if (it && it.type === '装备') piece.items.push({ item: it, elite: eliteItem });
       }
       resolveMorph(piece, s);
-      if (piece.morph && !piece.morph.covenant) morphIssues.push({ slot: i, name: op.name });
+      if (piece.morph && !piece.morph.covenant) morphIssues.push({ slot: i, name: name });
       pieces.push(piece);
     }
 
@@ -178,6 +192,8 @@
     }
 
     var harmonyOn = (tagCount['调和'] || 0) >= 1;
+    var pickCount = 0;
+    for (i = 0; i < pieces.length; i++) if (pieces[i].pick) pickCount++;
 
     var rows = [];
     for (i = 0; i < data.covenants.length; i++) {
@@ -187,7 +203,8 @@
 
     var summary = {
       size: size, filled: pieces.length, elite: eliteCount, price: price,
-      equip: equipCount, active: 0, empowered: 0, near: 0, conflict: 0, total: rows.length
+      equip: equipCount, picks: pickCount, pickLimit: RULES.pickLimit,
+      active: 0, empowered: 0, near: 0, conflict: 0, total: rows.length
     };
     for (i = 0; i < rows.length; i++) {
       var st = rows[i].state;
@@ -199,7 +216,7 @@
 
     return {
       rows: rows, summary: summary, dupes: dupes, pieces: pieces,
-      morphIssues: morphIssues
+      morphIssues: morphIssues, pickOverflow: pickCount > RULES.pickLimit
     };
   }
 

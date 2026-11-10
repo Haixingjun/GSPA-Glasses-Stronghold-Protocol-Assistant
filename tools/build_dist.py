@@ -25,7 +25,7 @@ DIST = os.path.join(ROOT, "dist")
 BUILD = os.path.join(ROOT, "build")
 DEPLOY = os.path.join(ROOT, "deploy")
 ZIP_PATH = os.path.join(BUILD, "gspa-web.zip")
-BUDGET_KB = 100.0
+BUDGET_KB = 115.0   # 2026-11 自选干员并入干员查询后首屏 110.2 KB，预算从 100 调到 115
 
 
 def read_text(p):
@@ -88,12 +88,25 @@ def main():
     js_src = {n: read_text(os.path.join(WEB, "js", n)) for n in js_names}
     data_src = read_text(data_path)
 
+    # 敌人图鉴是独立页面（web/enemies.html），资源单独收集；
+    # 不存在时不影响主站构建。
+    enemy_path = os.path.join(WEB, "enemies.html")
+    enemy_src = read_text(enemy_path) if os.path.exists(enemy_path) else ""
+    enemy_extra = []
+    for rel in ("assets/enemies.css", "data/enemies.js", "js/enemies.js"):
+        p = os.path.join(WEB, rel)
+        if os.path.exists(p):
+            enemy_extra.append(read_text(p))
+
     # ---------- 指纹：任何资源变了，URL 就变 ----------
     h = hashlib.sha1()
     h.update(css_src.encode("utf-8"))
     for n in js_names:
         h.update(js_src[n].encode("utf-8"))
     h.update(data_src.encode("utf-8"))
+    h.update(enemy_src.encode("utf-8"))
+    for body in enemy_extra:
+        h.update(body.encode("utf-8"))
     stamp = h.hexdigest()[:8]
 
     data_meta = {}
@@ -119,6 +132,9 @@ def main():
 
     index_out = re.sub(r'(href|src)="((?:assets|js|data)/[^"?#]+)"', bust, index_src)
     write_text(os.path.join(DIST, "index.html"), index_out)
+    if enemy_src:
+        enemy_out = re.sub(r'(href|src)="((?:assets|js|data)/[^"?#]+)"', bust, enemy_src)
+        write_text(os.path.join(DIST, "enemies.html"), enemy_out)
 
     if os.path.isdir(DEPLOY):
         for name in ("_headers", "robots.txt"):
@@ -151,6 +167,8 @@ def main():
         return "<script>\n" + body + "\n</script>"
 
     standalone = re.sub(r'<link\b[^>]*href="([^"]+)"[^>]*>', inline_link, index_src)
+    # 敌人图鉴是独立页面，单文件版没有它的资源与头像；构建时隐藏入口，避免死链。
+    standalone = re.sub(r'<a\b[^>]*data-standalone-hide[^>]*>.*?</a>', '', standalone, flags=re.S)
     standalone = re.sub(r'<script\b[^>]*src="([^"]+)"[^>]*>\s*</script>', inline_script, standalone)
     standalone = standalone.replace(
         "<head>",
@@ -335,3 +353,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

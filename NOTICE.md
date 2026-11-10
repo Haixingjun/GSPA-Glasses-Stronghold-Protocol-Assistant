@@ -8,6 +8,8 @@
 | --- | --- | --- |
 | 游戏名称、干员名、数值、技能与盟约文本 | `卫戍协议数据表.xlsx`、`source/`、`web/data/` | 归**鹰角网络**所有。本项目仅作非商业的玩家查询用途，不主张任何版权。 |
 | 干员头像（286 个 WebP） | `web/assets/avatars/`、`dist/assets/avatars/` | 游戏美术版权归**鹰角网络**所有；原始文件取自 **PRTS Wiki**。 |
+| 敌人头像（179 个，96 / 160 两档） | `web/assets/enemies/`、`dist/assets/enemies/` | 游戏美术版权归**鹰角网络**所有；原始 160×160 WebP 内嵌在 `卫戍协议-规程-特殊敌人图鉴.html`，图源为 PRTS / 本地解包。 |
+| 战场地图（10 图 × 3 场地） | `web/assets/maps/`、`dist/assets/maps/` | 游戏美术版权归**鹰角网络**所有；取自 **PRTS Wiki**「卫戍协议·规程/战场一览」。 |
 | 道具 / 策略 / 盟约图标（314 个 WebP） | `web/assets/icons/`、`dist/assets/icons/` | 游戏美术版权归**鹰角网络**所有；原始文件取自 **PRTS Wiki** 的本期「卫戍协议·规程」页面。 |
 | 特殊干员档案（职业/属性/天赋/技能文本） | `data/special_operators.json`、`web/data/` | 游戏内容版权归**鹰角网络**所有；字段补充自 **PRTS Wiki** 干员页，原始 wikitext 快照在 `source/prts/`。 |
 | PRTS Wiki 的文本内容 | 数据整理过程参考 | PRTS 采用 **CC BY-NC-SA**（署名—非商业性使用—相同方式共享）。**因此本项目整体不得用于商业用途。** |

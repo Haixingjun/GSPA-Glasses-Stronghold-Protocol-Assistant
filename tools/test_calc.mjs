@@ -29,7 +29,7 @@ function teamOf(names, opts = {}) {
   for (let i = 0; i < size; i++) slots.push(null);
   names.forEach((n, i) => {
     if (!n) return;
-    slots[i] = typeof n === 'string' ? { k: n, e: false } : { k: n.k, e: !!n.e };
+    slots[i] = typeof n === 'string' ? { k: n, e: false } : { k: n.k, e: !!n.e, p: n.p };
   });
   return { size, slots, layers: opts.layers || {} };
 }
@@ -276,4 +276,74 @@ test('层数数值：layerSegments 给出可着色的片段', () => {
   assert.equal(nums.length, 4, '萨尔贡这条有 4 个层数公式');
   assert.deepEqual(nums[0], { t: 'num', v: '27', f: '5+0.22×100' });
   assert.equal(nums[1].v.endsWith('%') && nums[1].v.startsWith('+'), true);
+});
+
+/* ---------------- 自选干员 ---------------- */
+const pickOf = (name) => data.picks.find((p) => p.name === name);
+
+test('自选干员：按 tags 计入盟约，但不进固定成员', () => {
+  const p = pickOf('斩业星熊');
+  assert.ok(p, '斩业星熊在自选干员表');
+  assert.deepEqual(p.tags, ['炎']);
+
+  const two = members('炎', 2);
+  const team = teamOf([two[0], two[1], { p: '斩业星熊' }]);
+  const res = Calc.evaluate(team, data);
+
+  assert.equal(row(res, '炎').count, 3);
+  assert.equal(row(res, '炎').state, 'active');
+  const basePrice = Calc.evaluate(teamOf([two[0], two[1]]), data).summary.price;
+  assert.equal(res.summary.price - basePrice, 4, '自选干员售价 4');
+  assert.equal(res.summary.picks, 1);
+  // 固定成员仍然是 10 人；斩业星熊只在 pickMembers
+  assert.equal(cov('炎').members.length, 10);
+  assert.ok(cov('炎').pickMembers.includes('斩业星熊'));
+});
+
+test('自选干员：多核心（炎/维多利亚）两边都计', () => {
+  const p = pickOf('煌');
+  assert.ok(p);
+  assert.deepEqual(p.tags.sort(), ['维多利亚', '炎'].sort());
+  const res = Calc.evaluate(teamOf([{ p: '煌' }]), data);
+  assert.equal(row(res, '炎').count, 1);
+  assert.equal(row(res, '维多利亚').count, 1);
+});
+
+test('自选干员：无核心 → 协防干员', () => {
+  const p = pickOf('凯尔希');
+  assert.ok(p);
+  assert.deepEqual(p.tags, ['协防干员']);
+  const res = Calc.evaluate(teamOf([
+    { p: '凯尔希' },
+    { p: '闪灵' }
+  ]), data);
+  assert.equal(row(res, '协防干员').count, 2);
+  assert.equal(row(res, '协防干员').state, 'active');
+});
+
+test('自选干员：同一人重复只计一次', () => {
+  const res = Calc.evaluate(teamOf([
+    { p: '斩业星熊' },
+    { p: '斩业星熊' }
+  ]), data);
+  assert.equal(res.dupes.length, 1);
+  assert.equal(row(res, '炎').count, 1);
+});
+
+test('自选干员：最多 2 名的标记', () => {
+  const res = Calc.evaluate(teamOf([
+    { p: '斩业星熊' },
+    { p: '煌' },
+    { p: '凯尔希' }
+  ]), data);
+  assert.equal(res.summary.picks, 3);
+  assert.equal(res.pickOverflow, true);
+  const ok = Calc.evaluate(teamOf([{ p: '斩业星熊' }, { p: '煌' }]), data);
+  assert.equal(ok.pickOverflow, false);
+});
+
+test('自选干员：缺 picks 的旧数据不崩', () => {
+  const old = { operators: data.operators, items: data.items, covenants: data.covenants };
+  const res = Calc.evaluate(teamOf(['拜松', '矩', '乌有']), old);
+  assert.equal(row(res, '炎').count, 3);
 });

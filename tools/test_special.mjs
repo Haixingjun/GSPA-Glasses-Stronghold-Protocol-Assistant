@@ -113,9 +113,9 @@ check('盟约·辅助干员深链：4★ 辅助/巫役 + 版本说明', () => {
   assert.match(drawer.innerHTML, /Pith/);
 });
 
-check('默认列表仍是 153 条，不把隐藏条目塞进首屏', () => {
+check('默认列表是 207 条（141 固定 + 66 自选），不把隐藏条目塞进首屏', () => {
   Store.set({ sel: null, q: '', hidden: false });
-  assert.equal(UI.getList().length, 153);
+  assert.equal(UI.getList().length, 207);
 });
 
 check('搜索「优等生」能命中「盟约·辅助干员」', () => {

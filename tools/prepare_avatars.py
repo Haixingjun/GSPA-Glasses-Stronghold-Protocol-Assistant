@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 从 PRTS wiki 抓取干员头像，裁方、压缩成 WebP，并生成头像清单。
 
@@ -114,12 +114,22 @@ def operator_names(wanted=None):
             continue
         if n not in names:
             names.append(n)
+    # 自选干员（6★ 甄选池）也要头像；它们不在 155 条干员表里。
+    if "自选干员" in wb.sheetnames:
+        ps = wb["自选干员"]
+        for r in range(2, ps.max_row + 1):
+            v = ps.cell(row=r, column=1).value
+            if v is None:
+                continue
+            n = str(v).strip()
+            if n and n not in names:
+                names.append(n)
     wb.close()
     if wanted:
         keep = [n for n in names if n in wanted]
         unknown = [n for n in wanted if n not in names]
         if unknown:
-            print("不在干员表里的名字（忽略）：%s" % "、".join(unknown))
+            print("不在干员表 / 自选干员表里的名字（忽略）：%s" % "、".join(unknown))
         return keep
     return names
 

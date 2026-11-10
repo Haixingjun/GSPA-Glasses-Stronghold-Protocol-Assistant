@@ -29,12 +29,13 @@
   var data = null;
   var covByName = {};
   var opByName = {};
+  var pickByName = {};
   var itemByName = {};
   var gearList = [];
 
   var picker = {
     open: false, mode: 'op', slot: -1, gear: -1,
-    q: '', tiers: [], tags: [], batch: true, pending: null, eliteMode: {}
+    q: '', tiers: [], tags: [], batch: true, pending: null, eliteMode: {}, filtersOpen: true
   };
   var els = {};
   var qTimer = null;
@@ -46,6 +47,7 @@
     var i;
     for (i = 0; i < data.covenants.length; i++) covByName[data.covenants[i].name] = data.covenants[i];
     for (i = 0; i < data.operators.length; i++) opByName[data.operators[i].name] = data.operators[i];
+    for (i = 0; i < (data.picks || []).length; i++) pickByName[data.picks[i].name] = data.picks[i];
     for (i = 0; i < data.items.length; i++) {
       itemByName[data.items[i].name] = data.items[i];
       if (data.items[i].type === '装备') gearList.push(data.items[i]);
@@ -88,6 +90,7 @@
     var h = '<div class="tm-head">' +
       '<div class="tm-stats">' +
       statHtml(s.filled + '/' + s.size, '场上席位') +
+      statHtml(s.picks + '/' + s.pickLimit, '自选') +
       statHtml(s.elite, '精锐') +
       statHtml(s.equip, '装备') +
       statHtml('◈' + s.price, '总售价') +
@@ -104,6 +107,7 @@
 
     var warns = [];
     if (res.dupes.length) warns.push('重复干员只计一次：' + esc(res.dupes.join('、')));
+    if (res.pickOverflow) warns.push('自选干员最多 2 名，当前 ' + s.picks + ' 名，请移除多余的自选席');
     if (res.morphIssues.length) {
       var parts = [];
       for (var i = 0; i < res.morphIssues.length; i++) parts.push('第 ' + (res.morphIssues[i].slot + 1) + ' 席 ' + res.morphIssues[i].name);
@@ -138,9 +142,28 @@
     return h;
   }
 
+  /** 席位实际显示的干员：普通干员取 opByName；自选干员只剩 picks（没有占位行）。
+      自选干员售价固定 4，阶数留空，用「自选」标签表示。 */
+  function slotOperator(s) {
+    var base = s && s.k ? opByName[s.k] : null;
+    var pick = s && s.p ? pickByName[s.p] : null;
+    if (!pick) return { op: base, pick: null };
+    return {
+      op: {
+        name: pick.name, tags: pick.tags || [],
+        tier: base ? base.tier : 0, tierLabel: base ? base.tierLabel : '',
+        price: base ? base.price : 4,
+        avatar: pick.avatar, avatarFull: pick.avatarFull,
+        type: '自选干员', pick: true
+      },
+      pick: pick
+    };
+  }
+
   function slotHtml(team, i, piece) {
     var s = team.slots[i];
-    var op = s && s.k ? opByName[s.k] : null;
+    var so = slotOperator(s);
+    var op = so.op;
 
     if (!op) {
       return '<button type="button" class="slot slot-empty" role="listitem" data-slot-open="' + i + '"' +
@@ -155,15 +178,16 @@
     for (var t = 0; t < list.length && t < 2; t++) {
       tags += '<span class="slot-tag" style="--h:' + UI.hue(list[t]) + '">' + esc(list[t]) + '</span>';
     }
+    if (so.pick) tags += '<span class="slot-tag slot-tag-pick">自选</span>';
 
-    return '<div class="slot slot-filled" role="listitem" data-slot-index="' + i + '">' +
-      '<button type="button" class="slot-body" data-slot-open="' + i + '" aria-label="第 ' + (i + 1) + ' 席 ' +
+    return '<div class="slot slot-filled' + (so.pick ? ' is-pick' : '') + '" role="listitem" data-slot-index="' + i + '">' +
+      '<button type="button" class="slot-body" data-slot-open="' + i + '" data-tip-op="' + esc(op.name) + '" aria-label="第 ' + (i + 1) + ' 席 ' +
       esc(op.name) + '，点击更换" title="' + esc(op.name) + '">' +
       UI.avatarHtml(op, op.name, 34) +
       '<span class="slot-text">' +
       '<span class="slot-name-row">' +
       '<span class="slot-name">' + esc(op.name) + '</span>' +
-      '<span class="tier" data-tier="' + op.tier + '">' + esc(op.tierLabel) + '</span>' +
+      (op.tier ? '<span class="tier" data-tier="' + op.tier + '">' + esc(op.tierLabel) + '</span>' : '') +
       '</span>' +
       '<span class="slot-tags">' + tags + '</span>' +
       '</span>' +
@@ -309,6 +333,26 @@
 
   /* ---------------- 盟约 / 装备详情（#tip） ---------------- */
   function tipHtmlFor(kind, key) {
+    if (kind === 'op') {
+      var pk = pickByName[key];
+      var op = opByName[key];
+      if (!pk && !op) return '';
+      var tags = (pk || op).tags || [];
+      var meta = pk
+        ? ([pk.class, pk.branch].filter(Boolean).join(' / ') + ' · 自选干员')
+        : (op.tierLabel + ' 阶 · ' + op.type);
+      var normal = pk ? '无特质（自选干员）' : op.normalText;
+      var elite = pk ? '无特质（自选干员）' : op.eliteText;
+      var price = pk ? 4 : op.price;
+      var fac = pk ? (pk.factions || []).join(' / ') : '';
+      return '<div class="tip-head"><b>' + esc(key) + '</b>' +
+        '<span class="pill ' + (pk ? 'pill-pick' : '') + '">' + esc(meta) + '</span></div>' +
+        '<div class="tip-sec"><h4>盟约</h4><p>' + esc(tags.join('、') || '无') + '</p></div>' +
+        '<div class="tip-sec"><h4>普通</h4><p>' + Search.format(normal) + '</p></div>' +
+        (elite !== normal ? '<div class="tip-sec"><h4>精锐</h4><p>' + Search.format(elite) + '</p></div>' : '') +
+        (fac ? '<div class="tip-sec"><h4>阵营</h4><p>' + esc(fac) + '</p></div>' : '') +
+        '<div class="tip-foot">售价 ◈' + price + '</div>';
+    }
     if (kind === 'item') {
       var it = itemByName[key];
       if (!it) return '';
@@ -366,6 +410,7 @@
     var html = '';
     if (el.getAttribute('data-tip-cov')) html = tipHtmlFor('cov', el.getAttribute('data-tip-cov'));
     else if (el.getAttribute('data-tip-item')) html = tipHtmlFor('item', el.getAttribute('data-tip-item'));
+    else if (el.getAttribute('data-tip-op')) html = tipHtmlFor('op', el.getAttribute('data-tip-op'));
     if (!html) return;
 
     els.tip.innerHTML = html;
@@ -405,7 +450,7 @@
     if (picker.open) return;
     // 鼠标进到层数输入框时收起气泡，别挡住输入
     if (e.target && e.target.closest && e.target.closest('.cov-layer')) { hideTip(); return; }
-    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-item]') : null;
+    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-item],[data-tip-op]') : null;
     if (!el || tip.pinned) return;
     if (e.relatedTarget && el.contains(e.relatedTarget)) return;  // 在块内部移动不重复定位
     showTip(el);
@@ -413,7 +458,7 @@
 
   function onHoverOut(e) {
     if (tip.pinned) return;
-    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-item]') : null;
+    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-item],[data-tip-op]') : null;
     if (!el) return;
     if (e.relatedTarget && el.contains(e.relatedTarget)) return;  // 移入子元素不算移出
     hideTip();
@@ -421,20 +466,25 @@
 
   function onFocusIn(e) {
     if (e.target && e.target.closest && e.target.closest('.cov-layer')) { hideTip(); return; }
-    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov]') : null;
+    var el = e.target && e.target.closest ? e.target.closest('[data-tip-cov],[data-tip-op]') : null;
     if (el) showTip(el);
   }
 
   /* ---------------- 选人 / 选装备面板 ---------------- */
   function openSheet(slot, mode, gear) {
     ensure();
+    var team = Store.getTeam();
+    var cur = slot >= 0 ? team.slots[slot] : null;
+    var onlyPick = (!mode || mode === 'op') && cur && cur.p;
     picker.open = true;
     picker.mode = mode || 'op';
     picker.slot = slot;
     picker.gear = (typeof gear === 'number') ? gear : -1;
     picker.q = '';
-    picker.tiers = [];
+    picker.tiers = onlyPick ? [0] : [];
     picker.tags = [];
+    // 矮屏（手机横屏）先收起筛选，保证列表还有足够高度；普通竖屏默认展开
+    picker.filtersOpen = picker.mode === 'item' || global.innerHeight >= 560;
     hideTip();
     renderSheet();
     els.sheet.hidden = false;
@@ -471,28 +521,22 @@
     if (picker.mode === 'share') return shareSheetHtml();
     if (picker.mode === 'import') return importSheetHtml();
 
-    var team = Store.getTeam();
-    var slot = picker.slot;
     var isItem = picker.mode === 'item';
-    var title, cur = slot >= 0 ? team.slots[slot] : null;
-    if (isItem) {
-      var opName = cur && cur.k && opByName[cur.k] ? opByName[cur.k].name : '';
-      title = '第 ' + (slot + 1) + ' 席' + (opName ? ' · ' + opName : '') +
-        (picker.gear >= 0 ? ' · 更换装备' : ' · 添加装备');
-    } else {
-      title = (cur && cur.k ? '更换第 ' : '第 ') + (slot + 1) + ' 席';
-    }
-
-    var sub = isItem
-      ? '每位干员最多 2 件' + (picker.batch ? ' · 连续添加' : '')
-      : (picker.batch ? '连续添加 · 点一名填一席' : '场上 ' + countFilled(team) + ' / ' + team.size);
+    var isPick = picker.mode === 'pick';
+    var head = sheetHeadTexts();
+    var nActive = picker.tiers.length + picker.tags.length;
 
     var h = '<div class="sheet-in">' +
       '<div class="sheet-head">' +
-      '<div class="sheet-title"><b>' + esc(title) + '</b>' +
-      '<small>' + esc(sub) + '</small></div>' +
-      '<button type="button" class="sheet-batch" data-batch-toggle aria-pressed="' +
-      (picker.batch ? 'true' : 'false') + '" title="连续添加：填完一个自动跳到下一个">连续添加</button>' +
+      '<div class="sheet-title"><b>' + esc(head.title) + '</b>' +
+      '<small>' + esc(head.sub) + '</small></div>' +
+      (isItem ? '' :
+        '<button type="button" class="sheet-fltbtn" data-sheet-filter-toggle aria-controls="sheet-filters"' +
+        ' aria-expanded="' + (picker.filtersOpen ? 'true' : 'false') + '" title="展开 / 收起筛选">筛选' +
+        (nActive ? '<span class="badge">' + nActive + '</span>' : '') + '</button>') +
+      (isPick ? '' :
+        '<button type="button" class="sheet-batch" data-batch-toggle aria-pressed="' +
+        (picker.batch ? 'true' : 'false') + '" title="连续添加：填完一个自动跳到下一个">连续添加</button>') +
       '<button type="button" class="d-close" data-sheet-close aria-label="关闭">' +
       '<svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>' +
       '</div>';
@@ -500,18 +544,62 @@
     h += '<div class="sheet-search">' +
       '<svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>' +
       '<input id="pq" type="search" autocomplete="off" autocapitalize="off" spellcheck="false"' +
-      ' placeholder="' + (isItem ? '搜索装备名 / 效果…' : '搜索干员名 / 盟约 / 效果…') + '"' +
+      ' placeholder="' + (isItem ? '搜索装备名 / 效果…' : (isPick ? '搜索自选干员 / 阵营 / 盟约…' : '搜索干员名 / 盟约 / 效果…')) + '"' +
       ' aria-label="搜索" value="' + esc(picker.q) + '">' +
       '</div>';
 
-    h += '<div class="sheet-filters">' +
-      '<div class="sheet-row">' + tierChipsHtml() + '</div>' +
+    h += '<div class="sheet-filters' + (!isItem && !picker.filtersOpen ? ' is-collapsed' : '') + '"' +
+      (isItem ? '' : ' id="sheet-filters"') + '>' +
+      (isPick ? '' : '<div class="sheet-row">' + tierChipsHtml() + '</div>') +
       (isItem ? '' : '<div class="sheet-row sheet-row-tags">' + tagChipsHtml() + '</div>') +
       '</div>';
 
-    h += '<div class="sheet-list">' + listHtml(team) + '</div>' +
+    h += '<div class="sheet-list">' + listHtml(Store.getTeam()) + '</div>' +
       '</div>';
     return h;
+  }
+
+  /** 面板标题与副标题：连续添加换席后要就地更新，不整块重绘 */
+  function sheetHeadTexts() {
+    var team = Store.getTeam();
+    var slot = picker.slot;
+    var isItem = picker.mode === 'item';
+    var isPick = picker.mode === 'pick';
+    var cur = slot >= 0 ? team.slots[slot] : null;
+    var curName = cur && cur.p ? cur.p : (cur && cur.k && opByName[cur.k] ? opByName[cur.k].name : '');
+    var title, sub = '';
+
+    if (isPick) {
+      title = '第 ' + (slot + 1) + ' 席 · 自选干员';
+      sub = '6★ · 需自身持有 · 不计入盟约固定 10 人';
+    } else if (isItem) {
+      title = '第 ' + (slot + 1) + ' 席' + (curName ? ' · ' + curName : '') +
+        (picker.gear >= 0 ? ' · 更换装备' : ' · 添加装备');
+      sub = '每位干员最多 2 件' + (picker.batch ? ' · 连续添加' : '');
+    } else {
+      title = (cur && cur.k ? '更换第 ' : '第 ') + (slot + 1) + ' 席';
+      sub = picker.batch ? '连续添加 · 点一名填一席' : '场上 ' + countFilled(team) + ' / ' + team.size;
+    }
+    return { title: title, sub: sub };
+  }
+
+  function updateSheetMeta() {
+    if (!picker.open || !els.sheet) return;
+    var head = sheetHeadTexts();
+    var b = els.sheet.querySelector('.sheet-title b');
+    var small = els.sheet.querySelector('.sheet-title small');
+    if (b) b.textContent = head.title;
+    if (small) small.textContent = head.sub;
+    var batch = els.sheet.querySelector('[data-batch-toggle]');
+    if (batch) batch.setAttribute('aria-pressed', picker.batch ? 'true' : 'false');
+    var btn = els.sheet.querySelector('[data-sheet-filter-toggle]');
+    if (btn) {
+      var badge = btn.querySelector('.badge');
+      var n = picker.tiers.length + picker.tags.length;
+      if (!n && badge) badge.remove();
+      else if (n && !badge) btn.insertAdjacentHTML('beforeend', '<span class="badge">' + n + '</span>');
+      else if (badge) badge.textContent = n;
+    }
   }
 
   /* ---------------- 分享 / 导入 ---------------- */
@@ -665,6 +753,9 @@
       h += '<button type="button" class="chip tier-chip" data-ptier="' + t + '" data-tier="' + t + '"' +
         ' aria-pressed="' + (on ? 'true' : 'false') + '">' + roman(t) + '</button>';
     }
+    var onPick = picker.tiers.indexOf(0) >= 0;
+    h += '<button type="button" class="chip tier-chip" data-ptier="0" data-tier="0"' +
+      ' aria-pressed="' + (onPick ? 'true' : 'false') + '">自选</button>';
     return h;
   }
 
@@ -681,6 +772,7 @@
   }
 
   function listHtml(team) {
+    if (picker.mode === 'pick') return pickListHtml(team);
     return picker.mode === 'item' ? itemListHtml(team) : opListHtml(team);
   }
 
@@ -752,9 +844,36 @@
     var out = '';
     var shown = 0;
 
+    // 自选干员也走「阶数=自选」的普通候选列表，不再单独按钮
+    var pickCount = 0;
+    for (i = 0; i < team.slots.length; i++) if (team.slots[i] && team.slots[i].p) pickCount++;
+    var curPick = picker.slot >= 0 && team.slots[picker.slot] && team.slots[picker.slot].p;
+    var canPick = pickCount < 2 || curPick;
+
     for (i = 0; i < list.length; i++) {
       var op = list[i];
-      if (op.type === '自选配置') continue;   // 无盟约标签，本期不参与配队
+      if (op.pick) {
+        var pickUsed = false;
+        for (var pk = 0; pk < team.slots.length; pk++) {
+          if (team.slots[pk] && team.slots[pk].p === op.name) pickUsed = true;
+        }
+        var usable = !pickUsed && canPick;
+        shown++;
+        out += '<button type="button" class="pick pick-pick-item' + (pickUsed ? ' is-used' : '') + '"' +
+          (usable ? ' data-choose-pick="' + esc(op.name) + '"' : ' disabled aria-disabled="true"') + '>' +
+          UI.avatarHtml(op, op.name, 34, false, true) +
+          '<span class="pick-main">' +
+          '<span class="pick-name">' + Search.highlight(op.name, toks) + '</span>' +
+          '<span class="pick-tags">' + pickTags(op.tags) + '</span>' +
+          '<span class="pick-eff">' + esc([op.class, op.branch].filter(Boolean).join(' / ')) +
+          (op.factions && op.factions.length ? ' · ' + esc(op.factions.join(' / ')) : '') +
+          ' · 不计入盟约固定 10 人</span>' +
+          '</span>' +
+          '<span class="pick-tier"><span class="tier tier-pick" data-tier="0">自选</span></span>' +
+          '<span class="pick-act">' + (pickUsed ? '已在场' : (!canPick ? '已满' : '＋')) + '</span>' +
+          '</button>';
+        continue;
+      }
       shown++;
       var isUsed = !!used[op.name];
       out += '<button type="button" class="pick' + (isUsed ? ' is-used' : '') + '"' +
@@ -773,6 +892,59 @@
     return out;
   }
 
+  function pickListHtml(team) {
+    var used = {};
+    var i;
+    for (i = 0; i < team.slots.length; i++) {
+      if (team.slots[i] && team.slots[i].p) used[team.slots[i].p] = 1;
+    }
+    var q = (picker.q || '').toLowerCase();
+    var toks = Search.tokens(picker.q);
+    var out = '';
+    var shown = 0;
+    var list = data.picks || [];
+    var pickCount = 0;
+    for (i = 0; i < team.slots.length; i++) if (team.slots[i] && team.slots[i].p) pickCount++;
+    var curPick = picker.slot >= 0 && team.slots[picker.slot] && team.slots[picker.slot].p;
+    if (pickCount >= 2 && !curPick) {
+      return '<p class="pick-empty">自选干员最多 2 名，请先移除一名再添加。</p>';
+    }
+
+    for (i = 0; i < list.length; i++) {
+      var p = list[i];
+      if (picker.tags.length) {
+        var hit = false;
+        for (var t = 0; t < picker.tags.length; t++) {
+          if ((p.tags || []).indexOf(picker.tags[t]) >= 0) { hit = true; break; }
+        }
+        if (!hit) continue;
+      }
+      if (q) {
+        var hay = [p.name, p.class, p.branch, p.nation,
+          (p.factions || []).join(' '), (p.hiddenFactions || []).join(' '),
+          (p.tags || []).join(' ')].join(' ').toLowerCase();
+        if (hay.indexOf(q) < 0) continue;
+      }
+      shown++;
+      var isUsed = !!used[p.name];
+      var cls = [p.class, p.branch].filter(Boolean).join(' / ');
+      var fac = (p.factions || []).join(' / ');
+      out += '<button type="button" class="pick pick-pick' + (isUsed ? ' is-used' : '') + '"' +
+        (isUsed ? ' disabled aria-disabled="true"' : ' data-choose-pick="' + esc(p.name) + '"') + '>' +
+        UI.avatarHtml(p, p.name, 34, false, true) +
+        '<span class="pick-main">' +
+        '<span class="pick-name">' + Search.highlight(p.name, toks) + '</span>' +
+        '<span class="pick-tags">' + pickTags(p.tags) + '</span>' +
+        '<span class="pick-eff">' + esc(cls + (fac ? ' · ' + fac : '')) + '</span>' +
+        '</span>' +
+        '<span class="pick-tier"><span class="pill pill-pick">6★</span></span>' +
+        '<span class="pick-act">' + (isUsed ? '已选' : '＋') + '</span>' +
+        '</button>';
+    }
+    if (!shown) out = '<p class="pick-empty">没有匹配的自选干员，试试换个关键词或减少筛选。</p>';
+    return out;
+  }
+
   function pickTags(tags) {
     var h = '';
     for (var i = 0; i < (tags || []).length; i++) {
@@ -781,24 +953,19 @@
     return h || '<span class="pick-tag is-muted">无盟约</span>';
   }
 
-  function refreshList() {
+  function refreshList(keepScroll) {
     if (!picker.open || !els.sheet) return;
     var box = els.sheet.querySelector('.sheet-list');
-    if (box) box.innerHTML = listHtml(Store.getTeam());
+    if (!box) return;
+    var top = keepScroll ? box.scrollTop : 0;
+    box.innerHTML = listHtml(Store.getTeam());
+    box.scrollTop = top;
   }
 
-  function rerenderSheet() {
-    var q = document.getElementById('pq');
-    var focused = q && document.activeElement === q;
-    var pos = focused ? q.selectionStart : 0;
-    renderSheet();
-    if (focused) {
-      var nq = document.getElementById('pq');
-      if (nq) {
-        nq.focus();
-        try { nq.setSelectionRange(pos, pos); } catch (e) { /* 忽略 */ }
-      }
-    }
+  /** 连续添加时只更新标题和列表，保留列表滚动位置，不再整块重绘 */
+  function refreshAfterChoice() {
+    updateSheetMeta();
+    refreshList(true);
   }
 
   /* ---------------- 操作 ---------------- */
@@ -826,7 +993,54 @@
       return;
     }
     picker.slot = next;
-    rerenderSheet();
+    refreshAfterChoice();
+  }
+
+  /** 自选干员：纯 p 席，不依赖占位行；全队最多 2 名 */
+  function choosePick(name) {
+    var team = Store.getTeam();
+    var i = picker.slot;
+    if (i < 0 || i >= team.size) return;
+    var cur = team.slots[i] || {};
+    var pickCount = 0;
+    for (var k = 0; k < team.slots.length; k++) {
+      if (team.slots[k] && team.slots[k].p) pickCount++;
+    }
+    if (!cur.p && pickCount >= Calc.RULES.pickLimit) {
+      toast('自选干员最多 2 名，请先移除一名');
+      return;
+    }
+    team.slots[i] = { p: name, e: !!cur.e, it: cur.it || [] };
+    Store.setTeam(team);
+    toast('第 ' + (i + 1) + ' 席：' + name + '（自选干员）');
+    closeSheet();
+  }
+
+  /** 干员图鉴的「加入 / 移出配队」：普通干员占 k，自选干员占 p */
+  function toggleFromList(name) {
+    ensure();
+    var team = Store.getTeam();
+    var i;
+    for (i = 0; i < team.slots.length; i++) {
+      var s = team.slots[i];
+      if (s && (s.k === name || s.p === name)) {
+        team.slots[i] = null;
+        Store.setTeam(team);
+        toast('已移出配队：' + name);
+        return;
+      }
+    }
+    var isPick = !!pickByName[name];
+    if (isPick) {
+      var pc = 0;
+      for (i = 0; i < team.slots.length; i++) if (team.slots[i] && team.slots[i].p) pc++;
+      if (pc >= Calc.RULES.pickLimit) { toast('自选干员最多 2 名，请先移除一名'); return; }
+    }
+    var idx = Calc.nextEmptySlot(team.slots, -1);
+    if (idx < 0) { toast('队伍已满，请先移除一名干员'); return; }
+    team.slots[idx] = isPick ? { p: name, e: false } : { k: name, e: false };
+    Store.setTeam(team);
+    toast((isPick ? '已加入自选干员：' : '已加入配队：') + name);
   }
 
   /** 配队页的「批量添加」：从第一个空位开始，连续填 */
@@ -873,7 +1087,7 @@
     if (!next) { closeSheet(); toast('没有空余的装备位了'); return; }
     picker.slot = next.slot;
     picker.gear = next.gear;
-    rerenderSheet();
+    refreshAfterChoice();
   }
 
   /** 谁还能再装：优先当前干员，其次按席位顺序找下一位有空位的 */
@@ -962,14 +1176,32 @@
     var i = picker.tiers.indexOf(n);
     if (i >= 0) picker.tiers.splice(i, 1);
     else picker.tiers.push(n);
-    rerenderSheet();
+    var chip = els.sheet && els.sheet.querySelector('[data-ptier="' + n + '"]');
+    if (chip) chip.setAttribute('aria-pressed', picker.tiers.indexOf(n) >= 0 ? 'true' : 'false');
+    updateSheetMeta();
+    refreshList(true);
   }
 
   function togglePickTag(name) {
     var i = picker.tags.indexOf(name);
     if (i >= 0) picker.tags.splice(i, 1);
     else picker.tags.push(name);
-    rerenderSheet();
+    var chips = els.sheet ? els.sheet.querySelectorAll('[data-ptag]') : [];
+    for (var k = 0; k < chips.length; k++) {
+      var on = picker.tags.indexOf(chips[k].getAttribute('data-ptag')) >= 0;
+      chips[k].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    updateSheetMeta();
+    refreshList(true);
+  }
+
+  function toggleSheetFilters() {
+    if (picker.mode === 'item') return;
+    picker.filtersOpen = !picker.filtersOpen;
+    var box = els.sheet && els.sheet.querySelector('.sheet-filters');
+    var btn = els.sheet && els.sheet.querySelector('[data-sheet-filter-toggle]');
+    if (box) box.classList.toggle('is-collapsed', !picker.filtersOpen);
+    if (btn) btn.setAttribute('aria-expanded', picker.filtersOpen ? 'true' : 'false');
   }
 
   /* ---------------- 拖拽排序 ---------------- */
@@ -1087,10 +1319,15 @@
     if ((el = t.closest('[data-apply-import]'))) { e.preventDefault(); applyImport(); return; }
     if ((el = t.closest('[data-team-clear]'))) { e.preventDefault(); clearTeam(); return; }
     if ((el = t.closest('[data-batch-add]'))) { e.preventDefault(); openBatch(); return; }
+    if ((el = t.closest('[data-sheet-filter-toggle]'))) {
+      e.preventDefault();
+      toggleSheetFilters();
+      return;
+    }
     if ((el = t.closest('[data-batch-toggle]'))) {
       e.preventDefault();
       picker.batch = !picker.batch;
-      rerenderSheet();
+      updateSheetMeta();
       return;
     }
     if ((el = t.closest('[data-sheet-close]'))) { e.preventDefault(); closeSheet(); return; }
@@ -1101,11 +1338,21 @@
     }
     if ((el = t.closest('[data-ptag]'))) { e.preventDefault(); togglePickTag(el.getAttribute('data-ptag')); return; }
     if ((el = t.closest('[data-pick]'))) { e.preventDefault(); pick(el.getAttribute('data-pick')); return; }
+    if ((el = t.closest('[data-choose-pick]'))) {
+      e.preventDefault();
+      choosePick(el.getAttribute('data-choose-pick'));
+      return;
+    }
     if ((el = t.closest('[data-gear-elite]'))) {
       e.preventDefault();
       var gname = el.getAttribute('data-gear-elite');
       picker.eliteMode[gname] = !picker.eliteMode[gname];
-      rerenderSheet();
+      var modeBtns = els.sheet ? els.sheet.querySelectorAll('[data-gear-elite]') : [];
+      for (var mb = 0; mb < modeBtns.length; mb++) {
+        var mn = modeBtns[mb].getAttribute('data-gear-elite');
+        modeBtns[mb].setAttribute('aria-pressed', picker.eliteMode[mn] ? 'true' : 'false');
+      }
+      refreshList(true);
       return;
     }
     if ((el = t.closest('[data-gear]'))) {
@@ -1246,6 +1493,7 @@
     closeSheet: closeSheet,
     isSheetOpen: isSheetOpen,
     hideTip: hideTip,
+    toggleFromList: toggleFromList,
     // 供测试 / 调试
     shareText: shareText,
     parseShareText: parseShareText

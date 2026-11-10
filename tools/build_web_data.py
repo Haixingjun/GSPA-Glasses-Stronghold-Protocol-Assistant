@@ -110,6 +110,16 @@ need_header(wb["指令阶段"], ["角色", "策略", "阶段序号", "状态", "
                           "阶段效果", "升级条件类型", "条件参数", "下一阶段ID", "当前阶段ID"])
 need_header(wb["补给增益"], ["名称", "效果", "效果ID"])
 
+# 自选干员（可选）：6★ 甄选池，单独一张表；不并入 155 条干员表，
+# 也不写入盟约的固定成员 members（盟约仍保持 10 人）。
+PICK_SHEET = "自选干员"
+PICK_HEADERS = ["干员名称", "稀有度", "职业", "分支", "所属国家", "游戏阵营",
+                "隐藏阵营", "核心盟约", "盟约来源", "PRTS ID", "备注"]
+if PICK_SHEET in wb.sheetnames:
+    need_header(wb[PICK_SHEET], PICK_HEADERS)
+else:
+    warn("缺少「%s」工作表：自选干员功能将关闭" % PICK_SHEET)
+
 if errors:
     print("\n".join(errors))
     sys.exit(1)
@@ -121,8 +131,9 @@ COV = rows(wb["盟约表"])
 FUSE = rows(wb["合成配方"])
 STAGE = rows(wb["指令阶段"])
 BUFF = rows(wb["补给增益"])
+PICK_ROWS = rows(wb[PICK_SHEET]) if PICK_SHEET in wb.sheetnames else []
 
-expect = {"干员表": (OP, 155), "道具表": (ITEM, 70), "策略表": (STRAT, 61), "盟约表": (COV, 26),
+expect = {"干员表": (OP, 143), "道具表": (ITEM, 70), "策略表": (STRAT, 61), "盟约表": (COV, 26),
           "合成配方": (FUSE, 5), "指令阶段": (STAGE, 74), "补给增益": (BUFF, 31)}
 for name, (data, n) in expect.items():
     if len(data) != n:
@@ -165,8 +176,8 @@ if os.path.exists(AVATAR_MANIFEST):
     except Exception as e:
         warn("头像清单读取失败：%s" % e)
     for name, meta in AVATARS.items():
-        if name not in OP_NAMES:
-            warn("头像清单中的「%s」不在干员表" % name)
+        if name not in OP_NAMES and name not in {r[0] for r in PICK_ROWS if r}:
+            warn("头像清单中的「%s」不在干员表 / 自选干员表" % name)
             continue
         for k in ("list", "full"):
             p = meta.get(k)
@@ -474,6 +485,65 @@ for _su in SPECIAL_STRATEGY_UNITS:
             "units": _units,
         }
 
+# ---------------------------------------------------------------- 自选干员
+# 来源：主表「自选干员」工作表。它们是 6★ 甄选池，不是固定干员：
+# · 不并入 operators（图鉴仍 155 条，不动分享码的干员下标）；
+# · 不写入 covenants[].members（盟约固定成员仍是 10 人）；
+# · 只在 covenants[].pickMembers 里单列，配队时按 tags 正常计盟约。
+picks = []
+PICK_NAMES = set()
+if PICK_ROWS:
+    if len(PICK_ROWS) < 50:
+        err("自选干员仅 %d 行，少于 50，疑似抓取/整理失败" % len(PICK_ROWS))
+    if len(PICK_ROWS) != 66:
+        warn("自选干员行数为 %d，期望 66（本期 6★ 142 − 固定 76）" % len(PICK_ROWS))
+
+    def split_pick_list(v):
+        return [x.strip() for x in re.split(r"[、,，;；/]", v or "") if x.strip()]
+
+    missing_avatar = 0
+    for r in PICK_ROWS:
+        name, rarity, cls, branch, nation, ingame, hidden, tags_raw, tag_source, char_id, note = (r + [""] * 11)[:11]
+        if not name:
+            err("自选干员存在空名称行")
+            continue
+        if name in OP_NAMES:
+            err("自选干员「%s」与固定干员重名（不能既固定又甄选）" % name)
+            continue
+        if name in PICK_NAMES:
+            err("自选干员重名：「%s」" % name)
+            continue
+        PICK_NAMES.add(name)
+        if rarity not in ("6★", "6", "★★★★★★"):
+            err("自选干员「%s」稀有度应为 6★，实际 %r" % (name, rarity))
+        tags = split_pick_list(tags_raw)
+        if not tags:
+            err("自选干员「%s」没有核心盟约标签" % name)
+        for t in tags:
+            if t not in COV_NAMES:
+                err("自选干员「%s」的盟约「%s」不在盟约表" % (name, t))
+        if not char_id:
+            warn("自选干员「%s」缺少 PRTS ID（charId）" % name)
+        factions = [x.strip() for x in re.split(r"[、,，]", ingame or "") if x.strip()]
+        hidden_factions = [x.strip() for x in re.split(r"[、,，;；]", hidden or "") if x.strip()]
+        avatar = (AVATARS.get(name) or {})
+        if not avatar.get("list"):
+            missing_avatar += 1
+        picks.append({
+            "key": name, "name": name, "type": "自选干员",
+            "rarity": 6, "star": "6★",
+            "class": cls, "branch": branch, "nation": nation,
+            "factions": factions, "hiddenFactions": hidden_factions,
+            "tags": tags,
+            "tagsSource": tag_source or ("无核心→协防" if tags == ["协防干员"] else "阵营并集"),
+            "charId": char_id,
+            "prts": {"page": name, "url": "https://prts.wiki/w/" + urllib.parse.quote(name)},
+            "avatar": avatar.get("list"), "avatarFull": avatar.get("full"),
+            "note": note,
+        })
+    if missing_avatar:
+        warn("自选干员有 %d/%d 名缺少头像（先跑 prepare_avatars.py）" % (missing_avatar, len(PICK_ROWS)))
+
 # ---------------------------------------------------------------- 盟约
 NUM_RE = re.compile(r"(\d+)")
 
@@ -591,6 +661,15 @@ for c in covenants:
     if c["rank"] == "additional" and c["family"] == "faction":
         err("附加盟约「%s」不应使用 faction 子类" % c["name"])
 
+# 自选干员单列：只写 pickMembers，绝不改 members / memberCount。
+# 核心盟约的固定成员必须仍是 10 人——这是「自选不占 10 人名额」的硬校验。
+for c in covenants:
+    c["pickMembers"] = [p["name"] for p in picks if c["name"] in p["tags"]]
+    c["pickCount"] = len(c["pickMembers"])
+    if c["rank"] == "core" and len(c["members"]) != 10:
+        err("核心盟约「%s」固定成员应为 10 人，实际 %d（自选干员不得混入 members）" %
+            (c["name"], len(c["members"])))
+
 # 图标清单的键必须能在本期数据里找到；多出来的多半是跨期残留
 for k in sorted(set(ICONS["items"]) - ITEM_NAMES):
     warn("图标清单里的道具「%s」不在道具表（跨期残留？）" % k)
@@ -624,11 +703,17 @@ payload = {
         "operators": len(operators), "items": len(items), "strategies": len(strategies),
         "covenants": len(covenants), "fusions": len(fusions),
         "stages": sum(len(s["stages"]) for s in strategies), "buffs": len(buffs),
-        "specials": len(special_names),
+        "specials": len(special_names), "picks": len(picks),
     },
     "tiers": TIERS,
     "specialMeta": SPECIAL_META,
+    "pickMeta": {
+        "source": "卫戍协议数据表.xlsx / 自选干员",
+        "rule": "6★、非固定干员；按 ingameFaction ∪ hiddenFaction 推导核心盟约，无匹配为协防干员",
+        "note": "自选干员单列，不计入盟约固定 10 人；配队中按 tags 参与激活/强化",
+    },
     "operators": operators,
+    "picks": picks,
     "items": items,
     "strategies": strategies,
     "covenants": covenants,
@@ -655,6 +740,8 @@ lines.append("| 表 | 行数 | 基线 | 状态 |")
 lines.append("| --- | --- | --- | --- |")
 for name, (data, n) in expect.items():
     lines.append("| %s | %d | %d | %s |" % (name, len(data), n, "✅" if len(data) == n else "❌"))
+if PICK_ROWS:
+    lines.append("| 自选干员 | %d | 66 | %s |" % (len(PICK_ROWS), "✅" if len(PICK_ROWS) == 66 else "⚠️"))
 lines.append("")
 lines.append("## 分布\n")
 lines.append("- 阶数：" + dist(lambda o: o["tierLabel"], operators))
@@ -682,6 +769,14 @@ if SPECIAL_META:
     lines.append("- 特殊干员档案：%s，PRTS 抓取 %s，游戏数据 %s" % (
         SPECIAL_META.get("season", "?"), SPECIAL_META.get("fetchedAt", "?"),
         SPECIAL_META.get("gameDataVersion", "?")))
+if picks:
+    _pc = collections.Counter()
+    for _p in picks:
+        _pc[_p["tags"][0] if _p["tags"] else "无"] += 1
+    lines.append("- 自选干员：%d 名（%s）；单列，不计入盟约固定 10 人" % (
+        len(picks), "、".join("%s %d" % (k, v) for k, v in _pc.most_common())))
+    lines.append("- 盟约自选池：" + "、".join(
+        "%s %d" % (c["name"], c["pickCount"]) for c in covenants if c["pickCount"]))
 _fu = [(s["key"], len(s["fixedUnits"]["units"])) for s in strategies if s.get("fixedUnits")]
 if _fu:
     lines.append("- 策略固定添加的专属单位：%s（非本期特殊干员，只做 PRTS 说明）" % "、".join(

@@ -280,13 +280,15 @@ check('层数：输入后写进 URL，盟约块显示节点与层数', () => {
   assert.match(cards.innerHTML, /cov-nodes/);
 });
 
-check('选人面板：搜索框、候选、筛选齐全，且排除自选配置', () => {
+check('选人面板：搜索框、候选、筛选齐全，自选作为阶数 chip', () => {
   Team.openSheet(3, 'op', -1);
   assert.equal(sheet.hidden, false);
   assert.match(sheet.innerHTML, /id="pq"/);
   assert.match(sheet.innerHTML, /data-pick=/);
   assert.match(sheet.innerHTML, /chip-tag/);
-  assert.doesNotMatch(sheet.innerHTML, /自选配置/);
+  assert.match(sheet.innerHTML, /data-ptier="0"[^>]*>自选/);
+  assert.match(sheet.innerHTML, /data-choose-pick=/);
+  assert.doesNotMatch(sheet.innerHTML, /data-pick="自选配置/);
   // 连续添加开关默认打开
   assert.match(sheet.innerHTML, /data-batch-toggle/);
   assert.match(sheet.innerHTML, /data-batch-toggle aria-pressed="true"/);
@@ -353,13 +355,13 @@ check('分享：面板里有代码、链接和说明文本', () => {
   Store.setTeam(team);
 
   const text = Team.shareText();
-  assert.match(text, /GSPA2\.[A-Za-z0-9_-]+/);
+  assert.match(text, /GSPA3\.[A-Za-z0-9_-]+/);
   assert.match(text, /#\/team\?c=/);
   assert.match(text, /我分享了一个卫戍协议配队/);
 
   Team.openSheet(-1, 'share', -1);
   assert.match(sheet.innerHTML, /分享配队/);
-  assert.match(sheet.innerHTML, /GSPA2\./);
+  assert.match(sheet.innerHTML, /GSPA3\./);
   assert.match(sheet.innerHTML, /data-copy-share/);
   Team.closeSheet();
 });
@@ -403,7 +405,7 @@ check('分享链接：?c= 打开即还原，不用再粘贴', () => {
   Store.setTeam(team);
 
   const text = Team.shareText();
-  assert.match(text, /#\/team\?c=GSPA2\./);
+  assert.match(text, /#\/team\?c=GSPA3\./);
 
   const link = text.split('\n')[1];
   const parsed = Store.parseHash(link.slice(link.indexOf('#')));
@@ -430,7 +432,123 @@ check('导入：识别不到时返回 null', () => {
   assert.equal(Team.parseShareText(''), null);
 });
 
-/* ---------------- 输出 ---------------- */
+/* ---------------- 自选干员 ---------------- */
+check('自选干员：面板、占席、计入盟约', () => {
+  Team.openSheet(0, 'op', -1);
+  assert.match(sheet.innerHTML, /data-choose-pick="斩业星熊"/);
+  assert.match(sheet.innerHTML, /不计入盟约固定 10 人/);
+  Team.closeSheet();
+
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { p: '斩业星熊', e: false };
+  Store.setTeam(team);
+  const res = Calc.evaluate(Store.getTeam(), win.GSPA_DATA);
+  assert.equal(res.rows.find((r) => r.name === '炎').count, 1);
+  assert.equal(res.summary.price, 4, '自选干员售价 4');
+  const html = Team.render();
+  assert.match(html, /斩业星熊/);
+  assert.match(html, /自选/);
+  assert.match(html, /data-tip-op="斩业星熊"/);
+});
+
+check('自选干员：URL p= 往返', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { p: '斩业星熊', e: false };
+  Store.setTeam(team);
+  assert.match(win.location.hash, /p=/);
+  const parsed = Store.parseHash(win.location.hash);
+  assert.equal(parsed.team.slots[0].p, '斩业星熊');
+  assert.equal(parsed.team.slots[0].k, undefined);
+});
+
+check('自选干员：GSPA3 分享码往返', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { p: '斩业星熊', e: true };
+  Store.setTeam(team);
+  const code = win.Code.encode(Store.getTeam(), win.GSPA_DATA);
+  assert.match(code, /^GSPA3\./);
+  const dec = win.Code.decode(code, win.GSPA_DATA);
+  assert.ok(dec);
+  assert.equal(dec.team.slots[0].p, '斩业星熊');
+  assert.equal(dec.team.slots[0].e, true);
+});
+
+check('自选干员：超过 2 名时截断到 2', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { p: '斩业星熊' };
+  team.slots[1] = { p: '煌' };
+  team.slots[2] = { p: '凯尔希' };
+  Store.setTeam(team);
+  const kept = Store.getTeam();
+  assert.equal(kept.slots.filter((s) => s && s.p).length, 2);
+  const html = Team.render();
+  assert.match(html, /2\/2/);
+});
+
+check('GSPA2 旧码仍能解码（无自选字段）', () => {
+  const bits = [];
+  const w = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
+  w(0, 1);                                   // 8 席
+  w(win.Code.dataTag(win.GSPA_DATA), 8);     // 数据指纹
+  w(1, 4);                                   // 1 条记录
+  const opIdx = win.GSPA_DATA.operators.findIndex((o) => o.name === '拜松') + 1;
+  w(opIdx, 8);                               // 干员下标
+  w(0, 1);                                   // 精锐
+  w(0, 1);                                   // 无装备
+  w(0, 3);                                   // 无层数
+  while (bits.length % 8) bits.push(0);
+  const bytes = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    let v = 0;
+    for (let j = 0; j < 8; j++) v = (v << 1) | bits[i + j];
+    bytes.push(v);
+  }
+  const b64 = Buffer.from(bytes).toString('base64')
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const dec = win.Code.decode('GSPA2.' + b64, win.GSPA_DATA);
+  assert.ok(dec);
+  assert.equal(dec.team.slots[0].k, '拜松');
+  assert.equal(dec.team.slots[0].p, undefined);
+});
+
+check('盟约固定成员仍是 10 人，自选干员只在 pickMembers', () => {
+  const c = win.GSPA_DATA.covenants.find((x) => x.name === '炎');
+  assert.equal(c.members.length, 10);
+  assert.equal(c.memberCount, 10);
+  assert.ok(c.pickMembers.includes('斩业星熊'));
+  assert.equal(c.pickCount, c.pickMembers.length);
+});
+
+check('自选干员并入干员查询：自选 + 炎 命中斩业星熊', () => {
+  Store.set({ view: 'op', sel: null, q: '自选 炎', tiers: [], tags: [] });
+  win.UI.render();
+  assert.match(cards.innerHTML, /斩业星熊/);
+  assert.match(cards.innerHTML, /自选干员/);
+  assert.match(cards.innerHTML, /data-team-toggle="斩业星熊"/);
+
+  // 阶数筛选项「自选」= 0
+  Store.set({ view: 'op', sel: null, q: '', tiers: [0], tags: [] });
+  win.UI.render();
+  assert.match(cards.innerHTML, /斩业星熊/);
+  assert.doesNotMatch(cards.innerHTML, /拜松/);
+
+  Store.set({ view: 'op', sel: null, q: '', tiers: [], tags: [] });
+});
+
+check('图鉴：加入 / 移出配队', () => {
+  Store.setTeam(Calc.emptyTeam(8));
+  Team.toggleFromList('拜松');
+  assert.equal(Store.getTeam().slots[0].k, '拜松');
+  Team.toggleFromList('拜松');
+  assert.equal(Store.getTeam().slots[0], null);
+
+  Team.toggleFromList('斩业星熊');
+  assert.equal(Store.getTeam().slots[0].p, '斩业星熊');
+  Team.toggleFromList('煌');
+  assert.equal(Store.getTeam().slots[1].p, '煌');
+  Team.toggleFromList('凯尔希');
+  assert.equal(Store.getTeam().slots[2], null, '第 3 名自选被拦截');
+});
 let failed = 0;
 for (const [status, msg] of results) {
   if (status !== 'ok') failed++;

@@ -33,7 +33,7 @@ function sampleTeam() {
 test('分享码：编码 → 解码能还原队伍、精锐、装备、转职、层数', () => {
   const team = sampleTeam();
   const code = Code.encode(team, data);
-  assert.match(code, /^GSPA2\.[A-Za-z0-9_-]+$/);
+  assert.match(code, /^GSPA3\.[A-Za-z0-9_-]+$/);
 
   const res = Code.decode(code, data);
   assert.ok(res, '应能解码');
@@ -109,4 +109,23 @@ test('分享码：转职盟约、两件装备与「进阶形态」分别还原',
     { k: '维式重锤', e: false }
   ]);
   assert.equal(res.team.slots[0].m, '萨尔贡');
+});
+
+test('分享码：自选干员（p）随 GSPA3 还原，最多 2 名', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { p: '斩业星熊', e: true };
+  const code = Code.encode(team, data);
+  assert.match(code, /^GSPA3\./);
+  const res = Code.decode(code, data);
+  assert.ok(res);
+  assert.equal(res.team.slots[0].k, undefined);
+  assert.equal(res.team.slots[0].p, '斩业星熊');
+  assert.equal(res.team.slots[0].e, true);
+
+  const over = Calc.emptyTeam(8);
+  over.slots[0] = { p: '斩业星熊' };
+  over.slots[1] = { p: '煌' };
+  over.slots[2] = { p: '凯尔希' };
+  const dec = Code.decode(Code.encode(over, data), data);
+  assert.equal(dec.team.slots.filter((s) => s && s.p).length, 2);
 });

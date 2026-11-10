@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0f14">
+<title>敌人图鉴 · 卫戍协议小助手</title>
+<meta name="description" content="《明日方舟》卫戍协议·规程特殊敌人图鉴：179 个敌人、9 类词条、93 条特殊敌人配置、10 张战场地图，支持搜索、词条组合筛选、身份筛选与地图机制速查。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5 4.5 7.3v8.6c0 6.6 4.7 11.5 11.5 13.6 6.8-2.1 11.5-7 11.5-13.6V7.3z' fill='%235bd1e6'/%3E%3Cpath d='M10 11.6h12M16 11.6v10.2' stroke='%230b0f14' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/enemies.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html" aria-label="返回 GSPA 主站">
+      <span class="brand-mark" aria-hidden="true">卫</span>
+      <span class="brand-text">卫戍协议<small>GSPA</small></span>
+    </a>
+    <span class="brand-sub">敌人图鉴</span>
+
+    <div class="search" role="search">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.6" cy="10.6" r="6.1"/><path d="m15.2 15.2 4.6 4.6"/></svg>
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="搜索敌人 / 敌人 ID / 词条 / 地图…" aria-label="搜索敌人、词条或地图">
+      <button id="qclear" class="search-clear" type="button" aria-label="清空搜索" hidden>×</button>
+      <kbd>/</kbd>
+    </div>
+
+    <div class="top-actions">
+      <a class="back-link" href="index.html" title="返回主站">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.8"><path d="M15 5l-7 7 7 7"/></svg>
+        <span>返回主站</span>
+      </a>
+      <button id="theme" class="icon-btn" type="button" title="切换深色 / 浅色" aria-label="切换深色 / 浅色">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div>
+      <p class="kicker">STRONGHOLD PROTOCOL / V3_1 / ENEMY CODEX</p>
+      <h1>特殊敌人<em>图鉴</em></h1>
+      <p class="intro">按词条、身份和名称查询 179 个敌人；每个特殊敌人带普通 / 精英随从。另附 10 张战场地图的场地、地形与装置速查。</p>
+    </div>
+    <div class="hero-stats" id="heroStats"></div>
+  </section>
+
+  <div class="view-switch" role="tablist" aria-label="敌人 / 地图">
+    <button type="button" role="tab" id="tabEnemy" aria-selected="true" data-view="enemy">敌人</button>
+    <button type="button" role="tab" id="tabMap" aria-selected="false" data-view="map">地图</button>
+  </div>
+
+  <!-- ================= 敌人 ================= -->
+  <section id="viewEnemy" aria-label="敌人图鉴">
+    <div class="filters">
+      <div class="filter-block">
+        <div class="filter-head">
+          <span>词条</span>
+          <button type="button" class="mode-btn" id="tagMode" data-mode="or" title="切换：任一 / 同时满足">OR</button>
+        </div>
+        <div class="chips" id="tagChips"></div>
+      </div>
+      <div class="filter-block">
+        <div class="filter-head"><span>身份</span></div>
+        <div class="chips" id="roleChips"></div>
+      </div>
+      <div class="filter-block">
+        <div class="filter-head"><span>其它</span></div>
+        <div class="filter-checks">
+          <label><input type="checkbox" id="dualOnly"> 只看双等级（0 / 1）</label>
+          <label><input type="checkbox" id="crossOnly"> 只看跨词条（≥ 2 类）</label>
+        </div>
+      </div>
+      <button type="button" class="reset-btn" id="resetFilters">重置筛选</button>
+    </div>
+
+    <div class="toolbar">
+      <span class="count" id="count"></span>
+      <div class="active-filters" id="activeFilters"></div>
+      <div class="toolbar-right">
+        <label for="sort" class="count">排序</label>
+        <select id="sort" class="sort-select">
+          <option value="index">图鉴顺序</option>
+          <option value="name">名称</option>
+          <option value="hp">生命 ↓</option>
+          <option value="atk">攻击 ↓</option>
+          <option value="def">防御 ↓</option>
+          <option value="res">法抗 ↓</option>
+          <option value="related">关联配置数 ↓</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cards" id="cards"></div>
+    <div class="empty" id="empty" hidden>
+      <b>没有匹配的敌人</b>
+      <p id="emptyText">试试减少词条，或换成 OR 模式。</p>
+      <button type="button" id="emptyReset">重置所有筛选</button>
+    </div>
+  </section>
+
+  <!-- ================= 地图 ================= -->
+  <section id="viewMap" aria-label="战场地图" hidden>
+    <div class="notice map-note">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.4v5.4M12 16.4v.4"/></svg>
+      <div><b>地图 ≠ 敌人列表。</b> 卫戍协议的每局地图与敌方势力随机搭配，PRTS 也没有「地图 → 敌人」的固定表；这里做的是地图机制速查，不能按地图限定敌人。要查敌人请回到「敌人」页按词条筛选。</div>
+    </div>
+    <div class="toolbar">
+      <span class="count" id="mapCount"></span>
+    </div>
+    <div class="map-grid" id="mapCards"></div>
+    <div class="empty" id="mapEmpty" hidden>
+      <b>没有匹配的地图</b>
+      <p>试试地图编号、地形或装置名。</p>
+      <button type="button" id="mapClear">清空搜索</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>数据：<code>activity_table.json → specialEnemyInfoDict</code>（V3_1，93 条配置）+ <code>enemy_database</code>（179 个敌人的名称、描述、等级数值）+ PRTS 战场一览（10 张地图 × 3 场地）。头像来自 PRTS / 本地解包，仅用于非商业速查。</p>
+  <p>地图与敌方势力随机搭配；本页不声称「某地图必出某敌人」。游戏更新后数据可能滞后，具体以游戏内为准。</p>
+</footer>
+
+<dialog class="modal" id="enemyDialog" aria-labelledby="enemyTitle">
+  <div class="modal-scroll">
+    <div class="modal-head">
+      <img id="enemyImg" alt="">
+      <div class="modal-title">
+        <h2 id="enemyTitle"></h2>
+        <code class="id" id="enemyId"></code>
+        <div class="tag-line" id="enemyTags"></div>
+        <div class="badges" id="enemyRoles" style="margin-top:6px"></div>
+      </div>
+      <button type="button" class="modal-close" data-close="enemyDialog" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" id="enemyDesc"></p>
+      <div class="detail-cols">
+        <section class="detail-section">
+          <h3>等级数值（数据库原始值）</h3>
+          <table class="stat-table">
+            <thead><tr><th>等级</th><th>生命</th><th>攻击</th><th>防御</th><th>法抗</th></tr></thead>
+            <tbody id="enemyLevels"></tbody>
+          </table>
+          <dl class="kv" id="enemyMeta" style="margin-top:14px"></dl>
+          <a class="prts-link" id="enemyPrts" href="#" target="_blank" rel="noopener noreferrer">在 PRTS 查看完整页面 ↗</a>
+        </section>
+        <section class="detail-section">
+          <h3>出现身份</h3>
+          <p class="role-line" id="enemyRoleText"></p>
+          <h3 style="margin-top:14px">相关特殊敌人包</h3>
+          <ul class="config-list" id="enemyConfigs"></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="modal" id="mapDialog" aria-labelledby="mapTitle">
+  <div class="modal-scroll">
+    <div class="map-dialog-head">
+      <div>
+        <h2 id="mapTitle"></h2>
+        <div class="sub" id="mapSub"></div>
+      </div>
+      <button type="button" class="modal-close" data-close="mapDialog" aria-label="关闭" style="margin-left:auto">×</button>
+    </div>
+    <div class="field-tabs" id="fieldTabs"></div>
+    <div class="map-stage"><img id="mapImage" alt=""></div>
+    <div class="map-detail" id="mapDetail"></div>
+  </div>
+</dialog>
+
+<noscript><div class="empty"><b>需要启用 JavaScript</b><p>数据已内嵌在本地文件中，不会发起网络请求。</p></div></noscript>
+
+<script src="data/enemies.js"></script>
+<script src="js/enemies.js"></script>
+</body>
+</html>

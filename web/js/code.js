@@ -22,12 +22,13 @@
 (function (global) {
   'use strict';
 
-  var PREFIX = 'GSPA2.';
-  var VERSION = 2;
-  var RE = /GSPA2\.([A-Za-z0-9_-]+)/;
+  var PREFIX = 'GSPA3.';
+  var PREFIX2 = 'GSPA2.';
+  var VERSION = 3;
+  var RE = /GSPA([23])\.([A-Za-z0-9_-]+)/;
 
   var BITS_SIZE = 1, BITS_COUNT = 4, BITS_TAG = 8;
-  var BITS_OP = 8, BITS_FLAG = 1;
+  var BITS_OP = 8, BITS_FLAG = 1, BITS_PICK = 8;
   var BITS_ITEM = 6, BITS_ITEM_ELITE = 1, BITS_COV = 5;
   var BITS_LAYER_N = 3, BITS_LAYER_VAL = 14;
 
@@ -46,6 +47,7 @@
     var parts = [];
     var i;
     for (i = 0; i < data.operators.length; i++) parts.push('o:' + data.operators[i].name);
+    for (i = 0; i < (data.picks || []).length; i++) parts.push('p:' + data.picks[i].name);
     for (i = 0; i < data.items.length; i++) parts.push('i:' + data.items[i].name);
     for (i = 0; i < data.covenants.length; i++) parts.push('c:' + data.covenants[i].name);
     var tag = fnv1a(parts.join('|')) & 0xff;
@@ -56,9 +58,10 @@
 
   function indexOf(data) {
     if (data._codeIndex) return data._codeIndex;
-    var idx = { op: {}, item: {}, cov: {} };
+    var idx = { op: {}, pick: {}, item: {}, cov: {} };
     var i;
     for (i = 0; i < data.operators.length; i++) idx.op[data.operators[i].name] = i;
+    for (i = 0; i < (data.picks || []).length; i++) idx.pick[data.picks[i].name] = i;
     for (i = 0; i < data.items.length; i++) idx.item[data.items[i].name] = i;
     for (i = 0; i < data.covenants.length; i++) idx.cov[data.covenants[i].name] = i;
     Object.defineProperty(data, '_codeIndex', { value: idx, writable: true, configurable: true });
@@ -139,9 +142,10 @@
 
     var recs = [];
     var i;
+    var pickCount = 0;
     for (i = 0; i < size; i++) {
       var s = team.slots[i];
-      if (!s || !s.k || idx.op[s.k] == null) continue;
+      if (!s || (!s.k && !s.p)) continue;
 
       var gear = [];
       var list = s.it || [];
@@ -153,9 +157,18 @@
       }
 
       var morph = s.m && idx.cov[s.m] != null ? idx.cov[s.m] + 1 : 0;
+      var pick = s.p && idx.pick[s.p] != null ? idx.pick[s.p] + 1 : 0;
+      // 自选干员上限 2：第 3 名起不再编码（UI 也会拦截）
+      if (pick) {
+        if (pickCount >= 2) continue;
+        pickCount++;
+      }
+      var opIdx = s.k && idx.op[s.k] != null ? idx.op[s.k] + 1 : 0;
+      if (!opIdx && !pick) continue;
       recs.push({
-        op: idx.op[s.k] + 1,
+        op: opIdx,
         elite: s.e ? 1 : 0,
+        pick: pick,
         items: [gear[0] || { i: 0, e: 0 }, gear[1] || { i: 0, e: 0 }],
         morph: morph
       });
@@ -167,6 +180,8 @@
       var hasGear = (r.items[0].i || r.items[1].i || r.morph) ? 1 : 0;
       w.write(r.op, BITS_OP);
       w.write(r.elite, BITS_FLAG);
+      w.write(r.pick ? 1 : 0, BITS_FLAG);
+      if (r.pick) w.write(r.pick, BITS_PICK);
       w.write(hasGear, BITS_FLAG);
       if (hasGear) {
         w.write(r.items[0].i, BITS_ITEM);
@@ -178,11 +193,11 @@
     }
 
     var layers = [];
-    var raw = team.layers || {};
-    for (var name in raw) {
-      if (!raw.hasOwnProperty(name)) continue;
+    var rawLayers = team.layers || {};
+    for (var name in rawLayers) {
+      if (!rawLayers.hasOwnProperty(name)) continue;
       var ci = idx.cov[name];
-      var v = Math.min(16383, Math.max(0, Math.floor(raw[name] || 0)));
+      var v = Math.min(16383, Math.max(0, Math.floor(rawLayers[name] || 0)));
       if (ci == null || !v) continue;
       layers.push([ci, v]);
     }
@@ -202,9 +217,10 @@
   function decode(text, data) {
     var m = String(text == null ? '' : text).match(RE);
     if (!m) return null;
+    var ver = m[1];
 
     var bytes;
-    try { bytes = fromB64(m[1]); } catch (e) { return null; }
+    try { bytes = fromB64(m[2]); } catch (e) { return null; }
     if (!bytes.length) return null;
 
     var r = new BitReader(bytes);
@@ -224,27 +240,64 @@
     for (i = 0; i < size; i++) team.slots.push(null);
 
     var placed = 0;
+    var pickSeen = 0;
     for (i = 0; i < n && i < size; i++) {
       var opIdx = r.read(BITS_OP);
       var elite = r.read(BITS_FLAG);
+      var hasPick = 0, pickIdx = 0;
+      if (ver === '3') {
+        hasPick = r.read(BITS_FLAG);
+        if (hasPick) pickIdx = r.read(BITS_PICK);
+      }
       var hasGear = r.read(BITS_FLAG);
-      if (opIdx === null || elite === null || hasGear === null) break;
+      if (opIdx === null || elite === null || hasPick === null || hasGear === null) break;
 
-      var op = data.operators[opIdx - 1];
-      if (!op) { warnings.push('第 ' + (i + 1) + ' 席的干员在当前数据里不存在，已跳过'); continue; }
-
-      var slot = { k: op.name, e: !!elite };
+      // 先读完整个记录，再校验下标；避免坏码把后续位流读错位。
+      var ai = 0, ae = 0, bi = 0, be = 0, mo = 0;
       if (hasGear) {
-        var ai = r.read(BITS_ITEM);
-        var ae = r.read(BITS_ITEM_ELITE);
-        var bi = r.read(BITS_ITEM);
-        var be = r.read(BITS_ITEM_ELITE);
-        var mo = r.read(BITS_COV);
-        if (ai === null || ae === null || bi === null || be === null || mo === null) {
-          if (placed < size) team.slots[placed++] = slot;
-          break;
-        }
+        ai = r.read(BITS_ITEM);
+        ae = r.read(BITS_ITEM_ELITE);
+        bi = r.read(BITS_ITEM);
+        be = r.read(BITS_ITEM_ELITE);
+        mo = r.read(BITS_COV);
+        if (ai === null || ae === null || bi === null || be === null || mo === null) break;
+      }
 
+      var slot = null;
+      if (opIdx === 0) {
+        // op=0 是「纯自选干员」哨兵：没有占位干员，只有 picks 下标。
+        if (!hasPick || pickIdx <= 0) {
+          warnings.push('第 ' + (i + 1) + ' 席缺少自选干员下标，已跳过');
+          continue;
+        }
+        var pk0 = (data.picks || [])[pickIdx - 1];
+        if (!pk0) {
+          warnings.push('第 ' + (i + 1) + ' 席的自选干员在当前数据里不存在，已跳过');
+          continue;
+        }
+        if (pickSeen >= 2) {
+          warnings.push('自选干员最多 2 名，已忽略第 3 名');
+          continue;
+        }
+        pickSeen++;
+        slot = { p: pk0.name, e: !!elite };
+      } else {
+        var op = data.operators[opIdx - 1];
+        if (!op) { warnings.push('第 ' + (i + 1) + ' 席的干员在当前数据里不存在，已跳过'); continue; }
+        slot = { k: op.name, e: !!elite };
+        if (hasPick && pickIdx > 0) {
+          var pk = (data.picks || [])[pickIdx - 1];
+          if (!pk) {
+            warnings.push('第 ' + (i + 1) + ' 席的自选干员在当前数据里不存在，已忽略');
+          } else if (pickSeen >= 2) {
+            warnings.push('自选干员最多 2 名，已忽略第 3 名');
+          } else {
+            slot.p = pk.name;
+            pickSeen++;
+          }
+        }
+      }
+      if (hasGear) {
         var gear = [];
         if (ai > 0 && data.items[ai - 1]) gear.push({ k: data.items[ai - 1].name, e: !!ae });
         if (bi > 0 && data.items[bi - 1]) {
@@ -273,6 +326,7 @@
 
   global.Code = {
     PREFIX: PREFIX,
+    PREFIX2: PREFIX2,
     VERSION: VERSION,
     encode: encode,
     decode: decode,

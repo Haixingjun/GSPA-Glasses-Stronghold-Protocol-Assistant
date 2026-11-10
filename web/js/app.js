@@ -298,6 +298,14 @@
     var t = e.target;
     if (!t || !t.closest) return;
 
+    // 0) 图鉴 / 详情里的「加入（移出）配队」
+    var teamBtn = t.closest('[data-team-toggle]');
+    if (teamBtn) {
+      e.preventDefault();
+      if (global.Team) global.Team.toggleFromList(teamBtn.getAttribute('data-team-toggle'));
+      return;
+    }
+
     // 1) 盟约标签（卡片内 / 详情内）
     var tag = t.closest('[data-tag]');
     if (tag) {
@@ -305,7 +313,8 @@
       var name = tag.getAttribute('data-tag');
       toggleFilters(false);
       Store.set({
-        view: 'op', q: '', tiers: [], tags: [name], tagMode: 'and',
+        view: 'op',
+        q: '', tiers: [], tags: [name], tagMode: 'and',
         triggers: [], prices: [], itypes: [], icats: [], otypes: [], ranks: [],
         hidden: false, sel: null
       }, { push: true });
@@ -496,6 +505,8 @@
     var on = (typeof force === 'boolean') ? force : !document.body.classList.contains('filters-open');
     document.body.classList.toggle('filters-open', on);
     if (on) {
+      // 详情抽屉和筛选抽屉都贴底，先收起详情，避免两个面板叠在一起
+      if (Store.state.sel) Store.set({ sel: null });
       document.body.classList.remove('detail-open');
       els.filters.scrollTop = 0;
     }
@@ -522,7 +533,7 @@
 
   function refreshLayout() {
     var w = window.innerWidth;
-    if (w >= 640) document.body.classList.remove('filters-open');
+    if (w >= 1024) document.body.classList.remove('filters-open');
 
     var hasSel = !!Store.state.sel && Store.state.view !== 'about';
     var hasEntity = hasSel && !!Store.entity(Store.state.view, Store.state.sel);
