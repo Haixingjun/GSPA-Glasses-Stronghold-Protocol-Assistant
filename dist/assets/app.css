@@ -215,6 +215,13 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
 .tab[aria-selected="true"] { color: var(--accent); background: rgba(91, 209, 230, 0.1); }
 .tab:active { transform: scale(0.97); }
 
+/* 6 个 tab 在窄屏上收紧，避免「配队」被挤出屏幕 */
+@media (max-width: 479px) {
+  .tabs { gap: 0; padding-left: 2px; padding-right: 2px; }
+  .tab { padding: 4px 1px; font-size: 10.5px; gap: 1px; }
+  .tab .ico { width: 18px; height: 18px; }
+}
+
 @media (min-width: 768px) {
   .tabs {
     position: static;
@@ -324,12 +331,14 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
 
 .filters-foot { display: none; }
 
-/* 手机：底部抽屉 */
-@media (max-width: 639px) {
+/* 手机 / 平板：底部抽屉（不再使用横向滚动的筛选条） */
+@media (max-width: 1023px) {
   .filters {
     position: fixed; z-index: 70;
     left: 0; right: 0; bottom: 0;
     max-height: 82vh; overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 96px;
     padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px));
     background: var(--bg1);
     border-top: 1px solid var(--line2);
@@ -356,23 +365,7 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
   background: var(--bg2); color: var(--fg2); cursor: pointer;
 }
 .filters-x .ico { width: 15px; height: 15px; }
-@media (max-width: 639px) { .filters-x { display: inline-grid; } }
-
-/* 平板：横向滚动条 */
-@media (min-width: 640px) and (max-width: 1023px) {
-  .filters {
-    display: flex; gap: 18px; overflow-x: auto;
-    padding-bottom: 8px;
-  }
-  .filters::-webkit-scrollbar { height: 6px; }
-  .filters::-webkit-scrollbar-track { background: transparent; }
-  .filters::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
-  .filters::-webkit-scrollbar-button { display: none; }
-  .filters-head { display: none; }
-  .filters .filters-head { display: none; }
-  .fgroup { flex: 0 0 auto; max-width: 420px; margin-bottom: 0; }
-  .fgroup[data-wide] { max-width: 560px; }
-}
+@media (max-width: 1023px) { .filters-x { display: inline-grid; } }
 
 /* 桌面：常驻侧栏 */
 @media (min-width: 1024px) {
@@ -416,7 +409,7 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
 }
 .btn-primary:hover { color: var(--accent-ink); filter: brightness(1.06); }
 .btn-filter { display: none; }
-@media (max-width: 639px) { .btn-filter { display: inline-flex; } }
+@media (max-width: 1023px) { .btn-filter { display: inline-flex; } }
 
 .badge {
   display: inline-grid; place-items: center;
@@ -649,6 +642,11 @@ body.no-avatars .icon { display: none; }
 .pill-add { background: var(--bg3); color: var(--fg3); }
 .pill-special { background: rgba(176, 132, 255, 0.16); color: #c9a7ff; }
 [data-theme="light"] .pill-special { background: rgba(110, 60, 200, 0.12); color: #5b3ba8; }
+.pill-pick { background: rgba(64, 196, 140, 0.16); color: #55d6a2; }
+[data-theme="light"] .pill-pick { background: rgba(20, 130, 90, 0.12); color: #147a55; }
+.tier-pick { background: rgba(64, 196, 140, 0.16); color: #55d6a2; }
+[data-theme="light"] .tier-pick { background: rgba(20, 130, 90, 0.12); color: #147a55; }
+.d-members-pick button { border-color: rgba(64, 196, 140, 0.35); }
 
 .desc {
   margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--fg2);
@@ -1065,6 +1063,7 @@ body.sheet-open { overflow: hidden; }
   color: hsl(var(--h, 200), 66%, 70%);
   background: hsla(var(--h, 200), 66%, 60%, 0.14);
 }
+.slot-tag-pick { --h: 155; font-weight: 600; }
 [data-theme="light"] .slot-tag { color: hsl(var(--h, 200), 58%, 36%); }
 .slot-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex: none; }
 .slot-acts { display: flex; align-items: center; gap: 5px; margin-top: auto; }
@@ -1088,8 +1087,9 @@ body.sheet-open { overflow: hidden; }
 .slot-x { flex: 0 0 30px; font-size: 13px; }
 .slot-x:hover { border-color: var(--danger); color: var(--danger); }
 
+/* 第 9 席：按网格顺序落在第 9 个格子。不要强制 grid-column: -2/-1 ——
+   2 列的窄屏上那会把它推到新一行的右格，左侧留一大块空白，像是「掉队」了。 */
 .slot-add {
-  grid-column: -2 / -1;   /* 落在最后一列：尺寸与干员席位一致，靠右 */
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   min-height: 96px;
   border-style: dashed; background: transparent;
@@ -1111,7 +1111,7 @@ body.sheet-open { overflow: hidden; }
   width: 34px; height: 34px; border-radius: 9px;
   background: var(--bg3); color: var(--fg2); font-size: 15px;
 }
-.slot-add-text { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
+.slot-add-text { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; text-align: center; }
 .slot-add-text b { font-size: 12.5px; color: var(--fg); }
 .slot-add-text small { font-size: 10.5px; color: var(--fg3); }
 .tm-slots-foot { margin-top: -4px; }
@@ -1221,6 +1221,10 @@ body.sheet-open { overflow: hidden; }
     animation: sheet-up 0.2s cubic-bezier(0.32, 0.72, 0.28, 1);
   }
 }
+/* 矮屏（手机横屏等）：面板尽量占满可用高度，别只剩两行列表 */
+@media (max-height: 560px) {
+  .sheet { max-height: calc(100vh - 16px); }
+}
 .sheet-in { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .sheet-head {
   display: flex; align-items: center; gap: 10px;
@@ -1243,10 +1247,10 @@ body.sheet-open { overflow: hidden; }
   display: grid; gap: 6px; padding: 4px 14px 9px;
   border-bottom: 1px solid var(--line); flex: none;
 }
+.sheet-filters.is-collapsed { display: none; }
 .sheet-row { display: flex; flex-wrap: wrap; gap: 5px; }
-.sheet-row-tags { max-height: 60px; overflow-y: auto; overscroll-behavior: contain; }
-.sheet-row-tags::-webkit-scrollbar { width: 5px; }
-.sheet-row-tags::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+/* 盟约标签完整换行显示，不再放进固定高的小滚动区里 */
+.sheet-row-tags { overflow: visible; }
 .chip-tag { font-size: 11px; padding: 2px 6px; min-height: 23px; }
 .sheet-list { flex: 1 1 auto; overflow-y: auto; padding: 6px; overscroll-behavior: contain; }
 .sheet-list::-webkit-scrollbar { width: 6px; }
@@ -1262,6 +1266,7 @@ body.sheet-open { overflow: hidden; }
 .pick:hover { background: var(--bg2); }
 .pick.is-used { opacity: 0.45; cursor: default; }
 .pick.is-used:hover { background: transparent; }
+.pick-flex-entry { border: 1px solid rgba(64, 196, 140, 0.3); background: rgba(64, 196, 140, 0.05); }
 .pick-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .pick-name {
   font-size: 13.5px; font-weight: 600; line-height: 1.35;
@@ -1382,6 +1387,20 @@ body.is-dragging .slot { pointer-events: none; }
 
 /* 批量添加 */
 .tm-actions { display: flex; gap: 6px; flex: none; }
+.sheet-fltbtn {
+  flex: none; padding: 3px 8px;
+  border: 1px solid var(--line); border-radius: 7px;
+  background: var(--bg2); color: var(--fg3);
+  font-size: 11.5px; line-height: 1.6; cursor: pointer;
+  transition: border-color 0.13s, color 0.13s, background 0.13s;
+}
+.sheet-fltbtn:hover { border-color: var(--line2); color: var(--fg); }
+.sheet-fltbtn[aria-expanded="true"] {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  background: rgba(91, 209, 230, 0.14);
+  color: var(--accent);
+}
+.sheet-fltbtn .badge { margin-left: 4px; }
 .sheet-batch {
   flex: none; padding: 3px 8px;
   border: 1px solid var(--line); border-radius: 7px;
@@ -1409,9 +1428,6 @@ body.is-dragging .slot { pointer-events: none; }
 }
 [data-theme="light"] .num { color: #0b6bcb; }
 .formula { color: var(--fg3); font-size: 11.5px; }
-.slot-add-text { text-align: center; }
-.slot-add-text b { font-size: 12px; }
-.slot-add-text small { font-size: 10px; }
 
 /* ---------- 17. 分享 / 导入 ---------- */
 .share-box { display: grid; gap: 8px; padding: 12px 14px; min-height: 0; }
@@ -1477,3 +1493,14 @@ body.is-dragging .slot { pointer-events: none; }
   background: var(--accent2); color: #22160a;
   font-size: 7px; font-style: normal; font-weight: 800; line-height: 1;
 }
+
+/* 图鉴 / 详情：加入（移出）配队 */
+.team-toggle {
+  flex: none; padding: 2px 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--bg2); color: var(--fg2); font-size: 11px; cursor: pointer;
+  line-height: 1.6;
+}
+.team-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.team-toggle.is-in { border-color: rgba(64, 196, 140, 0.4); color: #55d6a2; background: rgba(64, 196, 140, 0.08); }
+[data-theme="light"] .team-toggle.is-in { color: #147a55; }
+.btn.team-toggle { font-size: 12px; padding: 6px 12px; }

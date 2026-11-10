@@ -1,47 +1,439 @@
 GSPA · 眼镜卫戍协议小助手 · 构建产物说明
 ========================================
-构建时间：2026-11-10 02:48:01
-数据版本：2026-11-09 04:53
-数据生成：2026-11-10 02:47:53
-资源指纹：ceadae16
+构建时间：2026-11-11 01:58:07
+数据版本：2026-11-11 01:05
+数据生成：2026-11-11 01:38:50
+资源指纹：0182060b
 
 部署：把整个 dist/ 目录上传到站点根目录或任意子目录即可。
 单文件：dist/standalone.html 可单独发送 / 双击打开，无需其他文件。
-头像：dist/assets/avatars 共 286 个 WebP（2704.1 KB），懒加载；单文件版不含头像。
+头像：dist/assets/avatars 共 418 个 WebP（3951.5 KB），懒加载；单文件版不含头像。
 图标：dist/assets/icons 共 314 个 WebP（2027.7 KB，本期「规程」道具 / 策略 / 盟约）；单文件版不含图标。
-缓存：资源已带 ?v=ceadae16，index.html 建议 no-cache，静态资源可长缓存。
+缓存：资源已带 ?v=0182060b，index.html 建议 no-cache，静态资源可长缓存。
 
 首屏（gzip 前 → 后）：
-  index.html           8.2 KB  →   2.8 KB
-  assets/app.css      55.4 KB  →  11.5 KB
-  js/store.js         19.3 KB  →   5.7 KB
-  js/search.js        12.2 KB  →   4.0 KB
-  js/calc.js          12.5 KB  →   4.7 KB
-  js/code.js           9.4 KB  →   3.4 KB
-  js/ui.js            54.2 KB  →  14.0 KB
-  js/team.js          46.0 KB  →  12.8 KB
-  js/app.js           18.2 KB  →   5.5 KB
-  data/data.js       212.9 KB  →  33.6 KB
-  合计                 448.2 KB  →  98.0 KB
-  预算 100 KB（gzip）：通过
+  index.html           8.9 KB  →   3.1 KB
+  assets/app.css      56.9 KB  →  12.1 KB
+  js/store.js         21.7 KB  →   6.4 KB
+  js/search.js        13.0 KB  →   4.3 KB
+  js/calc.js          13.3 KB  →   5.0 KB
+  js/code.js          11.5 KB  →   4.0 KB
+  js/ui.js            60.2 KB  →  15.1 KB
+  js/team.js          57.7 KB  →  15.5 KB
+  js/app.js           18.6 KB  →   5.6 KB
+  data/data.js       244.6 KB  →  39.2 KB
+  合计                 506.4 KB  →  110.2 KB
+  预算 115 KB（gzip）：通过
 
-单文件版 standalone.html：448.2 KB（gzip 93.9 KB）
+单文件版 standalone.html：506.1 KB（gzip 105.6 KB）
 
 dist 文件清单：
   .nojekyll                    0.0 KB
   _headers                     0.7 KB
-  assets/app.css              55.4 KB
-  data/data.js               212.9 KB
-  data/data.json             262.3 KB
-  index.html                   8.2 KB
-  js/app.js                   18.2 KB
-  js/calc.js                  12.5 KB
-  js/code.js                   9.4 KB
-  js/search.js                12.2 KB
-  js/store.js                 19.3 KB
-  js/team.js                  46.0 KB
-  js/ui.js                    54.2 KB
+  assets/app.css              56.9 KB
+  assets/enemies.css          24.1 KB
+  assets/enemies/enemy_1000_gopro_2-160.webp   8.4 KB
+  assets/enemies/enemy_1000_gopro_2-96.webp   3.8 KB
+  assets/enemies/enemy_10031_cnvsld-160.webp   8.6 KB
+  assets/enemies/enemy_10031_cnvsld-96.webp   3.9 KB
+  assets/enemies/enemy_10034_cnvsax-160.webp   8.8 KB
+  assets/enemies/enemy_10034_cnvsax-96.webp   4.2 KB
+  assets/enemies/enemy_10042_prtrop-160.webp   9.6 KB
+  assets/enemies/enemy_10042_prtrop-96.webp   4.5 KB
+  assets/enemies/enemy_10042_prtrop_2-160.webp  10.0 KB
+  assets/enemies/enemy_10042_prtrop_2-96.webp   4.6 KB
+  assets/enemies/enemy_10043_sailor-160.webp   8.8 KB
+  assets/enemies/enemy_10043_sailor-96.webp   4.2 KB
+  assets/enemies/enemy_1005_yokai-160.webp   8.1 KB
+  assets/enemies/enemy_1005_yokai-96.webp   3.6 KB
+  assets/enemies/enemy_1005_yokai_2-160.webp   8.3 KB
+  assets/enemies/enemy_1005_yokai_2-96.webp   3.7 KB
+  assets/enemies/enemy_1005_yokai_3-160.webp   8.2 KB
+  assets/enemies/enemy_1005_yokai_3-96.webp   3.8 KB
+  assets/enemies/enemy_10065_ftzlc-160.webp   9.0 KB
+  assets/enemies/enemy_10065_ftzlc-96.webp   4.4 KB
+  assets/enemies/enemy_10067_ftsjc-160.webp   9.5 KB
+  assets/enemies/enemy_10067_ftsjc-96.webp   4.5 KB
+  assets/enemies/enemy_1006_shield_3-160.webp   7.3 KB
+  assets/enemies/enemy_1006_shield_3-96.webp   3.4 KB
+  assets/enemies/enemy_10083_hlbird-160.webp   8.4 KB
+  assets/enemies/enemy_10083_hlbird-96.webp   4.2 KB
+  assets/enemies/enemy_10084_hlegle-160.webp   8.8 KB
+  assets/enemies/enemy_10084_hlegle-96.webp   4.0 KB
+  assets/enemies/enemy_1009_lurker-160.webp   7.9 KB
+  assets/enemies/enemy_1009_lurker-96.webp   3.8 KB
+  assets/enemies/enemy_1010_demon-160.webp   9.4 KB
+  assets/enemies/enemy_1010_demon-96.webp   4.5 KB
+  assets/enemies/enemy_1010_demon_2-160.webp   9.1 KB
+  assets/enemies/enemy_1010_demon_2-96.webp   4.4 KB
+  assets/enemies/enemy_10122_uacann_2-160.webp   8.9 KB
+  assets/enemies/enemy_10122_uacann_2-96.webp   4.1 KB
+  assets/enemies/enemy_10124_uashld_2-160.webp   9.1 KB
+  assets/enemies/enemy_10124_uashld_2-96.webp   4.2 KB
+  assets/enemies/enemy_10163_mnctur_2-160.webp   9.0 KB
+  assets/enemies/enemy_10163_mnctur_2-96.webp   4.4 KB
+  assets/enemies/enemy_1017_defdrn-160.webp   8.2 KB
+  assets/enemies/enemy_1017_defdrn-96.webp   3.7 KB
+  assets/enemies/enemy_1019_jshoot-160.webp   8.6 KB
+  assets/enemies/enemy_1019_jshoot-96.webp   4.2 KB
+  assets/enemies/enemy_1019_jshoot_2-160.webp   8.4 KB
+  assets/enemies/enemy_1019_jshoot_2-96.webp   4.3 KB
+  assets/enemies/enemy_1041_lazerd-160.webp   8.3 KB
+  assets/enemies/enemy_1041_lazerd-96.webp   3.9 KB
+  assets/enemies/enemy_1041_lazerd_2-160.webp   8.3 KB
+  assets/enemies/enemy_1041_lazerd_2-96.webp   4.0 KB
+  assets/enemies/enemy_1042_frostd-160.webp   8.2 KB
+  assets/enemies/enemy_1042_frostd-96.webp   4.0 KB
+  assets/enemies/enemy_1043_zomsbr-160.webp   8.8 KB
+  assets/enemies/enemy_1043_zomsbr-96.webp   4.4 KB
+  assets/enemies/enemy_1045_hammer-160.webp   9.2 KB
+  assets/enemies/enemy_1045_hammer-96.webp   4.4 KB
+  assets/enemies/enemy_1045_hammer_2-160.webp   8.9 KB
+  assets/enemies/enemy_1045_hammer_2-96.webp   4.2 KB
+  assets/enemies/enemy_1046_agent-160.webp   8.6 KB
+  assets/enemies/enemy_1046_agent-96.webp   4.1 KB
+  assets/enemies/enemy_1061_zomshd-160.webp   9.1 KB
+  assets/enemies/enemy_1061_zomshd-96.webp   4.3 KB
+  assets/enemies/enemy_1064_snsbr-160.webp   8.4 KB
+  assets/enemies/enemy_1064_snsbr-96.webp   4.1 KB
+  assets/enemies/enemy_1067_snslime_2-160.webp   8.6 KB
+  assets/enemies/enemy_1067_snslime_2-96.webp   4.1 KB
+  assets/enemies/enemy_1071_dftman-160.webp   7.6 KB
+  assets/enemies/enemy_1071_dftman-96.webp   3.7 KB
+  assets/enemies/enemy_1072_dlancer-160.webp   8.6 KB
+  assets/enemies/enemy_1072_dlancer-96.webp   4.1 KB
+  assets/enemies/enemy_1103_wdkght_2-160.webp   9.9 KB
+  assets/enemies/enemy_1103_wdkght_2-96.webp   4.7 KB
+  assets/enemies/enemy_1104_lfkght-160.webp   9.5 KB
+  assets/enemies/enemy_1104_lfkght-96.webp   4.6 KB
+  assets/enemies/enemy_1104_lfkght_3-160.webp   9.3 KB
+  assets/enemies/enemy_1104_lfkght_3-96.webp   4.3 KB
+  assets/enemies/enemy_1112_emppnt-160.webp   7.2 KB
+  assets/enemies/enemy_1112_emppnt-96.webp   3.3 KB
+  assets/enemies/enemy_1116_liprr-160.webp   8.5 KB
+  assets/enemies/enemy_1116_liprr-96.webp   4.0 KB
+  assets/enemies/enemy_1116_liprr_2-160.webp   8.4 KB
+  assets/enemies/enemy_1116_liprr_2-96.webp   3.9 KB
+  assets/enemies/enemy_1118_lidbox_2-160.webp  10.1 KB
+  assets/enemies/enemy_1118_lidbox_2-96.webp   4.8 KB
+  assets/enemies/enemy_1119_vofsd-160.webp   8.9 KB
+  assets/enemies/enemy_1119_vofsd-96.webp   4.3 KB
+  assets/enemies/enemy_1121_lifbos-160.webp   9.5 KB
+  assets/enemies/enemy_1121_lifbos-96.webp   4.7 KB
+  assets/enemies/enemy_1121_lifbos_2-160.webp   9.4 KB
+  assets/enemies/enemy_1121_lifbos_2-96.webp   4.6 KB
+  assets/enemies/enemy_1131_sbeast-160.webp   7.7 KB
+  assets/enemies/enemy_1131_sbeast-96.webp   3.6 KB
+  assets/enemies/enemy_1131_sbeast_2-160.webp   7.8 KB
+  assets/enemies/enemy_1131_sbeast_2-96.webp   3.6 KB
+  assets/enemies/enemy_1132_sarchn-160.webp   8.0 KB
+  assets/enemies/enemy_1132_sarchn-96.webp   3.7 KB
+  assets/enemies/enemy_1132_sarchn_2-160.webp   7.9 KB
+  assets/enemies/enemy_1132_sarchn_2-96.webp   3.7 KB
+  assets/enemies/enemy_1133_harchn-160.webp   7.7 KB
+  assets/enemies/enemy_1133_harchn-96.webp   3.6 KB
+  assets/enemies/enemy_1133_harchn_2-160.webp   7.4 KB
+  assets/enemies/enemy_1133_harchn_2-96.webp   3.5 KB
+  assets/enemies/enemy_1148_dssbr-160.webp   8.4 KB
+  assets/enemies/enemy_1148_dssbr-96.webp   3.8 KB
+  assets/enemies/enemy_1148_dssbr_2-160.webp   8.1 KB
+  assets/enemies/enemy_1148_dssbr_2-96.webp   3.8 KB
+  assets/enemies/enemy_1158_divman-160.webp   8.6 KB
+  assets/enemies/enemy_1158_divman-96.webp   4.2 KB
+  assets/enemies/enemy_1160_hvyslr-160.webp   8.4 KB
+  assets/enemies/enemy_1160_hvyslr-96.webp   4.3 KB
+  assets/enemies/enemy_1160_hvyslr_2-160.webp   8.6 KB
+  assets/enemies/enemy_1160_hvyslr_2-96.webp   4.5 KB
+  assets/enemies/enemy_1161_tidmag-160.webp   7.8 KB
+  assets/enemies/enemy_1161_tidmag-96.webp   3.9 KB
+  assets/enemies/enemy_1161_tidmag_2-160.webp   8.0 KB
+  assets/enemies/enemy_1161_tidmag_2-96.webp   4.0 KB
+  assets/enemies/enemy_1165_duhond-160.webp   8.6 KB
+  assets/enemies/enemy_1165_duhond-96.webp   3.9 KB
+  assets/enemies/enemy_1166_dusbr-160.webp   9.3 KB
+  assets/enemies/enemy_1166_dusbr-96.webp   4.3 KB
+  assets/enemies/enemy_1166_dusbr_2-160.webp   9.2 KB
+  assets/enemies/enemy_1166_dusbr_2-96.webp   4.3 KB
+  assets/enemies/enemy_1168_dumage-160.webp   8.6 KB
+  assets/enemies/enemy_1168_dumage-96.webp   3.9 KB
+  assets/enemies/enemy_1169_duphlx-160.webp   8.8 KB
+  assets/enemies/enemy_1169_duphlx-96.webp   4.0 KB
+  assets/enemies/enemy_1169_duphlx_2-160.webp   8.9 KB
+  assets/enemies/enemy_1169_duphlx_2-96.webp   4.1 KB
+  assets/enemies/enemy_1170_dushld-160.webp   8.8 KB
+  assets/enemies/enemy_1170_dushld-96.webp   4.0 KB
+  assets/enemies/enemy_1170_dushld_2-160.webp   8.8 KB
+  assets/enemies/enemy_1170_dushld_2-96.webp   4.0 KB
+  assets/enemies/enemy_1172_dugago-160.webp   8.9 KB
+  assets/enemies/enemy_1172_dugago-96.webp   4.1 KB
+  assets/enemies/enemy_1174_duholy-160.webp   9.2 KB
+  assets/enemies/enemy_1174_duholy-96.webp   4.2 KB
+  assets/enemies/enemy_1174_duholy_2-160.webp   8.9 KB
+  assets/enemies/enemy_1174_duholy_2-96.webp   4.2 KB
+  assets/enemies/enemy_1175_dushdo_2-160.webp   9.1 KB
+  assets/enemies/enemy_1175_dushdo_2-96.webp   4.1 KB
+  assets/enemies/enemy_1191_krgrg-160.webp   8.9 KB
+  assets/enemies/enemy_1191_krgrg-96.webp   4.1 KB
+  assets/enemies/enemy_1191_krgrg_2-160.webp   8.8 KB
+  assets/enemies/enemy_1191_krgrg_2-96.webp   4.1 KB
+  assets/enemies/enemy_1195_sfyin-160.webp   9.3 KB
+  assets/enemies/enemy_1195_sfyin-96.webp   4.3 KB
+  assets/enemies/enemy_1195_sfyin_2-160.webp   9.0 KB
+  assets/enemies/enemy_1195_sfyin_2-96.webp   4.2 KB
+  assets/enemies/enemy_1197_sfshu-160.webp   9.2 KB
+  assets/enemies/enemy_1197_sfshu-96.webp   4.1 KB
+  assets/enemies/enemy_1197_sfshu_2-160.webp   9.2 KB
+  assets/enemies/enemy_1197_sfshu_2-96.webp   4.5 KB
+  assets/enemies/enemy_1199_sfjin-160.webp   9.5 KB
+  assets/enemies/enemy_1199_sfjin-96.webp   4.5 KB
+  assets/enemies/enemy_1207_sfji-160.webp   9.4 KB
+  assets/enemies/enemy_1207_sfji-96.webp   4.3 KB
+  assets/enemies/enemy_1213_mtrsnp-160.webp   8.7 KB
+  assets/enemies/enemy_1213_mtrsnp-96.webp   4.3 KB
+  assets/enemies/enemy_1216_cansld-160.webp   9.0 KB
+  assets/enemies/enemy_1216_cansld-96.webp   4.4 KB
+  assets/enemies/enemy_1219_mtrbty-160.webp   8.6 KB
+  assets/enemies/enemy_1219_mtrbty-96.webp   4.2 KB
+  assets/enemies/enemy_1222_dpvt-160.webp   9.0 KB
+  assets/enemies/enemy_1222_dpvt-96.webp   4.2 KB
+  assets/enemies/enemy_1222_dpvt_2-160.webp   8.2 KB
+  assets/enemies/enemy_1222_dpvt_2-96.webp   3.8 KB
+  assets/enemies/enemy_1223_dmech-160.webp   9.5 KB
+  assets/enemies/enemy_1223_dmech-96.webp   4.5 KB
+  assets/enemies/enemy_1223_dmech_2-160.webp   9.0 KB
+  assets/enemies/enemy_1223_dmech_2-96.webp   4.3 KB
+  assets/enemies/enemy_1224_dsuply-160.webp   8.9 KB
+  assets/enemies/enemy_1224_dsuply-96.webp   4.2 KB
+  assets/enemies/enemy_1224_dsuply_2-160.webp   8.9 KB
+  assets/enemies/enemy_1224_dsuply_2-96.webp   4.3 KB
+  assets/enemies/enemy_1225_dkmage-160.webp   9.0 KB
+  assets/enemies/enemy_1225_dkmage-96.webp   4.3 KB
+  assets/enemies/enemy_1225_dkmage_2-160.webp   9.2 KB
+  assets/enemies/enemy_1225_dkmage_2-96.webp   4.4 KB
+  assets/enemies/enemy_1226_dklord-160.webp   9.0 KB
+  assets/enemies/enemy_1226_dklord-96.webp   4.3 KB
+  assets/enemies/enemy_1226_dklord_2-160.webp   9.2 KB
+  assets/enemies/enemy_1226_dklord_2-96.webp   4.4 KB
+  assets/enemies/enemy_1229_darmy-160.webp   9.0 KB
+  assets/enemies/enemy_1229_darmy-96.webp   4.2 KB
+  assets/enemies/enemy_1229_darmy_2-160.webp   8.9 KB
+  assets/enemies/enemy_1229_darmy_2-96.webp   4.1 KB
+  assets/enemies/enemy_1234_dsubrl-160.webp   9.1 KB
+  assets/enemies/enemy_1234_dsubrl-96.webp   4.4 KB
+  assets/enemies/enemy_1234_dsubrl_2-160.webp   8.7 KB
+  assets/enemies/enemy_1234_dsubrl_2-96.webp   4.3 KB
+  assets/enemies/enemy_1249_lysdb_2-160.webp   8.9 KB
+  assets/enemies/enemy_1249_lysdb_2-96.webp   4.1 KB
+  assets/enemies/enemy_1251_lysyta-160.webp   7.7 KB
+  assets/enemies/enemy_1251_lysyta-96.webp   3.5 KB
+  assets/enemies/enemy_1251_lysyta_2-160.webp   7.8 KB
+  assets/enemies/enemy_1251_lysyta_2-96.webp   3.6 KB
+  assets/enemies/enemy_1252_lysytb_2-160.webp   8.3 KB
+  assets/enemies/enemy_1252_lysytb_2-96.webp   3.9 KB
+  assets/enemies/enemy_1254_lypa_2-160.webp   9.1 KB
+  assets/enemies/enemy_1254_lypa_2-96.webp   4.3 KB
+  assets/enemies/enemy_1267_nhpbr-160.webp   8.5 KB
+  assets/enemies/enemy_1267_nhpbr-96.webp   3.9 KB
+  assets/enemies/enemy_1267_nhpbr_2-160.webp   8.6 KB
+  assets/enemies/enemy_1267_nhpbr_2-96.webp   3.9 KB
+  assets/enemies/enemy_1270_nhstlk-160.webp   8.0 KB
+  assets/enemies/enemy_1270_nhstlk-96.webp   3.6 KB
+  assets/enemies/enemy_1270_nhstlk_2-160.webp   8.3 KB
+  assets/enemies/enemy_1270_nhstlk_2-96.webp   3.7 KB
+  assets/enemies/enemy_1272_nhtank-160.webp   8.2 KB
+  assets/enemies/enemy_1272_nhtank-96.webp   3.9 KB
+  assets/enemies/enemy_1272_nhtank_2-160.webp   8.3 KB
+  assets/enemies/enemy_1272_nhtank_2-96.webp   3.8 KB
+  assets/enemies/enemy_1275_dwlock_2-160.webp   9.2 KB
+  assets/enemies/enemy_1275_dwlock_2-96.webp   4.3 KB
+  assets/enemies/enemy_1283_sgkill-160.webp   8.6 KB
+  assets/enemies/enemy_1283_sgkill-96.webp   3.9 KB
+  assets/enemies/enemy_1288_duskls-160.webp   8.7 KB
+  assets/enemies/enemy_1288_duskls-96.webp   4.0 KB
+  assets/enemies/enemy_1288_duskls_2-160.webp   8.8 KB
+  assets/enemies/enemy_1288_duskls_2-96.webp   4.1 KB
+  assets/enemies/enemy_1292_duskld-160.webp   9.2 KB
+  assets/enemies/enemy_1292_duskld-96.webp   4.3 KB
+  assets/enemies/enemy_1299_ymkilr-160.webp   8.6 KB
+  assets/enemies/enemy_1299_ymkilr-96.webp   3.9 KB
+  assets/enemies/enemy_1299_ymkilr_2-160.webp   8.4 KB
+  assets/enemies/enemy_1299_ymkilr_2-96.webp   3.9 KB
+  assets/enemies/enemy_1305_mhslim-160.webp   8.5 KB
+  assets/enemies/enemy_1305_mhslim-96.webp   4.1 KB
+  assets/enemies/enemy_1305_mhslim_2-160.webp   8.6 KB
+  assets/enemies/enemy_1305_mhslim_2-96.webp   4.1 KB
+  assets/enemies/enemy_1309_mhboar_2-160.webp   8.9 KB
+  assets/enemies/enemy_1309_mhboar_2-96.webp   4.2 KB
+  assets/enemies/enemy_1320_wdrrl_2-160.webp   8.6 KB
+  assets/enemies/enemy_1320_wdrrl_2-96.webp   4.1 KB
+  assets/enemies/enemy_1325_cbgpro-160.webp   9.1 KB
+  assets/enemies/enemy_1325_cbgpro-96.webp   4.4 KB
+  assets/enemies/enemy_1325_cbgpro_2-160.webp   9.0 KB
+  assets/enemies/enemy_1325_cbgpro_2-96.webp   4.4 KB
+  assets/enemies/enemy_1328_cbjedi-160.webp   9.3 KB
+  assets/enemies/enemy_1328_cbjedi-96.webp   4.6 KB
+  assets/enemies/enemy_1329_cbshld-160.webp   8.4 KB
+  assets/enemies/enemy_1329_cbshld-96.webp   4.4 KB
+  assets/enemies/enemy_1329_cbshld_2-160.webp   8.6 KB
+  assets/enemies/enemy_1329_cbshld_2-96.webp   4.4 KB
+  assets/enemies/enemy_1355_mrfly-160.webp   8.3 KB
+  assets/enemies/enemy_1355_mrfly-96.webp   3.6 KB
+  assets/enemies/enemy_1355_mrfly_2-160.webp   8.1 KB
+  assets/enemies/enemy_1355_mrfly_2-96.webp   3.5 KB
+  assets/enemies/enemy_1360_dfello-160.webp   6.8 KB
+  assets/enemies/enemy_1360_dfello-96.webp   3.3 KB
+  assets/enemies/enemy_1361_dthrow-160.webp   8.3 KB
+  assets/enemies/enemy_1361_dthrow-96.webp   4.0 KB
+  assets/enemies/enemy_1361_dthrow_2-160.webp   8.5 KB
+  assets/enemies/enemy_1361_dthrow_2-96.webp   4.0 KB
+  assets/enemies/enemy_1362_dfat-160.webp   9.2 KB
+  assets/enemies/enemy_1362_dfat-96.webp   4.4 KB
+  assets/enemies/enemy_1362_dfat_2-160.webp   9.7 KB
+  assets/enemies/enemy_1362_dfat_2-96.webp   4.6 KB
+  assets/enemies/enemy_1363_spnshd_2-160.webp   8.8 KB
+  assets/enemies/enemy_1363_spnshd_2-96.webp   4.1 KB
+  assets/enemies/enemy_1373_ltnhor-160.webp   9.7 KB
+  assets/enemies/enemy_1373_ltnhor-96.webp   4.6 KB
+  assets/enemies/enemy_1373_ltnhor_2-160.webp   9.6 KB
+  assets/enemies/enemy_1373_ltnhor_2-96.webp   4.4 KB
+  assets/enemies/enemy_1375_ltnclr-160.webp   9.6 KB
+  assets/enemies/enemy_1375_ltnclr-96.webp   4.6 KB
+  assets/enemies/enemy_1375_ltnclr_2-160.webp   9.4 KB
+  assets/enemies/enemy_1375_ltnclr_2-96.webp   4.4 KB
+  assets/enemies/enemy_1376_ltndru-160.webp   9.2 KB
+  assets/enemies/enemy_1376_ltndru-96.webp   4.5 KB
+  assets/enemies/enemy_1376_ltndru_2-160.webp   9.4 KB
+  assets/enemies/enemy_1376_ltndru_2-96.webp   4.5 KB
+  assets/enemies/enemy_1381_winman-160.webp   9.0 KB
+  assets/enemies/enemy_1381_winman-96.webp   4.3 KB
+  assets/enemies/enemy_1381_winman_2-160.webp   9.2 KB
+  assets/enemies/enemy_1381_winman_2-96.webp   4.3 KB
+  assets/enemies/enemy_1385_winbom-160.webp   9.4 KB
+  assets/enemies/enemy_1385_winbom-96.webp   4.5 KB
+  assets/enemies/enemy_1385_winbom_2-160.webp   9.6 KB
+  assets/enemies/enemy_1385_winbom_2-96.webp   4.6 KB
+  assets/enemies/enemy_1387_winshd-160.webp   9.5 KB
+  assets/enemies/enemy_1387_winshd-96.webp   4.5 KB
+  assets/enemies/enemy_1388_wingnt-160.webp   7.3 KB
+  assets/enemies/enemy_1388_wingnt-96.webp   3.6 KB
+  assets/enemies/enemy_1388_wingnt_2-160.webp   7.1 KB
+  assets/enemies/enemy_1388_wingnt_2-96.webp   3.5 KB
+  assets/enemies/enemy_1389_winbab_2-160.webp   8.9 KB
+  assets/enemies/enemy_1389_winbab_2-96.webp   4.2 KB
+  assets/enemies/enemy_1402_tgshd_2-160.webp   9.3 KB
+  assets/enemies/enemy_1402_tgshd_2-96.webp   4.3 KB
+  assets/enemies/enemy_1403_gunsho-160.webp   9.3 KB
+  assets/enemies/enemy_1403_gunsho-96.webp   4.4 KB
+  assets/enemies/enemy_1403_gunsho_2-160.webp   9.1 KB
+  assets/enemies/enemy_1403_gunsho_2-96.webp   4.3 KB
+  assets/enemies/enemy_1404_msnip-160.webp   9.5 KB
+  assets/enemies/enemy_1404_msnip-96.webp   4.4 KB
+  assets/enemies/enemy_1405_boomer_2-160.webp   9.1 KB
+  assets/enemies/enemy_1405_boomer_2-96.webp   4.3 KB
+  assets/enemies/enemy_1406_chghmr-160.webp   9.9 KB
+  assets/enemies/enemy_1406_chghmr-96.webp   4.7 KB
+  assets/enemies/enemy_1407_hummbd-160.webp   8.2 KB
+  assets/enemies/enemy_1407_hummbd-96.webp   3.7 KB
+  assets/enemies/enemy_1409_bdguad_2-160.webp   9.9 KB
+  assets/enemies/enemy_1409_bdguad_2-96.webp   4.6 KB
+  assets/enemies/enemy_1422_lrsldr_2-160.webp   8.4 KB
+  assets/enemies/enemy_1422_lrsldr_2-96.webp   3.8 KB
+  assets/enemies/enemy_1425_lrcmra_2-160.webp   9.7 KB
+  assets/enemies/enemy_1425_lrcmra_2-96.webp   4.6 KB
+  assets/enemies/enemy_1428_lrsoul-160.webp   7.8 KB
+  assets/enemies/enemy_1428_lrsoul-96.webp   3.4 KB
+  assets/enemies/enemy_1429_lrwzrd-160.webp   8.1 KB
+  assets/enemies/enemy_1429_lrwzrd-96.webp   3.7 KB
+  assets/enemies/enemy_1429_lrwzrd_2-160.webp   8.0 KB
+  assets/enemies/enemy_1429_lrwzrd_2-96.webp   3.6 KB
+  assets/enemies/enemy_1431_lrmzrd-160.webp   8.5 KB
+  assets/enemies/enemy_1431_lrmzrd-96.webp   4.0 KB
+  assets/enemies/enemy_1431_lrmzrd_2-160.webp   8.4 KB
+  assets/enemies/enemy_1431_lrmzrd_2-96.webp   4.0 KB
+  assets/enemies/enemy_1433_dsbasi-160.webp   9.7 KB
+  assets/enemies/enemy_1433_dsbasi-96.webp   4.5 KB
+  assets/enemies/enemy_1433_dsbasi_2-160.webp   9.6 KB
+  assets/enemies/enemy_1433_dsbasi_2-96.webp   4.6 KB
+  assets/enemies/enemy_1436_dsdivi-160.webp   9.7 KB
+  assets/enemies/enemy_1436_dsdivi-96.webp   4.6 KB
+  assets/enemies/enemy_1436_dsdivi_2-160.webp   9.7 KB
+  assets/enemies/enemy_1436_dsdivi_2-96.webp   4.8 KB
+  assets/enemies/enemy_1437_dsfull-160.webp   9.7 KB
+  assets/enemies/enemy_1437_dsfull-96.webp   4.8 KB
+  assets/enemies/enemy_1437_dsfull_2-160.webp   9.8 KB
+  assets/enemies/enemy_1437_dsfull_2-96.webp   4.8 KB
+  assets/enemies/enemy_1439_dslntf-160.webp   9.5 KB
+  assets/enemies/enemy_1439_dslntf-96.webp   4.5 KB
+  assets/enemies/enemy_2021_syfish-160.webp   9.4 KB
+  assets/enemies/enemy_2021_syfish-96.webp   4.4 KB
+  assets/enemies/enemy_2025_syufo-160.webp   9.5 KB
+  assets/enemies/enemy_2025_syufo-96.webp   4.5 KB
+  assets/enemies/enemy_9006_actoxi-160.webp   7.6 KB
+  assets/enemies/enemy_9006_actoxi-96.webp   3.7 KB
+  assets/enemies/enemy_9007_acelem-160.webp   7.1 KB
+  assets/enemies/enemy_9007_acelem-96.webp   3.5 KB
+  assets/enemies/enemy_9008_acbunn-160.webp   7.9 KB
+  assets/enemies/enemy_9008_acbunn-96.webp   3.9 KB
+  assets/enemies/enemy_9009_acfort-160.webp   8.2 KB
+  assets/enemies/enemy_9009_acfort-96.webp   4.1 KB
+  assets/enemies/enemy_9010_acpupp-160.webp   8.7 KB
+  assets/enemies/enemy_9010_acpupp-96.webp   4.3 KB
+  assets/enemies/enemy_9011_acrefr-160.webp   7.3 KB
+  assets/enemies/enemy_9011_acrefr-96.webp   3.7 KB
+  assets/enemies/enemy_9030_acpara-160.webp   8.6 KB
+  assets/enemies/enemy_9030_acpara-96.webp   4.3 KB
+  assets/enemies/enemy_9031_acrefd-160.webp   8.3 KB
+  assets/enemies/enemy_9031_acrefd-96.webp   4.0 KB
+  assets/enemies/enemy_9034_acblk-160.webp   8.6 KB
+  assets/enemies/enemy_9034_acblk-96.webp   4.2 KB
+  assets/enemies/enemy_9039_acrefm-160.webp   8.2 KB
+  assets/enemies/enemy_9039_acrefm-96.webp   4.1 KB
+  assets/enemies/enemy_9040_accrit-160.webp   8.6 KB
+  assets/enemies/enemy_9040_accrit-96.webp   4.1 KB
+  assets/maps/map01-1.webp    34.2 KB
+  assets/maps/map01-2.webp    30.4 KB
+  assets/maps/map01-3.webp    35.6 KB
+  assets/maps/map02-1.webp    34.5 KB
+  assets/maps/map02-2.webp    31.3 KB
+  assets/maps/map02-3.webp    36.0 KB
+  assets/maps/map03-1.webp    34.8 KB
+  assets/maps/map03-2.webp    31.6 KB
+  assets/maps/map03-3.webp    36.8 KB
+  assets/maps/map04-1.webp    35.5 KB
+  assets/maps/map04-2.webp    33.7 KB
+  assets/maps/map04-3.webp    37.0 KB
+  assets/maps/map05-1.webp    39.7 KB
+  assets/maps/map05-2.webp    36.2 KB
+  assets/maps/map05-3.webp    40.1 KB
+  assets/maps/map06-1.webp    34.2 KB
+  assets/maps/map06-2.webp    30.5 KB
+  assets/maps/map06-3.webp    36.0 KB
+  assets/maps/map09-1.webp    39.0 KB
+  assets/maps/map09-2.webp    33.1 KB
+  assets/maps/map09-3.webp    40.5 KB
+  assets/maps/map10-1.webp    52.1 KB
+  assets/maps/map10-2.webp    50.5 KB
+  assets/maps/map10-3.webp    47.3 KB
+  assets/maps/map11-1.webp    38.6 KB
+  assets/maps/map11-2.webp    34.5 KB
+  assets/maps/map11-3.webp    40.5 KB
+  assets/maps/map12-1.webp    52.6 KB
+  assets/maps/map12-2.webp    51.5 KB
+  assets/maps/map12-3.webp    49.1 KB
+  data/data.js               244.6 KB
+  data/data.json             303.6 KB
+  data/enemies.js             96.9 KB
+  enemies.html                 8.7 KB
+  index.html                   8.9 KB
+  js/app.js                   18.6 KB
+  js/calc.js                  13.3 KB
+  js/code.js                  11.5 KB
+  js/enemies.js               25.5 KB
+  js/search.js                13.0 KB
+  js/store.js                 21.7 KB
+  js/team.js                  57.7 KB
+  js/ui.js                    60.2 KB
   robots.txt                   0.0 KB
-  standalone.html            448.2 KB
-  assets/avatars/ (286 个)    2704.1 KB
+  standalone.html            506.1 KB
+  assets/avatars/ (418 个)    3951.5 KB
   assets/icons/ (314 个)      2027.7 KB

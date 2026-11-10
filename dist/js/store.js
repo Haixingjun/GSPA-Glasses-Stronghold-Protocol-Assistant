@@ -96,7 +96,7 @@
     for (var i = 0; i < list.length; i++) {
       var n = toInt(list[i]);
       if (n === null) n = ROMAN_TIER[String(list[i]).toUpperCase()] || null;
-      if (n !== null && n >= 1 && n <= 6 && out.indexOf(n) < 0) out.push(n);
+      if (n !== null && n >= 0 && n <= 6 && out.indexOf(n) < 0) out.push(n);
     }
     return out;
   }
@@ -107,10 +107,37 @@
     return out.join(',');
   }
 
+  /* 自选干员的查询投影：和普通干员放进同一个 op 列表，
+     用 tier=0 / tierLabel=自选 作为与阶数并列的标签。 */
+  function pickOps(picks) {
+    var out = [];
+    for (var i = 0; i < (picks || []).length; i++) {
+      var p = picks[i];
+      out.push({
+        key: p.name, name: p.name, tier: 0, tierLabel: '自选',
+        tags: p.tags || [], type: '自选干员', hidden: false, price: 4,
+        normalText: '无特质（自选干员）', eliteText: '无特质（自选干员）',
+        normalTrigger: '—', eliteTrigger: '—',
+        normalTriggers: [], eliteTriggers: [],
+        avatar: p.avatar, avatarFull: p.avatarFull,
+        pick: true, rarity: 6, star: '6★',
+        class: p.class, branch: p.branch, nation: p.nation,
+        factions: p.factions || [], hiddenFactions: p.hiddenFactions || [],
+        tagsSource: p.tagsSource, charId: p.charId, prts: p.prts, note: p.note
+      });
+    }
+    return out;
+  }
+
+  function allOps(payload) {
+    return (payload.operators || []).concat(pickOps(payload.picks || []));
+  }
+
   /* ---------------- 初始化 ---------------- */
   function init(payload) {
     data = payload;
-    maps.op = indexBy(payload.operators, function (o) { return o.name; });
+    data._allOps = allOps(payload);
+    maps.op = indexBy(data._allOps, function (o) { return o.name; });
     maps.item = indexBy(payload.items, function (o) { return o.name; });
     maps.strategy = indexBy(payload.strategies, function (o) { return o.key; });
     maps.covenant = indexBy(payload.covenants, function (o) { return o.name; });
@@ -137,7 +164,7 @@
 
   function listOf(view) {
     if (!data) return [];
-    if (view === 'op') return data.operators;
+    if (view === 'op') return data._allOps || data.operators;
     if (view === 'item') return data.items;
     if (view === 'strategy') return data.strategies;
     if (view === 'covenant') return data.covenants;
@@ -170,7 +197,7 @@
 
     if (!query) return next;
     var pairs = query.split('&');
-    var rawT = null, rawBs = null, rawL = null, rawE = null, rawIt = null, rawM = null, rawC = null;
+    var rawT = null, rawBs = null, rawL = null, rawE = null, rawIt = null, rawM = null, rawC = null, rawP = null;
     for (var p = 0; p < pairs.length; p++) {
       if (!pairs[p]) continue;
       var idx = pairs[p].indexOf('=');
@@ -195,6 +222,7 @@
         case 'e': rawE = val; break;
         case 'it': rawIt = val; break;
         case 'm': rawM = val; break;
+        case 'p': rawP = val; break;
         case 'c': rawC = val; break;
         default: break;
       }
@@ -206,6 +234,7 @@
     applyElites(rawE, slots);
     applyItems(rawIt, slots);
     applyMorph(rawM, slots);
+    applyPicks(rawP, slots);
     next.team = {
       size: Math.max(size, slots.length),
       slots: slots,
@@ -217,6 +246,7 @@
       var dec = global.Code.decode(safeDecode(rawC), data);
       if (dec && dec.team) next.team = dec.team;
     }
+    next.team = normalizeTeam(next.team);
     return next;
   }
 
@@ -321,6 +351,32 @@
     }
   }
 
+  /* 自选干员：p= 与 t= 平行，按席位、空段占位；p-only 席位不依赖占位行 */
+  function applyPicks(value, slots) {
+    if (!value) return;
+    var parts = String(value).split(',');
+    for (var i = 0; i < parts.length && i < slots.length; i++) {
+      var raw = parts[i];
+      if (!raw) continue;
+      var name = safeDecode(raw);
+      if (!name) continue;
+      if (!slots[i]) slots[i] = { e: false };
+      slots[i].p = name;
+    }
+  }
+
+  function encodePicks(slots) {
+    var out = [];
+    var any = false;
+    for (var i = 0; i < slots.length; i++) {
+      var s = slots[i];
+      if (s && s.p) { out.push(encodeURIComponent(String(s.p))); any = true; }
+      else out.push('');
+    }
+    while (out.length && out[out.length - 1] === '') out.pop();
+    return any ? out.join(',') : '';
+  }
+
   function encodeElites(slots) {
     var out = [];
     for (var i = 0; i < slots.length; i++) {
@@ -352,9 +408,7 @@
       if (s && s.m) out.push(i + ':' + encodeURIComponent(s.m));
     }
     return out.join(',');
-  }
-
-  function encodeLayers(layers) {
+  }  function encodeLayers(layers) {
     var out = [];
     for (var k in layers) {
       if (!layers.hasOwnProperty(k)) continue;
@@ -365,7 +419,9 @@
   }
 
   function hasSlots(slots) {
-    for (var i = 0; i < slots.length; i++) if (slots[i] && slots[i].k) return true;
+    for (var i = 0; i < slots.length; i++) {
+      if (slots[i] && (slots[i].k || slots[i].p)) return true;
+    }
     return false;
   }
 
@@ -411,6 +467,8 @@
       if (its) qs.push('it=' + its);
       var mo = encodeMorph(s.team.slots);
       if (mo) qs.push('m=' + mo);
+      var pk = encodePicks(s.team.slots);
+      if (pk) qs.push('p=' + pk);
       var ly = encodeLayers(s.team.layers || {});
       if (ly) qs.push('L=' + ly);
     }
@@ -559,8 +617,10 @@
   }
 
   function cloneSlot(s) {
-    if (!s || !s.k) return null;
-    var out = { k: String(s.k), e: !!s.e };
+    if (!s || (!s.k && !s.p)) return null;
+    var out = { e: !!s.e };
+    if (s.k) out.k = String(s.k);
+    if (s.p) out.p = String(s.p);
     if (s.it && s.it.length) {
       out.it = [];
       for (var i = 0; i < s.it.length && out.it.length < ITEMS_MAX; i++) {
@@ -597,8 +657,15 @@
   function normalizeTeam(team) {
     var size = clampSize(team && team.size);
     var slots = [];
+    var pickSeen = 0;
     for (var i = 0; i < size; i++) {
-      slots.push(cloneSlot(team && team.slots ? team.slots[i] : null));
+      var s = cloneSlot(team && team.slots ? team.slots[i] : null);
+      // 自选干员全队最多 2 名：URL / 导入 / 旧数据都在这里截断
+      if (s && s.p) {
+        if (pickSeen >= 2) { slots.push(null); continue; }
+        pickSeen++;
+      }
+      slots.push(s);
     }
     return { size: size, slots: slots, layers: cloneLayers(team && team.layers) };
   }

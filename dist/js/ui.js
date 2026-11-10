@@ -66,7 +66,7 @@
 
   function fillTabCounts() {
     var c = data.counts;
-    var map = { op: c.operators, item: c.items, strategy: c.strategies, covenant: c.covenants };
+    var map = { op: c.operators + (c.picks || 0), item: c.items, strategy: c.strategies, covenant: c.covenants };
     var nodes = refs.tabs ? refs.tabs.querySelectorAll('[data-n]') : [];
     for (var i = 0; i < nodes.length; i++) {
       var k = nodes[i].getAttribute('data-n');
@@ -275,6 +275,8 @@
       '</div>';
   }
 
+  var lastFilterView = null;
+
   function renderFilters(st) {
     var groups = buildGroups(st);
     var html = '<div class="filters-head"><span class="filters-title">筛选</span>' +
@@ -302,7 +304,12 @@
         '</div>';
     }
 
+    // 选中一个筛选条件后不要跳回顶部：抽屉 / 侧栏滚动位置按视图保留
+    var sameView = lastFilterView === st.view;
+    var top = sameView ? refs.filters.scrollTop : 0;
+    lastFilterView = st.view;
     refs.filters.innerHTML = html;
+    if (top) refs.filters.scrollTop = top;
   }
 
   function buildGroups(st) {
@@ -313,7 +320,7 @@
         id: 'tiers', title: '阶数', wide: false,
         items: data.tiers.map(function (t, i) {
           return { v: i + 1, label: t, tier: String(i + 1) };
-        }),
+        }).concat([{ v: 0, label: '自选', tier: '0' }]),
         countOf: function (o) { return [o.tier]; }
       });
       groups.push({
@@ -335,7 +342,7 @@
       });
       groups.push({
         id: 'otypes', title: '条目类型', wide: true,
-        items: ['特许条目', '普通条目', '自选配置'].map(function (t) { return { v: t, label: t }; }),
+        items: ['特许条目', '普通条目', '自选干员'].map(function (t) { return { v: t, label: t }; }),
         countOf: function (o) { return [o.type]; }
       });
       groups.push({
@@ -486,7 +493,9 @@
     if (st.tiers.length) {
       var tl = [];
       for (i = 0; i < st.tiers.length; i++) {
-        tl.push(st.view === 'item' ? String(st.tiers[i]) : data.tiers[st.tiers[i] - 1]);
+        if (st.view === 'item') tl.push(String(st.tiers[i]));
+        else if (st.tiers[i] === 0) tl.push('自选');
+        else tl.push(data.tiers[st.tiers[i] - 1]);
       }
       out.push(afChip('tiers', '阶数 ' + tl.join('/')));
     }
@@ -538,7 +547,7 @@
   }
 
   function cardHtml(view, e, toks, st) {
-    if (view === 'op') return opCard(e, toks, st);
+    if (view === 'op') return e.pick ? pickCard(e, toks, st) : opCard(e, toks, st);
     if (view === 'item') return itemCard(e, toks, st);
     if (view === 'strategy') return strategyCard(e, toks, st);
     return covenantCard(e, toks, st);
@@ -632,6 +641,21 @@
     return html;
   }
 
+  function isInTeam(name) {
+    var team = Store.getTeam();
+    for (var i = 0; i < team.slots.length; i++) {
+      var s = team.slots[i];
+      if (s && (s.k === name || s.p === name)) return true;
+    }
+    return false;
+  }
+
+  function teamToggleHtml(name, big) {
+    var on = isInTeam(name);
+    return '<button type="button" class="' + (big ? 'btn ' : '') + 'team-toggle' + (on ? ' is-in' : '') +
+      '" data-team-toggle="' + esc(name) + '">' + (on ? '移出配队' : '加入配队') + '</button>';
+  }
+
   function opCard(o, toks, st) {
     var active = st.sel === o.name ? 'is-active' : '';
     var label = '干员 ' + o.name + '，' + o.tierLabel + ' 阶，售价 ' + o.price +
@@ -657,6 +681,35 @@
       '<span class="pill">' + esc(o.type) + '</span>' +
       (o.special ? '<span class="pill pill-special">特殊干员</span>' : '') +
       (o.hidden ? '<span class="pill pill-warn">隐藏条目</span>' : '') +
+      teamToggleHtml(o.name, false) +
+      '<span class="sp"></span><span>详情 ›</span>' +
+      '</div>' +
+      '</div>';
+  }
+
+  function pickCard(p, toks, st) {
+    var active = st.sel === p.name ? 'is-active' : '';
+    var faction = (p.factions || []).join(' / ') || '—';
+    var cls = [p.class, p.branch].filter(Boolean).join(' / ') || '6★';
+    var label = '自选干员 ' + p.name + '，' + cls + '，阵营 ' + faction +
+      '，盟约 ' + (p.tags || []).join('、');
+
+    return cardOpen('op', p.name, label, active) +
+      '<div class="card-top">' +
+      avatarHtml(p, p.name, 40) +
+      '<div class="card-main">' +
+      '<div class="card-title">' + Search.highlight(p.name, toks) + '</div>' +
+      '<div class="card-sub">' + esc(cls) + '</div>' +
+      '</div>' +
+      '<div class="card-badges">' +
+      '<span class="tier tier-pick" data-tier="0">自选</span>' +
+      '<span class="pill">6★</span></div></div>' +
+      '<div class="card-tags">' + tagsHtml(p.tags) + '</div>' +
+      '<div class="card-sub">阵营：' + esc(faction) + '</div>' +
+      '<div class="card-foot">' +
+      '<span class="pill pill-pick">自选干员</span>' +
+      '<span class="pill">不计入 10 人</span>' +
+      teamToggleHtml(p.name, false) +
       '<span class="sp"></span><span>详情 ›</span>' +
       '</div>' +
       '</div>';
@@ -782,7 +835,7 @@
     }
 
     var html = '';
-    if (st.view === 'op') html = opDetail(e, toks);
+    if (st.view === 'op') html = e.pick ? pickDetail(e, toks) : opDetail(e, toks);
     else if (st.view === 'item') html = itemDetail(e, toks);
     else if (st.view === 'strategy') html = strategyDetail(e, toks);
     else html = covenantDetail(e, toks);
@@ -805,6 +858,61 @@
       '<button type="button" class="btn" data-copy="1"><svg class="ico" aria-hidden="true"><use href="#i-share"/></svg>复制链接</button>' +
       '<button type="button" class="btn" data-close="1">关闭</button>' +
       '</div>';
+  }
+
+  function pickDetail(p, toks) {
+    var cls = [p.class, p.branch].filter(Boolean).join(' / ') || '6★';
+    var html = '<div class="d-head">' + avatarHtml(p, p.name, 56, true) +
+      '<div class="d-head-main"><h2 class="d-title">' + Search.highlight(p.name, toks) + '</h2>' +
+      '<div class="d-sub" style="margin-bottom:0">' + esc(cls) + ' · 自选干员 · 6★</div></div>' +
+      closeBtn() + '</div>';
+
+    html += '<div class="d-meta">' +
+      '<span class="pill pill-pick">自选干员</span>' +
+      '<span class="pill">不计入盟约 10 人</span>' +
+      '<span class="pill">配队可激活盟约</span>' +
+      '</div>';
+
+    html += '<div class="d-tags">' + tagsHtml(p.tags) + '</div>';
+
+    html += '<div class="d-sec"><h3>阵营</h3><div class="d-box"><dl class="rule">' +
+      '<dt>所属国家</dt><dd>' + esc(p.nation || '—') + '</dd>' +
+      '<dt>游戏阵营</dt><dd>' + esc((p.factions || []).join('、') || '—') + '</dd>' +
+      '<dt>隐藏阵营</dt><dd>' + esc((p.hiddenFactions || []).join('、') || '—') + '</dd>' +
+      '<dt>推导口径</dt><dd>' + esc(p.tagsSource || '阵营并集') + '</dd>' +
+      '<dt>PRTS ID</dt><dd><code>' + esc(p.charId || '—') + '</code></dd>' +
+      '</dl></div></div>';
+
+    html += '<div class="d-sec"><h3>配队规则</h3><div class="d-box"><p>' +
+      '自选干员单独归类为「自选干员」，<b>不进入盟约的固定 10 人名单</b>；' +
+      '在配队界面仍按上方盟约标签计入激活 / 强化人数，且不拥有任何特质。' +
+      '</p></div></div>';
+
+    if (p.tags && p.tags.length) {
+      html += '<div class="d-sec"><h3>所属盟约</h3>';
+      for (var i = 0; i < p.tags.length; i++) {
+        var c = Store.covenantByName(p.tags[i]);
+        if (!c) continue;
+        html += '<button type="button" class="d-box d-link" data-cov="' + esc(c.name) + '">' +
+          '<h4><span class="tag" style="--h:' + hue(c.name) + '"><i class="dot"></i>' + esc(c.name) + '</span>' +
+          '<span style="color:var(--fg3);font-weight:400">' + esc(activationShort(c)) + '</span></h4>' +
+          '<p>' + esc(firstLine(c.desc)) + '</p>' +
+          '</button>';
+      }
+      html += '<p class="d-note" style="margin-top:8px">' +
+        '盟约详情里的「固定成员」仍是 10 人；该干员列在「自选干员」一栏。</p>';
+      html += '</div>';
+    }
+
+    html += '<div class="d-sec"><h3>外部资料</h3><div class="d-box">' +
+      '<p>完整页面、语音与立绘见 PRTS；本站只离线保存查询所需字段，不发起外部请求。</p>' +
+      '<p style="margin-top:8px"><a class="btn" href="' + esc(p.prts.url) +
+      '" target="_blank" rel="noopener noreferrer">在 PRTS 查看「' + esc(p.prts.page) +
+      '」 ↗</a></p></div></div>';
+
+    html += '<div class="d-actions">' + teamToggleHtml(p.name, true) + '</div>';
+    html += actionBar();
+    return html;
   }
 
   function opDetail(o, toks) {
@@ -844,7 +952,7 @@
       }
       html += '</div>';
     } else {
-      html += '<div class="d-sec"><h3>所属盟约</h3><div class="d-box"><p>该条目没有盟约标签（自选配置槽位）。</p></div></div>';
+      html += '<div class="d-sec"><h3>所属盟约</h3><div class="d-box"><p>该条目没有盟约标签。</p></div></div>';
     }
 
     if (o.special) {
@@ -855,6 +963,7 @@
         '」 ↗</a></p></div></div>';
     }
 
+    html += '<div class="d-actions">' + teamToggleHtml(o.name, true) + '</div>';
     html += actionBar();
     return html;
   }
@@ -1174,6 +1283,19 @@
     }
     html += '</div>';
 
+    if (c.pickMembers && c.pickMembers.length) {
+      html += '<div class="d-sec"><h3>自选干员（' + c.pickCount + '）' +
+        '<span class="pill pill-pick" style="margin-left:6px">不计入固定 ' + c.memberCount + ' 人</span>' +
+        '</h3><div class="d-box"><p class="d-note">' +
+        '以下干员单独归类为「自选干员」，不写入盟约固定成员名单；在配队界面仍可计入本盟约的激活 / 强化人数。' +
+        '</p><div class="d-members d-members-pick">';
+      for (var q = 0; q < c.pickMembers.length; q++) {
+        html += '<button type="button" data-op="' + esc(c.pickMembers[q]) + '">' +
+          esc(c.pickMembers[q]) + '</button>';
+      }
+      html += '</div></div></div>';
+    }
+
     html += actionBar();
     return html;
   }
@@ -1196,6 +1318,7 @@
 
       '<div class="stats">' +
       '<div class="stat"><b>' + c.operators + '</b><span>干员条目</span></div>' +
+      (c.picks ? '<div class="stat"><b>' + c.picks + '</b><span>自选干员</span></div>' : '') +
       (c.specials ? '<div class="stat"><b>' + c.specials + '</b><span>特殊干员</span></div>' : '') +
       '<div class="stat"><b>' + c.items + '</b><span>道具</span></div>' +
       '<div class="stat"><b>' + c.strategies + '</b><span>策略</span></div>' +
@@ -1223,7 +1346,7 @@
       '并锚定本期「卫戍协议·规程」页面实际渲染的文件；策略图标为「策略发起人」头像，' +
       '不混用 2024 / 2025-11「盟约」/ 2026-03「盟约 下半」的素材。游戏美术版权归鹰角网络所有，' +
       '此处仅作非商业的玩家查询用途；如果权利人提出异议，关闭图片显示或删除对应文件即可。</p>' +
-      '<p>已知限制：自选配置条目没有盟约与触发时机；「绝技」没有固定成员，按精锐数量判定；' +
+      '<p>已知限制：自选干员单独成类、不占盟约固定 10 人，全队最多 2 名；「绝技」没有固定成员，按精锐数量判定；' +
       '「盟约·辅助干员」与「“暴躁铁皮”」默认隐藏，可搜索「优等生」「Pith」「森蚺」「暴躁铁皮」直接命中，' +
       '也可从策略详情跳转，或在筛选里打开隐藏条目。</p>' +
       '<p>特殊干员的职业、属性、天赋与技能补充自 ' +
@@ -1252,7 +1375,7 @@
       '<span class="dot-sep">·</span>' +
       '<span class="footer-meta">生成 ' + esc(data.generatedAt) + '</span>' +
       '<span class="dot-sep">·</span>' +
-      '<span>干员 ' + c.operators + ' / 道具 ' + c.items + ' / 策略 ' + c.strategies + ' / 盟约 ' + c.covenants + '</span>' +
+      '<span>干员 ' + (c.operators + (c.picks || 0)) + ' / 道具 ' + c.items + ' / 策略 ' + c.strategies + ' / 盟约 ' + c.covenants + '</span>' +
       '</div>' +
       '<div class="footer-inner" style="margin-top:4px">' +
       '<span>非官方工具，数据整理自玩家表格，与鹰角网络无关。</span>' +

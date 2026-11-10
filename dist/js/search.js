@@ -12,6 +12,21 @@
   var index = { op: [], item: [], strategy: [], covenant: [] };
   var data = null;
 
+  function pickOp(p) {
+    return {
+      key: p.name, name: p.name, tier: 0, tierLabel: '自选',
+      tags: p.tags || [], type: '自选干员', hidden: false, price: 4,
+      normalText: '无特质（自选干员）', eliteText: '无特质（自选干员）',
+      normalTrigger: '—', eliteTrigger: '—',
+      normalTriggers: [], eliteTriggers: [],
+      avatar: p.avatar, avatarFull: p.avatarFull,
+      pick: true, rarity: 6, star: '6★',
+      class: p.class, branch: p.branch, nation: p.nation,
+      factions: p.factions || [], hiddenFactions: p.hiddenFactions || [],
+      tagsSource: p.tagsSource, charId: p.charId, prts: p.prts, note: p.note
+    };
+  }
+
   /* ---------------- 初始化索引 ---------------- */
   function init(payload) {
     data = payload;
@@ -23,7 +38,8 @@
       if (sp.special && sp.special.strategyKey) specialByStrategy[sp.special.strategyKey] = sp;
     }
 
-    index.op = payload.operators.map(function (o) {
+    var allOps = payload.operators.concat((payload.picks || []).map(pickOp));
+    index.op = allOps.map(function (o) {
       return {
         e: o,
         h: low([
@@ -68,7 +84,7 @@
         e: o,
         h: low([
           o.name, o.desc, (o.activation.empower || []).join(' '),
-          (o.members || []).join(' '), kindLabel(o.activation.kind),
+          (o.members || []).join(' '), (o.pickMembers || []).join(' '), kindLabel(o.activation.kind),
           rankLabel(o.rank), familyLabel(o.family),
           (o.functions || []).map(funcLabel).join(' ')
         ].join(SEP))
@@ -211,7 +227,8 @@
   }
 
   function byTierName(a, b) {
-    if (a.tier !== b.tier) return a.tier - b.tier;
+    var ta = a.tier || 99, tb = b.tier || 99;
+    if (ta !== tb) return ta - tb;
     return cmpName(a.name || a.role, b.name || b.role);
   }
 

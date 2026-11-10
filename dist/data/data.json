@@ -1,16 +1,17 @@
 {
- "version": "2026-11-09 04:53",
- "generatedAt": "2026-11-10 02:47:53",
+ "version": "2026-11-11 01:05",
+ "generatedAt": "2026-11-11 01:38:50",
  "source": "卫戍协议数据表.xlsx",
  "counts": {
-  "operators": 155,
+  "operators": 143,
   "items": 70,
   "strategies": 61,
   "covenants": 26,
   "fusions": 5,
   "stages": 74,
   "buffs": 31,
-  "specials": 2
+  "specials": 2,
+  "picks": 66
  },
  "tiers": [
   "I",
@@ -47,6 +48,11 @@
     "note": "随森蚺策略【暴躁铁皮】加入；本期主表即 V3_1。"
    }
   ]
+ },
+ "pickMeta": {
+  "source": "卫戍协议数据表.xlsx / 自选干员",
+  "rule": "6★、非固定干员；按 ingameFaction ∪ hiddenFaction 推导核心盟约，无匹配为协防干员",
+  "note": "自选干员单列，不计入盟约固定 10 人；配队中按 tags 参与激活/强化"
  },
  "operators": [
   {
@@ -3521,114 +3527,6 @@
    "avatarFull": "assets/avatars/av-a6f9ce09-180.webp"
   },
   {
-   "key": "自选配置 5阶-1",
-   "name": "自选配置 5阶-1",
-   "tier": 5,
-   "tierLabel": "V",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
-  },
-  {
-   "key": "自选配置 5阶-2",
-   "name": "自选配置 5阶-2",
-   "tier": 5,
-   "tierLabel": "V",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
-  },
-  {
-   "key": "自选配置 5阶-3",
-   "name": "自选配置 5阶-3",
-   "tier": 5,
-   "tierLabel": "V",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
-  },
-  {
-   "key": "自选配置 5阶-4",
-   "name": "自选配置 5阶-4",
-   "tier": 5,
-   "tierLabel": "V",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
-  },
-  {
-   "key": "自选配置 5阶-5",
-   "name": "自选配置 5阶-5",
-   "tier": 5,
-   "tierLabel": "V",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
-  },
-  {
-   "key": "自选配置 5阶-6",
-   "name": "自选配置 5阶-6",
-   "tier": 5,
-   "tierLabel": "V",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
-  },
-  {
    "key": "引星棘刺",
    "name": "引星棘刺",
    "tier": 6,
@@ -4123,114 +4021,1798 @@
    ],
    "avatar": "assets/avatars/av-679d552c-96.webp",
    "avatarFull": "assets/avatars/av-679d552c-180.webp"
+  }
+ ],
+ "picks": [
+  {
+   "key": "阿",
+   "name": "阿",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "怪杰",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门",
+    "鲤氏侦探事务所"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_225_haak",
+   "prts": {
+    "page": "阿",
+    "url": "https://prts.wiki/w/%E9%98%BF"
+   },
+   "avatar": "assets/avatars/av-35e6854c-96.webp",
+   "avatarFull": "assets/avatars/av-35e6854c-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
   },
   {
-   "key": "自选配置 6阶-1",
-   "name": "自选配置 6阶-1",
-   "tier": 6,
-   "tierLabel": "VI",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
+   "key": "陈",
+   "name": "陈",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "剑豪",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门",
+    "龙门近卫局"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_010_chen",
+   "prts": {
+    "page": "陈",
+    "url": "https://prts.wiki/w/%E9%99%88"
+   },
+   "avatar": "assets/avatars/av-6a5d848e-96.webp",
+   "avatarFull": "assets/avatars/av-6a5d848e-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
   },
   {
-   "key": "自选配置 6阶-2",
-   "name": "自选配置 6阶-2",
-   "tier": 6,
-   "tierLabel": "VI",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
+   "key": "赤刃明霄陈",
+   "name": "赤刃明霄陈",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "术战者",
+   "nation": "炎",
+   "factions": [
+    "炎"
+   ],
+   "hiddenFactions": [
+    "罗德岛"
+   ],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1050_chen3",
+   "prts": {
+    "page": "赤刃明霄陈",
+    "url": "https://prts.wiki/w/%E8%B5%A4%E5%88%83%E6%98%8E%E9%9C%84%E9%99%88"
+   },
+   "avatar": "assets/avatars/av-f978c33a-96.webp",
+   "avatarFull": "assets/avatars/av-f978c33a-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
   },
   {
-   "key": "自选配置 6阶-3",
-   "name": "自选配置 6阶-3",
-   "tier": 6,
-   "tierLabel": "VI",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
+   "key": "煌",
+   "name": "煌",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "强攻手",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛",
+    "罗德岛-精英干员"
+   ],
+   "hiddenFactions": [
+    "炎",
+    "维多利亚"
+   ],
+   "tags": [
+    "炎",
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_017_huang",
+   "prts": {
+    "page": "煌",
+    "url": "https://prts.wiki/w/%E7%85%8C"
+   },
+   "avatar": "assets/avatars/av-d8a435ab-96.webp",
+   "avatarFull": "assets/avatars/av-d8a435ab-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
   },
   {
-   "key": "自选配置 6阶-4",
-   "name": "自选配置 6阶-4",
-   "tier": 6,
-   "tierLabel": "VI",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
+   "key": "假日威龙陈",
+   "name": "假日威龙陈",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "散射手",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [
+    "炎"
+   ],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1013_chen2",
+   "prts": {
+    "page": "假日威龙陈",
+    "url": "https://prts.wiki/w/%E5%81%87%E6%97%A5%E5%A8%81%E9%BE%99%E9%99%88"
+   },
+   "avatar": "assets/avatars/av-030ff5ab-96.webp",
+   "avatarFull": "assets/avatars/av-030ff5ab-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
   },
   {
-   "key": "自选配置 6阶-5",
-   "name": "自选配置 6阶-5",
-   "tier": 6,
-   "tierLabel": "VI",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
+   "key": "缄默德克萨斯",
+   "name": "缄默德克萨斯",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "处决者",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门",
+    "企鹅物流"
+   ],
+   "hiddenFactions": [
+    "叙拉古"
+   ],
+   "tags": [
+    "炎",
+    "叙拉古"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1028_texas2",
+   "prts": {
+    "page": "缄默德克萨斯",
+    "url": "https://prts.wiki/w/%E7%BC%84%E9%BB%98%E5%BE%B7%E5%85%8B%E8%90%A8%E6%96%AF"
+   },
+   "avatar": "assets/avatars/av-c95ce792-96.webp",
+   "avatarFull": "assets/avatars/av-c95ce792-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
   },
   {
-   "key": "自选配置 6阶-6",
-   "name": "自选配置 6阶-6",
-   "tier": 6,
-   "tierLabel": "VI",
-   "tags": [],
-   "type": "自选配置",
-   "hidden": false,
-   "price": 4,
-   "normalText": "按自选干员配置",
-   "eliteText": "按自选干员配置",
-   "normalTrigger": "—",
-   "eliteTrigger": "—",
-   "normalTriggers": [],
-   "eliteTriggers": [],
-   "avatar": null,
-   "avatarFull": null
+   "key": "林",
+   "name": "林",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "阵法术师",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4080_lin",
+   "prts": {
+    "page": "林",
+    "url": "https://prts.wiki/w/%E6%9E%97"
+   },
+   "avatar": "assets/avatars/av-020ff479-96.webp",
+   "avatarFull": "assets/avatars/av-020ff479-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "琳琅诗怀雅",
+   "name": "琳琅诗怀雅",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "行商",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1033_swire2",
+   "prts": {
+    "page": "琳琅诗怀雅",
+    "url": "https://prts.wiki/w/%E7%90%B3%E7%90%85%E8%AF%97%E6%80%80%E9%9B%85"
+   },
+   "avatar": "assets/avatars/av-cd035ffa-96.webp",
+   "avatarFull": "assets/avatars/av-cd035ffa-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "令",
+   "name": "令",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "辅助",
+   "branch": "召唤师",
+   "nation": "炎",
+   "factions": [
+    "炎",
+    "炎-岁"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_2023_ling",
+   "prts": {
+    "page": "令",
+    "url": "https://prts.wiki/w/%E4%BB%A4"
+   },
+   "avatar": "assets/avatars/av-bd65e37c-96.webp",
+   "avatarFull": "assets/avatars/av-bd65e37c-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "莫斯提马",
+   "name": "莫斯提马",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "扩散术师",
+   "nation": "拉特兰",
+   "factions": [
+    "拉特兰"
+   ],
+   "hiddenFactions": [
+    "炎-龙门",
+    "企鹅物流"
+   ],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_213_mostma",
+   "prts": {
+    "page": "莫斯提马",
+    "url": "https://prts.wiki/w/%E8%8E%AB%E6%96%AF%E6%8F%90%E9%A9%AC"
+   },
+   "avatar": "assets/avatars/av-aa58f3a3-96.webp",
+   "avatarFull": "assets/avatars/av-aa58f3a3-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "能天使",
+   "name": "能天使",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "速射手",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门",
+    "企鹅物流"
+   ],
+   "hiddenFactions": [
+    "拉特兰"
+   ],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_103_angel",
+   "prts": {
+    "page": "能天使",
+    "url": "https://prts.wiki/w/%E8%83%BD%E5%A4%A9%E4%BD%BF"
+   },
+   "avatar": "assets/avatars/av-5eff4c2f-96.webp",
+   "avatarFull": "assets/avatars/av-5eff4c2f-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "年",
+   "name": "年",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "重装",
+   "branch": "铁卫",
+   "nation": "炎",
+   "factions": [
+    "炎",
+    "炎-岁"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_2014_nian",
+   "prts": {
+    "page": "年",
+    "url": "https://prts.wiki/w/%E5%B9%B4"
+   },
+   "avatar": "assets/avatars/av-6f14c264-96.webp",
+   "avatarFull": "assets/avatars/av-6f14c264-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "司霆惊蛰",
+   "name": "司霆惊蛰",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "解放者",
+   "nation": "炎",
+   "factions": [
+    "炎"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1043_leizi2",
+   "prts": {
+    "page": "司霆惊蛰",
+    "url": "https://prts.wiki/w/%E5%8F%B8%E9%9C%86%E6%83%8A%E8%9B%B0"
+   },
+   "avatar": "assets/avatars/av-49166341-96.webp",
+   "avatarFull": "assets/avatars/av-49166341-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "望",
+   "name": "望",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "陷阱师",
+   "nation": "炎",
+   "factions": [
+    "炎",
+    "炎-岁"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_2027_wang",
+   "prts": {
+    "page": "望",
+    "url": "https://prts.wiki/w/%E6%9C%9B"
+   },
+   "avatar": "assets/avatars/av-0c45066b-96.webp",
+   "avatarFull": "assets/avatars/av-0c45066b-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "新约能天使",
+   "name": "新约能天使",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "怪杰",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门",
+    "企鹅物流"
+   ],
+   "hiddenFactions": [
+    "拉特兰"
+   ],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1041_angel2",
+   "prts": {
+    "page": "新约能天使",
+    "url": "https://prts.wiki/w/%E6%96%B0%E7%BA%A6%E8%83%BD%E5%A4%A9%E4%BD%BF"
+   },
+   "avatar": "assets/avatars/av-c27a763a-96.webp",
+   "avatarFull": "assets/avatars/av-c27a763a-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "星熊",
+   "name": "星熊",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "重装",
+   "branch": "铁卫",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门",
+    "龙门近卫局"
+   ],
+   "hiddenFactions": [
+    "东"
+   ],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_136_hsguma",
+   "prts": {
+    "page": "星熊",
+    "url": "https://prts.wiki/w/%E6%98%9F%E7%86%8A"
+   },
+   "avatar": "assets/avatars/av-855ef776-96.webp",
+   "avatarFull": "assets/avatars/av-855ef776-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "斩业星熊",
+   "name": "斩业星熊",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "重装",
+   "branch": "驭法铁卫",
+   "nation": "炎-龙门",
+   "factions": [
+    "炎-龙门",
+    "龙门近卫局"
+   ],
+   "hiddenFactions": [
+    "东"
+   ],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1044_hsgma2",
+   "prts": {
+    "page": "斩业星熊",
+    "url": "https://prts.wiki/w/%E6%96%A9%E4%B8%9A%E6%98%9F%E7%86%8A"
+   },
+   "avatar": "assets/avatars/av-41b4eef6-96.webp",
+   "avatarFull": "assets/avatars/av-41b4eef6-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "重岳",
+   "name": "重岳",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "斗士",
+   "nation": "炎",
+   "factions": [
+    "炎",
+    "炎-岁"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_2024_chyue",
+   "prts": {
+    "page": "重岳",
+    "url": "https://prts.wiki/w/%E9%87%8D%E5%B2%B3"
+   },
+   "avatar": "assets/avatars/av-ee19019d-96.webp",
+   "avatarFull": "assets/avatars/av-ee19019d-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "左乐",
+   "name": "左乐",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "武者",
+   "nation": "炎",
+   "factions": [
+    "炎"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "炎"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4121_zuole",
+   "prts": {
+    "page": "左乐",
+    "url": "https://prts.wiki/w/%E5%B7%A6%E4%B9%90"
+   },
+   "avatar": "assets/avatars/av-30d951b4-96.webp",
+   "avatarFull": "assets/avatars/av-30d951b4-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "百炼嘉维尔",
+   "name": "百炼嘉维尔",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "强攻手",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [
+    "萨尔贡"
+   ],
+   "tags": [
+    "萨尔贡"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1026_gvial2",
+   "prts": {
+    "page": "百炼嘉维尔",
+    "url": "https://prts.wiki/w/%E7%99%BE%E7%82%BC%E5%98%89%E7%BB%B4%E5%B0%94"
+   },
+   "avatar": "assets/avatars/av-fcee59c1-96.webp",
+   "avatarFull": "assets/avatars/av-fcee59c1-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "娜仁图亚",
+   "name": "娜仁图亚",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "回环射手",
+   "nation": "萨尔贡",
+   "factions": [
+    "萨尔贡"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "萨尔贡"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4138_narant",
+   "prts": {
+    "page": "娜仁图亚",
+    "url": "https://prts.wiki/w/%E5%A8%9C%E4%BB%81%E5%9B%BE%E4%BA%9A"
+   },
+   "avatar": "assets/avatars/av-74a85fb4-96.webp",
+   "avatarFull": "assets/avatars/av-74a85fb4-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "缇缇",
+   "name": "缇缇",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "医疗",
+   "branch": "咒愈师",
+   "nation": "萨尔贡",
+   "factions": [
+    "萨尔贡"
+   ],
+   "hiddenFactions": [
+    "米诺斯"
+   ],
+   "tags": [
+    "萨尔贡"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4056_titi",
+   "prts": {
+    "page": "缇缇",
+    "url": "https://prts.wiki/w/%E7%BC%87%E7%BC%87"
+   },
+   "avatar": "assets/avatars/av-0d147d6c-96.webp",
+   "avatarFull": "assets/avatars/av-0d147d6c-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "澄闪",
+   "name": "澄闪",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "驭械术师",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_377_gdglow",
+   "prts": {
+    "page": "澄闪",
+    "url": "https://prts.wiki/w/%E6%BE%84%E9%97%AA"
+   },
+   "avatar": "assets/avatars/av-1f60af87-96.webp",
+   "avatarFull": "assets/avatars/av-1f60af87-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "风笛",
+   "name": "风笛",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "先锋",
+   "branch": "冲锋手",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_222_bpipe",
+   "prts": {
+    "page": "风笛",
+    "url": "https://prts.wiki/w/%E9%A3%8E%E7%AC%9B"
+   },
+   "avatar": "assets/avatars/av-241a3b75-96.webp",
+   "avatarFull": "assets/avatars/av-241a3b75-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "号角",
+   "name": "号角",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "重装",
+   "branch": "要塞",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4039_horn",
+   "prts": {
+    "page": "号角",
+    "url": "https://prts.wiki/w/%E5%8F%B7%E8%A7%92"
+   },
+   "avatar": "assets/avatars/av-3c7cb401-96.webp",
+   "avatarFull": "assets/avatars/av-3c7cb401-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "傀影",
+   "name": "傀影",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "处决者",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_250_phatom",
+   "prts": {
+    "page": "傀影",
+    "url": "https://prts.wiki/w/%E5%82%80%E5%BD%B1"
+   },
+   "avatar": "assets/avatars/av-ca43bece-96.webp",
+   "avatarFull": "assets/avatars/av-ca43bece-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "琴柳",
+   "name": "琴柳",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "先锋",
+   "branch": "执旗手",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_479_sleach",
+   "prts": {
+    "page": "琴柳",
+    "url": "https://prts.wiki/w/%E7%90%B4%E6%9F%B3"
+   },
+   "avatar": "assets/avatars/av-f54bf524-96.webp",
+   "avatarFull": "assets/avatars/av-f54bf524-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "死芒",
+   "name": "死芒",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "塑灵术师",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚",
+    "塔拉"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_450_necras",
+   "prts": {
+    "page": "死芒",
+    "url": "https://prts.wiki/w/%E6%AD%BB%E8%8A%92"
+   },
+   "avatar": "assets/avatars/av-a50ed95b-96.webp",
+   "avatarFull": "assets/avatars/av-a50ed95b-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "推进之王",
+   "name": "推进之王",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "先锋",
+   "branch": "尖兵",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚",
+    "格拉斯哥帮"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_112_siege",
+   "prts": {
+    "page": "推进之王",
+    "url": "https://prts.wiki/w/%E6%8E%A8%E8%BF%9B%E4%B9%8B%E7%8E%8B"
+   },
+   "avatar": "assets/avatars/av-29ed5dd0-96.webp",
+   "avatarFull": "assets/avatars/av-29ed5dd0-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "焰影苇草",
+   "name": "焰影苇草",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "医疗",
+   "branch": "咒愈师",
+   "nation": "维多利亚",
+   "factions": [
+    "维多利亚",
+    "塔拉"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "维多利亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1020_reed2",
+   "prts": {
+    "page": "焰影苇草",
+    "url": "https://prts.wiki/w/%E7%84%B0%E5%BD%B1%E8%8B%87%E8%8D%89"
+   },
+   "avatar": "assets/avatars/av-3c690379-96.webp",
+   "avatarFull": "assets/avatars/av-3c690379-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "银灰",
+   "name": "银灰",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "领主",
+   "nation": "谢拉格",
+   "factions": [
+    "谢拉格",
+    "喀兰贸易"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "谢拉格"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_172_svrash",
+   "prts": {
+    "page": "银灰",
+    "url": "https://prts.wiki/w/%E9%93%B6%E7%81%B0"
+   },
+   "avatar": "assets/avatars/av-130f5f10-96.webp",
+   "avatarFull": "assets/avatars/av-130f5f10-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "弑君者",
+   "name": "弑君者",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "处决者",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [
+    "叙拉古",
+    "乌萨斯"
+   ],
+   "tags": [
+    "叙拉古",
+    "乌萨斯"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1502_crosly",
+   "prts": {
+    "page": "弑君者",
+    "url": "https://prts.wiki/w/%E5%BC%91%E5%90%9B%E8%80%85"
+   },
+   "avatar": "assets/avatars/av-f0a350be-96.webp",
+   "avatarFull": "assets/avatars/av-f0a350be-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "予愿安洁莉娜",
+   "name": "予愿安洁莉娜",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "巡空者",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [
+    "叙拉古"
+   ],
+   "tags": [
+    "叙拉古"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_1015_aglna2",
+   "prts": {
+    "page": "予愿安洁莉娜",
+    "url": "https://prts.wiki/w/%E4%BA%88%E6%84%BF%E5%AE%89%E6%B4%81%E8%8E%89%E5%A8%9C"
+   },
+   "avatar": "assets/avatars/av-7acf5f19-96.webp",
+   "avatarFull": "assets/avatars/av-7acf5f19-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "电弧",
+   "name": "电弧",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "辅助",
+   "branch": "召唤师",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛",
+    "罗德岛-精英干员"
+   ],
+   "hiddenFactions": [
+    "乌萨斯"
+   ],
+   "tags": [
+    "乌萨斯"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4195_radian",
+   "prts": {
+    "page": "电弧",
+    "url": "https://prts.wiki/w/%E7%94%B5%E5%BC%A7"
+   },
+   "avatar": "assets/avatars/av-f71b70d2-96.webp",
+   "avatarFull": "assets/avatars/av-f71b70d2-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "国度",
+   "name": "国度",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "伏击客",
+   "nation": "乌萨斯",
+   "factions": [
+    "乌萨斯"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "乌萨斯"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4246_dminon",
+   "prts": {
+    "page": "国度",
+    "url": "https://prts.wiki/w/%E5%9B%BD%E5%BA%A6"
+   },
+   "avatar": "assets/avatars/av-e973d0ca-96.webp",
+   "avatarFull": "assets/avatars/av-e973d0ca-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "早露",
+   "name": "早露",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "攻城手",
+   "nation": "乌萨斯",
+   "factions": [
+    "乌萨斯",
+    "乌萨斯学生自治团"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "乌萨斯"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_197_poca",
+   "prts": {
+    "page": "早露",
+    "url": "https://prts.wiki/w/%E6%97%A9%E9%9C%B2"
+   },
+   "avatar": "assets/avatars/av-fe1df505-96.webp",
+   "avatarFull": "assets/avatars/av-fe1df505-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "止颂",
+   "name": "止颂",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "无畏者",
+   "nation": "莱塔尼亚",
+   "factions": [
+    "莱塔尼亚"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "莱塔尼亚"
+   ],
+   "tagsSource": "阵营并集",
+   "charId": "char_4011_lessng",
+   "prts": {
+    "page": "止颂",
+    "url": "https://prts.wiki/w/%E6%AD%A2%E9%A2%82"
+   },
+   "avatar": "assets/avatars/av-979b98ad-96.webp",
+   "avatarFull": "assets/avatars/av-979b98ad-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "阿斯卡纶",
+   "name": "阿斯卡纶",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "伏击客",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛",
+    "S.W.E.E.P."
+   ],
+   "hiddenFactions": [
+    "巴别塔"
+   ],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4132_ascln",
+   "prts": {
+    "page": "阿斯卡纶",
+    "url": "https://prts.wiki/w/%E9%98%BF%E6%96%AF%E5%8D%A1%E7%BA%B6"
+   },
+   "avatar": "assets/avatars/av-5db9accc-96.webp",
+   "avatarFull": "assets/avatars/av-5db9accc-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "艾拉",
+   "name": "艾拉",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "陷阱师",
+   "nation": "",
+   "factions": [
+    "彩虹小队"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4123_ela",
+   "prts": {
+    "page": "艾拉",
+    "url": "https://prts.wiki/w/%E8%89%BE%E6%8B%89"
+   },
+   "avatar": "assets/avatars/av-1a184568-96.webp",
+   "avatarFull": "assets/avatars/av-1a184568-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "嵯峨",
+   "name": "嵯峨",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "先锋",
+   "branch": "尖兵",
+   "nation": "东",
+   "factions": [
+    "东"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_362_saga",
+   "prts": {
+    "page": "嵯峨",
+    "url": "https://prts.wiki/w/%E5%B5%AF%E5%B3%A8"
+   },
+   "avatar": "assets/avatars/av-169bb3e1-96.webp",
+   "avatarFull": "assets/avatars/av-169bb3e1-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "多萝西",
+   "name": "多萝西",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "陷阱师",
+   "nation": "哥伦比亚",
+   "factions": [
+    "哥伦比亚",
+    "莱茵生命"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4048_doroth",
+   "prts": {
+    "page": "多萝西",
+    "url": "https://prts.wiki/w/%E5%A4%9A%E8%90%9D%E8%A5%BF"
+   },
+   "avatar": "assets/avatars/av-dbc0710b-96.webp",
+   "avatarFull": "assets/avatars/av-dbc0710b-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "菲亚梅塔",
+   "name": "菲亚梅塔",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "炮手",
+   "nation": "拉特兰",
+   "factions": [
+    "拉特兰"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_300_phenxi",
+   "prts": {
+    "page": "菲亚梅塔",
+    "url": "https://prts.wiki/w/%E8%8F%B2%E4%BA%9A%E6%A2%85%E5%A1%94"
+   },
+   "avatar": "assets/avatars/av-410f89ac-96.webp",
+   "avatarFull": "assets/avatars/av-410f89ac-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "丰川祥子",
+   "name": "丰川祥子",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "领主",
+   "nation": "",
+   "factions": [
+    "Ave Mujica"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4182_oblvns",
+   "prts": {
+    "page": "丰川祥子",
+    "url": "https://prts.wiki/w/%E4%B8%B0%E5%B7%9D%E7%A5%A5%E5%AD%90"
+   },
+   "avatar": "assets/avatars/av-a5bd0354-96.webp",
+   "avatarFull": "assets/avatars/av-a5bd0354-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "黑",
+   "name": "黑",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "重射手",
+   "nation": "哥伦比亚",
+   "factions": [
+    "哥伦比亚",
+    "汐斯塔"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_340_shwaz",
+   "prts": {
+    "page": "黑",
+    "url": "https://prts.wiki/w/%E9%BB%91"
+   },
+   "avatar": "assets/avatars/av-1518fc4a-96.webp",
+   "avatarFull": "assets/avatars/av-1518fc4a-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "灰烬",
+   "name": "灰烬",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "速射手",
+   "nation": "",
+   "factions": [
+    "彩虹小队"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_456_ash",
+   "prts": {
+    "page": "灰烬",
+    "url": "https://prts.wiki/w/%E7%81%B0%E7%83%AC"
+   },
+   "avatar": "assets/avatars/av-27808f47-96.webp",
+   "avatarFull": "assets/avatars/av-27808f47-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "结城理",
+   "name": "结城理",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "傀儡师",
+   "nation": "",
+   "factions": [
+    "S.E.E.S."
+   ],
+   "hiddenFactions": [
+    "拉特兰"
+   ],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4217_makoto",
+   "prts": {
+    "page": "结城理",
+    "url": "https://prts.wiki/w/%E7%BB%93%E5%9F%8E%E7%90%86"
+   },
+   "avatar": "assets/avatars/av-c04d6742-96.webp",
+   "avatarFull": "assets/avatars/av-c04d6742-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "凯尔希",
+   "name": "凯尔希",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "医疗",
+   "branch": "医师",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [
+    "巴别塔"
+   ],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_003_kalts",
+   "prts": {
+    "page": "凯尔希",
+    "url": "https://prts.wiki/w/%E5%87%AF%E5%B0%94%E5%B8%8C"
+   },
+   "avatar": "assets/avatars/av-a117bea2-96.webp",
+   "avatarFull": "assets/avatars/av-a117bea2-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "凯尔希·思衡托",
+   "name": "凯尔希·思衡托",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "医疗",
+   "branch": "守望者",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_1052_kalts2",
+   "prts": {
+    "page": "凯尔希·思衡托",
+    "url": "https://prts.wiki/w/%E5%87%AF%E5%B0%94%E5%B8%8C%C2%B7%E6%80%9D%E8%A1%A1%E6%89%98"
+   },
+   "avatar": "assets/avatars/av-98bbdac0-96.webp",
+   "avatarFull": "assets/avatars/av-98bbdac0-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "刻俄柏",
+   "name": "刻俄柏",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "中坚术师",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [
+    "玻利瓦尔"
+   ],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_2013_cerber",
+   "prts": {
+    "page": "刻俄柏",
+    "url": "https://prts.wiki/w/%E5%88%BB%E4%BF%84%E6%9F%8F"
+   },
+   "avatar": "assets/avatars/av-e27efbea-96.webp",
+   "avatarFull": "assets/avatars/av-e27efbea-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "莱伊",
+   "name": "莱伊",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "猎手",
+   "nation": "雷姆必拓",
+   "factions": [
+    "雷姆必拓"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4117_ray",
+   "prts": {
+    "page": "莱伊",
+    "url": "https://prts.wiki/w/%E8%8E%B1%E4%BC%8A"
+   },
+   "avatar": "assets/avatars/av-f3d869b8-96.webp",
+   "avatarFull": "assets/avatars/av-f3d869b8-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "玛露西尔",
+   "name": "玛露西尔",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "扩散术师",
+   "nation": "",
+   "factions": [
+    "莱欧斯小队"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4141_marcil",
+   "prts": {
+    "page": "玛露西尔",
+    "url": "https://prts.wiki/w/%E7%8E%9B%E9%9C%B2%E8%A5%BF%E5%B0%94"
+   },
+   "avatar": "assets/avatars/av-e6398bb7-96.webp",
+   "avatarFull": "assets/avatars/av-e6398bb7-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "麦哲伦",
+   "name": "麦哲伦",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "辅助",
+   "branch": "召唤师",
+   "nation": "哥伦比亚",
+   "factions": [
+    "哥伦比亚",
+    "莱茵生命"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_248_mgllan",
+   "prts": {
+    "page": "麦哲伦",
+    "url": "https://prts.wiki/w/%E9%BA%A6%E5%93%B2%E4%BC%A6"
+   },
+   "avatar": "assets/avatars/av-16074551-96.webp",
+   "avatarFull": "assets/avatars/av-16074551-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "谬因",
+   "name": "谬因",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "轰击术师",
+   "nation": "哥伦比亚",
+   "factions": [
+    "哥伦比亚"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4229_aphris",
+   "prts": {
+    "page": "谬因",
+    "url": "https://prts.wiki/w/%E8%B0%AC%E5%9B%A0"
+   },
+   "avatar": "assets/avatars/av-a65963ce-96.webp",
+   "avatarFull": "assets/avatars/av-a65963ce-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "娜斯提",
+   "name": "娜斯提",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "辅助",
+   "branch": "工匠",
+   "nation": "哥伦比亚",
+   "factions": [
+    "哥伦比亚",
+    "莱茵生命"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4212_nasti",
+   "prts": {
+    "page": "娜斯提",
+    "url": "https://prts.wiki/w/%E5%A8%9C%E6%96%AF%E6%8F%90"
+   },
+   "avatar": "assets/avatars/av-d33889de-96.webp",
+   "avatarFull": "assets/avatars/av-d33889de-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "泥岩",
+   "name": "泥岩",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "重装",
+   "branch": "不屈者",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_311_mudrok",
+   "prts": {
+    "page": "泥岩",
+    "url": "https://prts.wiki/w/%E6%B3%A5%E5%B2%A9"
+   },
+   "avatar": "assets/avatars/av-79b9fef3-96.webp",
+   "avatarFull": "assets/avatars/av-79b9fef3-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "麒麟R夜刀",
+   "name": "麒麟R夜刀",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "特种",
+   "branch": "处决者",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛",
+    "行动组A4"
+   ],
+   "hiddenFactions": [
+    "东"
+   ],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_1029_yato2",
+   "prts": {
+    "page": "麒麟R夜刀",
+    "url": "https://prts.wiki/w/%E9%BA%92%E9%BA%9FR%E5%A4%9C%E5%88%80"
+   },
+   "avatar": "assets/avatars/av-6b8db6bc-96.webp",
+   "avatarFull": "assets/avatars/av-6b8db6bc-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "珊比",
+   "name": "珊比",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "重装",
+   "branch": "本源铁卫",
+   "nation": "雷姆必拓",
+   "factions": [
+    "雷姆必拓"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4235_thumpy",
+   "prts": {
+    "page": "珊比",
+    "url": "https://prts.wiki/w/%E7%8F%8A%E6%AF%94"
+   },
+   "avatar": "assets/avatars/av-40cf87fd-96.webp",
+   "avatarFull": "assets/avatars/av-40cf87fd-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "闪灵",
+   "name": "闪灵",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "医疗",
+   "branch": "医师",
+   "nation": "",
+   "factions": [
+    "使徒"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_147_shining",
+   "prts": {
+    "page": "闪灵",
+    "url": "https://prts.wiki/w/%E9%97%AA%E7%81%B5"
+   },
+   "avatar": "assets/avatars/av-a9194943-96.webp",
+   "avatarFull": "assets/avatars/av-a9194943-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "圣约送葬人",
+   "name": "圣约送葬人",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "近卫",
+   "branch": "收割者",
+   "nation": "拉特兰",
+   "factions": [
+    "拉特兰"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_1032_excu2",
+   "prts": {
+    "page": "圣约送葬人",
+    "url": "https://prts.wiki/w/%E5%9C%A3%E7%BA%A6%E9%80%81%E8%91%AC%E4%BA%BA"
+   },
+   "avatar": "assets/avatars/av-507fda43-96.webp",
+   "avatarFull": "assets/avatars/av-507fda43-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "塑心",
+   "name": "塑心",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "辅助",
+   "branch": "巫役",
+   "nation": "拉特兰",
+   "factions": [
+    "拉特兰"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_245_cello",
+   "prts": {
+    "page": "塑心",
+    "url": "https://prts.wiki/w/%E5%A1%91%E5%BF%83"
+   },
+   "avatar": "assets/avatars/av-d66a8d25-96.webp",
+   "avatarFull": "assets/avatars/av-d66a8d25-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "提丰",
+   "name": "提丰",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "攻城手",
+   "nation": "萨米",
+   "factions": [
+    "萨米"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_2012_typhon",
+   "prts": {
+    "page": "提丰",
+    "url": "https://prts.wiki/w/%E6%8F%90%E4%B8%B0"
+   },
+   "avatar": "assets/avatars/av-25050c7b-96.webp",
+   "avatarFull": "assets/avatars/av-25050c7b-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "维什戴尔",
+   "name": "维什戴尔",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "投掷手",
+   "nation": "",
+   "factions": [
+    "巴别塔"
+   ],
+   "hiddenFactions": [
+    "罗德岛"
+   ],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_1035_wisdel",
+   "prts": {
+    "page": "维什戴尔",
+    "url": "https://prts.wiki/w/%E7%BB%B4%E4%BB%80%E6%88%B4%E5%B0%94"
+   },
+   "avatar": "assets/avatars/av-75fd4287-96.webp",
+   "avatarFull": "assets/avatars/av-75fd4287-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "信仰搅拌机",
+   "name": "信仰搅拌机",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "重装",
+   "branch": "哨戒铁卫",
+   "nation": "拉特兰",
+   "factions": [
+    "拉特兰"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4194_rmixer",
+   "prts": {
+    "page": "信仰搅拌机",
+    "url": "https://prts.wiki/w/%E4%BF%A1%E4%BB%B0%E6%90%85%E6%8B%8C%E6%9C%BA"
+   },
+   "avatar": "assets/avatars/av-741bd98c-96.webp",
+   "avatarFull": "assets/avatars/av-741bd98c-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "焰狐龙梓兰",
+   "name": "焰狐龙梓兰",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "狙击",
+   "branch": "重射手",
+   "nation": "罗德岛",
+   "factions": [
+    "罗德岛",
+    "行动预备组A6"
+   ],
+   "hiddenFactions": [
+    "哥伦比亚"
+   ],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_1048_orchd2",
+   "prts": {
+    "page": "焰狐龙梓兰",
+    "url": "https://prts.wiki/w/%E7%84%B0%E7%8B%90%E9%BE%99%E6%A2%93%E5%85%B0"
+   },
+   "avatar": "assets/avatars/av-184418d3-96.webp",
+   "avatarFull": "assets/avatars/av-184418d3-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "伊芙利特",
+   "name": "伊芙利特",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "术师",
+   "branch": "轰击术师",
+   "nation": "哥伦比亚",
+   "factions": [
+    "哥伦比亚",
+    "莱茵生命"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_134_ifrit",
+   "prts": {
+    "page": "伊芙利特",
+    "url": "https://prts.wiki/w/%E4%BC%8A%E8%8A%99%E5%88%A9%E7%89%B9"
+   },
+   "avatar": "assets/avatars/av-f65b8146-96.webp",
+   "avatarFull": "assets/avatars/av-f65b8146-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
+  },
+  {
+   "key": "伊内丝",
+   "name": "伊内丝",
+   "type": "自选干员",
+   "rarity": 6,
+   "star": "6★",
+   "class": "先锋",
+   "branch": "情报官",
+   "nation": "",
+   "factions": [
+    "巴别塔"
+   ],
+   "hiddenFactions": [],
+   "tags": [
+    "协防干员"
+   ],
+   "tagsSource": "无核心→协防",
+   "charId": "char_4087_ines",
+   "prts": {
+    "page": "伊内丝",
+    "url": "https://prts.wiki/w/%E4%BC%8A%E5%86%85%E4%B8%9D"
+   },
+   "avatar": "assets/avatars/av-27558c98-96.webp",
+   "avatarFull": "assets/avatars/av-27558c98-180.webp",
+   "note": "6★；需自身持有；不计入盟约固定 10 人"
   }
  ],
  "items": [
@@ -7015,7 +8597,29 @@
    "garrison": false,
    "valueText": "【炎】干员攻击力+(23+0.9×层数)%\n<在场6名不同的【炎】干员>战斗开始时，【炎】干员每次攻击时造成攻击力6%的随机元素损伤；全场敌人元素损伤恢复速度增加(40+0.3×层数)%",
    "icon": "assets/icons/cv-92510a49-48.webp",
-   "iconFull": "assets/icons/cv-92510a49-96.webp"
+   "iconFull": "assets/icons/cv-92510a49-96.webp",
+   "pickMembers": [
+    "阿",
+    "陈",
+    "赤刃明霄陈",
+    "煌",
+    "假日威龙陈",
+    "缄默德克萨斯",
+    "林",
+    "琳琅诗怀雅",
+    "令",
+    "莫斯提马",
+    "能天使",
+    "年",
+    "司霆惊蛰",
+    "望",
+    "新约能天使",
+    "星熊",
+    "斩业星熊",
+    "重岳",
+    "左乐"
+   ],
+   "pickCount": 19
   },
   {
    "key": "sargonShip",
@@ -7054,7 +8658,13 @@
    "garrison": false,
    "valueText": "【萨尔贡】干员开启技能时，所有【萨尔贡】干员攻击速度+12（至多+300），持续(5+0.22×层数)秒\n<在场6名不同的【萨尔贡】干员>【萨尔贡】干员每次开启技能时，在攻击范围内制造一个流沙地面。位于流沙地面上的敌人受到(20+0.025×层数)%的迟钝效果，每5秒造成一次(5000+25×层数)点法术伤害并束缚1秒；【萨尔贡】干员技能持续期间，攻击范围内的流沙地面使敌人的迟钝效果变为2倍，每秒受到(800+4×层数)点法术伤害",
    "icon": "assets/icons/cv-8f08277b-48.webp",
-   "iconFull": "assets/icons/cv-8f08277b-96.webp"
+   "iconFull": "assets/icons/cv-8f08277b-96.webp",
+   "pickMembers": [
+    "百炼嘉维尔",
+    "娜仁图亚",
+    "缇缇"
+   ],
+   "pickCount": 3
   },
   {
    "key": "victoriaShip",
@@ -7094,7 +8704,19 @@
    "garrison": false,
    "valueText": "携带装备的【维多利亚】干员伤害提升至(125+0.8×层数)%\n<每叠加25层>获得一件带有随机特殊效果的维式重锤\n<在场6名不同【维多利亚】干员>【维多利亚】干员每携带1件装备攻击力+40%，携带进阶装备改为+80%",
    "icon": "assets/icons/cv-a31161fe-48.webp",
-   "iconFull": "assets/icons/cv-a31161fe-96.webp"
+   "iconFull": "assets/icons/cv-a31161fe-96.webp",
+   "pickMembers": [
+    "煌",
+    "澄闪",
+    "风笛",
+    "号角",
+    "傀影",
+    "琴柳",
+    "死芒",
+    "推进之王",
+    "焰影苇草"
+   ],
+   "pickCount": 9
   },
   {
    "key": "kjeragShip",
@@ -7135,7 +8757,11 @@
    "garrison": false,
    "valueText": "【谢拉格】干员伤害提升至125%，对寒冷和冻结敌人额外提升至(135+1×层数)%\n<每叠加100层>获得一件谢拉格不融冰\n<在场6名不同的【谢拉格】干员>战斗开始时召唤可自主行动的雪山巨人，其攻击力和生命值随谢拉格层数提升而提升。雪山巨人将在巨人和雪山形态转换，雪山形态可以阻挡敌人并造成溅射伤害，雪山形态攻击被冻结的敌人时造成高额法术伤害并解除目标的冻结状态；巨人形态可以移动并对敌人造成远程溅射伤害",
    "icon": "assets/icons/cv-0a6314f6-48.webp",
-   "iconFull": "assets/icons/cv-0a6314f6-96.webp"
+   "iconFull": "assets/icons/cv-0a6314f6-96.webp",
+   "pickMembers": [
+    "银灰"
+   ],
+   "pickCount": 1
   },
   {
    "key": "egirShip",
@@ -7174,7 +8800,9 @@
    "garrison": false,
    "valueText": "【阿戈尔】干员生命值+(35+1×层数)%\n战斗开始时【阿戈尔】干员依次吞噬身前一格干员造成5000点物理伤害并获得其基础攻击力和阻挡数，并叠加等于被吞噬者等阶的盟约层数（【阿戈尔】之间优先对更靠左和靠上的干员发起吞噬）\n<在场6名不同【阿戈尔】干员>前3名【阿戈尔】干员首次被击倒时立刻复活",
    "icon": "assets/icons/cv-8f2377fa-48.webp",
-   "iconFull": "assets/icons/cv-8f2377fa-96.webp"
+   "iconFull": "assets/icons/cv-8f2377fa-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "siracusaShip",
@@ -7213,7 +8841,13 @@
    "garrison": false,
    "valueText": "【叙拉古】干员部署后攻击速度+(25+0.8×层数)，持续(32+0.4×层数)秒\n<在场6名不同的【叙拉古】干员>每次攻击时有30%概率为敌人随机附加一个异常状态，持续(1+0.0018×层数)秒；敌人存在2种或以上异常状态时，每秒对自身及周围一定范围内的敌人造成(800+10×层数)点真实伤害",
    "icon": "assets/icons/cv-e1d5a7a9-48.webp",
-   "iconFull": "assets/icons/cv-e1d5a7a9-96.webp"
+   "iconFull": "assets/icons/cv-e1d5a7a9-96.webp",
+   "pickMembers": [
+    "缄默德克萨斯",
+    "弑君者",
+    "予愿安洁莉娜"
+   ],
+   "pickCount": 3
   },
   {
    "key": "kazimierzShip",
@@ -7253,7 +8887,9 @@
    "garrison": false,
    "valueText": "每次有干员部署时【卡西米尔】干员攻击力+20%（至多+(50+1×层数)%），持续至战斗结束\n<在场6名不同的【卡西米尔】干员>【卡西米尔】地面干员被击倒时离场并召唤整备区最右侧【卡西米尔】干员加入战斗（不改变当前盟约的激活状态）；【卡西米尔】干员开启技能或部署后30秒内攻击时附带攻击力65%的真实伤害",
    "icon": "assets/icons/cv-1f6611c6-48.webp",
-   "iconFull": "assets/icons/cv-1f6611c6-96.webp"
+   "iconFull": "assets/icons/cv-1f6611c6-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "ursusShip",
@@ -7293,7 +8929,14 @@
    "garrison": false,
    "valueText": "【乌萨斯】干员攻击力+(35+0.75×层数)%，生命值+(10+0.3×层数)%，【乌萨斯】干员击倒其他单位时为【乌萨斯】叠加2层临时层数\n<在场6名不同的【乌萨斯】干员>【乌萨斯】干员受到伤害的(15+0.05×层数)%转化为10秒的生命流失，当伤害来源被击倒时不再流失生命；阻挡敌人期间，敌人每秒受到相当于攻击力(50+0.25×层数)%的法术伤害；【乌萨斯】干员击倒其他单位时叠加的临时层数提升至4层",
    "icon": "assets/icons/cv-88803819-48.webp",
-   "iconFull": "assets/icons/cv-88803819-96.webp"
+   "iconFull": "assets/icons/cv-88803819-96.webp",
+   "pickMembers": [
+    "弑君者",
+    "电弧",
+    "国度",
+    "早露"
+   ],
+   "pickCount": 4
   },
   {
    "key": "iberiaShip",
@@ -7332,7 +8975,9 @@
    "garrison": false,
    "valueText": "【伊比利亚】干员或炼金单元每次造成伤害时，使目标每秒受到(11+0.06×层数)%攻击力（至多叠加10次）的持续法术伤害，持续10秒\n<在场6名不同的【伊比利亚】干员>【伊比利亚】干员或炼金单元造成伤害时附带的持续法术伤害提升至2倍，并使目标移动速度-4%（至多-80%），持续10秒；【伊比利亚】干员或炼金单元每次造成伤害时有20%概率弹射到周围一定范围内的敌人造成300%攻击力的法术伤害",
    "icon": "assets/icons/cv-b9057624-48.webp",
-   "iconFull": "assets/icons/cv-b9057624-96.webp"
+   "iconFull": "assets/icons/cv-b9057624-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "lethaniaShip",
@@ -7372,7 +9017,11 @@
    "garrison": false,
    "valueText": "【莱塔尼亚】干员和召唤物攻击力+(30+1×层数)%，场上敌人被击倒时在附近召唤“一个小节”（场上最多存在10个）\n<在场6名不同的【莱塔尼亚】干员>召唤“一个小节”时(30+0.1×层数)%概率改为召唤“一个乐部”，在场时使【莱塔尼亚】干员攻速+20；场上【莱塔尼亚】召唤物上限提升至20；场上我方干员被击倒时会额外召唤“一个小节”",
    "icon": "assets/icons/cv-2f3edf5b-48.webp",
-   "iconFull": "assets/icons/cv-2f3edf5b-96.webp"
+   "iconFull": "assets/icons/cv-2f3edf5b-96.webp",
+   "pickMembers": [
+    "止颂"
+   ],
+   "pickCount": 1
   },
   {
    "key": "preciShip",
@@ -7413,7 +9062,9 @@
    "garrison": false,
    "valueText": "【精准】干员攻击力+(10+1.2×层数)%\n<在场3名不同【精准】干员>生效范围变为【精准】干员和所有远程干员，且攻击无视30%防御力和法术抗性",
    "icon": "assets/icons/cv-25815209-48.webp",
-   "iconFull": "assets/icons/cv-25815209-96.webp"
+   "iconFull": "assets/icons/cv-25815209-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "swiftShip",
@@ -7455,7 +9106,9 @@
    "garrison": false,
    "valueText": "【迅捷】干员技能结束时有(20+0.35×层数)%概率立刻回复12点技力\n<达到40层>所有干员技能结束时有等概率额外回复15点技力",
    "icon": "assets/icons/cv-93406de7-48.webp",
-   "iconFull": "assets/icons/cv-93406de7-96.webp"
+   "iconFull": "assets/icons/cv-93406de7-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "skillfulShip",
@@ -7497,7 +9150,9 @@
    "garrison": false,
    "valueText": "【灵巧】干员及周围4格的干员攻击速度+(10+1×层数)\n<达到40层>生效范围变为【灵巧】干员周围8格",
    "icon": "assets/icons/cv-cc929b5f-48.webp",
-   "iconFull": "assets/icons/cv-cc929b5f-96.webp"
+   "iconFull": "assets/icons/cv-cc929b5f-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "steadShip",
@@ -7539,7 +9194,9 @@
    "garrison": false,
    "valueText": "所有干员生命值+(25+1.2×层数)%\n<在场3名不同【坚守】干员>场上非【坚守】干员受到伤害时，所受伤害的40%由【坚守】干员平均承担；【坚守】干员受到伤害时，伤害来源受到(850+10×层数)点法术伤害（每0.2秒至多触发1次）和持续5秒的40%的脆弱效果",
    "icon": "assets/icons/cv-dc7e4f32-48.webp",
-   "iconFull": "assets/icons/cv-dc7e4f32-96.webp"
+   "iconFull": "assets/icons/cv-dc7e4f32-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "deputShip",
@@ -7577,7 +9234,9 @@
    "garrison": false,
    "valueText": "所有干员防御力+(15+1.2×层数)%，再部署时间-30%\n休整期结束时，使当前所有已激活的盟约层数+2\n<在场3名不同【助力】干员>改为层数+4",
    "icon": "assets/icons/cv-0d725916-48.webp",
-   "iconFull": "assets/icons/cv-0d725916-96.webp"
+   "iconFull": "assets/icons/cv-0d725916-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "visiShip",
@@ -7621,7 +9280,9 @@
    "garrison": true,
    "valueText": "<每叠加10层>获得一次2资金\n<首次到达80层>所有【远见】干员购买价格永久-1资金\n<首次到达150层>所有【远见】干员购买价格额外永久-1资金\n整备区的【远见】干员也可用于激活盟约",
    "icon": "assets/icons/cv-cd2a2697-48.webp",
-   "iconFull": "assets/icons/cv-cd2a2697-96.webp"
+   "iconFull": "assets/icons/cv-cd2a2697-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "miraShip",
@@ -7662,7 +9323,9 @@
    "garrison": true,
    "valueText": "刷新调度中心时，有(18+0.25×层数)%概率使下次刷新不消耗资金\n<首次到达100层>调度中心刷新时至少出现一名等同于当前调度中心等级的干员\n整备区的【奇迹】干员也可用于激活盟约",
    "icon": "assets/icons/cv-6a002b4c-48.webp",
-   "iconFull": "assets/icons/cv-6a002b4c-96.webp"
+   "iconFull": "assets/icons/cv-6a002b4c-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "investShip",
@@ -7698,7 +9361,9 @@
    "garrison": true,
    "valueText": "干员的“获得时”类特质每次触发2次\n<达到100层>“获得时”类特质每次触发3次\n整备区的【投资人】干员也可用于激活盟约",
    "icon": "assets/icons/cv-f872baa2-48.webp",
-   "iconFull": "assets/icons/cv-f872baa2-96.webp"
+   "iconFull": "assets/icons/cv-f872baa2-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "raidShip",
@@ -7739,7 +9404,9 @@
    "garrison": false,
    "valueText": "【突袭】干员10秒内未进行攻击或技能就绪时，若范围内没有敌人，则保留技力立即再部署至一名地面敌人周围，期间攻击力和生命值+(25+1×层数)%\n<达到50层>所有干员攻击速度+50",
    "icon": "assets/icons/cv-3969f554-48.webp",
-   "iconFull": "assets/icons/cv-3969f554-96.webp"
+   "iconFull": "assets/icons/cv-3969f554-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "indomShip",
@@ -7779,7 +9446,9 @@
    "garrison": false,
    "valueText": "地面干员被击倒时，有(18+0.4×层数)%概率立刻重新部署\n<在场3名不同【不屈】干员>地面干员被击倒时使场上所有干员技力+5",
    "icon": "assets/icons/cv-0730d798-48.webp",
-   "iconFull": "assets/icons/cv-0730d798-96.webp"
+   "iconFull": "assets/icons/cv-0730d798-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "maniShip",
@@ -7808,7 +9477,9 @@
    "garrison": false,
    "valueText": "激活时可以使场上核心盟约的激活人数+1，【调和】干员享受已激活的核心盟约的效果",
    "icon": "assets/icons/cv-5171ca2b-48.webp",
-   "iconFull": "assets/icons/cv-5171ca2b-96.webp"
+   "iconFull": "assets/icons/cv-5171ca2b-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "emptyShip",
@@ -7843,7 +9514,39 @@
    "garrison": false,
    "valueText": "所有干员受到的物理和法术伤害-20%；【协防干员】伤害提升至120%，精锐【协防干员】造成伤害提升至140%",
    "icon": "assets/icons/cv-b0925f13-48.webp",
-   "iconFull": "assets/icons/cv-b0925f13-96.webp"
+   "iconFull": "assets/icons/cv-b0925f13-96.webp",
+   "pickMembers": [
+    "阿斯卡纶",
+    "艾拉",
+    "嵯峨",
+    "多萝西",
+    "菲亚梅塔",
+    "丰川祥子",
+    "黑",
+    "灰烬",
+    "结城理",
+    "凯尔希",
+    "凯尔希·思衡托",
+    "刻俄柏",
+    "莱伊",
+    "玛露西尔",
+    "麦哲伦",
+    "谬因",
+    "娜斯提",
+    "泥岩",
+    "麒麟R夜刀",
+    "珊比",
+    "闪灵",
+    "圣约送葬人",
+    "塑心",
+    "提丰",
+    "维什戴尔",
+    "信仰搅拌机",
+    "焰狐龙梓兰",
+    "伊芙利特",
+    "伊内丝"
+   ],
+   "pickCount": 29
   },
   {
    "key": "soloShip",
@@ -7875,7 +9578,9 @@
    "garrison": false,
    "valueText": "<在场1名【独行】干员>【独行】干员攻击力和生命值+60%，初始技力+15（在场2名及以上【独行】干员时失效）",
    "icon": "assets/icons/cv-3cd088c2-48.webp",
-   "iconFull": "assets/icons/cv-3cd088c2-96.webp"
+   "iconFull": "assets/icons/cv-3cd088c2-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "suntShip",
@@ -7907,7 +9612,9 @@
    "garrison": false,
    "valueText": "<在场2名精锐状态的干员>精锐状态的干员攻击力+30%\n<在场5名精锐状态的干员>精锐状态的干员技力消耗-30%\n（所有干员的精锐状态均可激活盟约）",
    "icon": "assets/icons/cv-279f10ee-48.webp",
-   "iconFull": "assets/icons/cv-279f10ee-96.webp"
+   "iconFull": "assets/icons/cv-279f10ee-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "docShip",
@@ -7949,7 +9656,9 @@
    "garrison": false,
    "valueText": "【聚合】干员攻击范围内的我方单位每秒回复攻击力(16+0.12×层数)%的生命值和攻击力(8+0.06×层数)%的元素损伤\n<在场3名【聚合】干员>【聚合】干员攻击范围内的所有干员获得(15+0.08×层数)%的庇护",
    "icon": "assets/icons/cv-115b6227-48.webp",
-   "iconFull": "assets/icons/cv-115b6227-96.webp"
+   "iconFull": "assets/icons/cv-115b6227-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   },
   {
    "key": "arcaneShip",
@@ -7992,7 +9701,9 @@
    "garrison": false,
    "valueText": "【奥术】干员造成伤害时额外附加一次(20+0.4×层数)%攻击力的法术伤害\n<在场3名不同【奥术】干员>场上所有敌人每次受到伤害时法术抗性-1（至多(-30-0.05×层数)）；【奥术】干员攻击范围内的敌人隐匿效果失效",
    "icon": "assets/icons/cv-f2c33fba-48.webp",
-   "iconFull": "assets/icons/cv-f2c33fba-96.webp"
+   "iconFull": "assets/icons/cv-f2c33fba-96.webp",
+   "pickMembers": [],
+   "pickCount": 0
   }
  ],
  "fusions": [
