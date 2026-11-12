@@ -18,4 +18,5 @@
 web/data/data.js    linguist-generated=true
 web/data/data.json  linguist-generated=true
 dist/**             linguist-generated=true
+release/**          linguist-generated=true
 data/avatars.json   linguist-generated=true

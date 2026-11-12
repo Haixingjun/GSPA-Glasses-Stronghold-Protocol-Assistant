@@ -1,0 +1,75 @@
+:root{
+  --bg:#0b1118;--panel:#121c27;--line:#2a3a4d;--text:#e6edf6;--muted:#8ea1b8;
+  --accent:#5aa9ff;--gold:#e6b35a;--cell:clamp(28px,min(4.4vw,6.4vh),52px);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{
+  background:radial-gradient(900px 500px at 10% -10%,#17283b,transparent 55%),var(--bg);
+  color:var(--text);font:13px/1.5 "Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+}
+button{font:inherit}
+a{color:#9fd0ff;text-decoration:none}
+.btn{border:1px solid var(--line);background:#182536;color:var(--text);padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12px;white-space:nowrap}
+.btn:hover{border-color:#4c7398}
+.btn.primary{border-color:#3f79b8;background:#28547d;color:#eaf5ff}
+.btn.ghost{background:transparent}
+.mini{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer}
+.mini:hover{color:var(--text);border-color:#4c7398}
+.mini.active{border-color:var(--gold);color:#ffe1a8;background:#2a2113}
+.muted{color:var(--muted);font-size:10px}
+
+.editor-page{height:100dvh;display:flex;flex-direction:column;gap:8px;padding:10px 14px}
+.ed-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex:none}
+.ed-head h1{margin:0 0 2px;font-size:19px;letter-spacing:.02em}
+.ed-head p{margin:0;color:var(--muted);font-size:11px;max-width:720px}
+.ed-head-actions{display:flex;gap:8px;flex:none}
+
+.ed-controls{flex:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:7px}
+.ed-current{display:flex;align-items:center;gap:9px;min-width:0}
+.ed-current img{width:74px;height:41px;object-fit:cover;border-radius:6px;border:1px solid #3a4a5e;background:#0a0d10;flex:none}
+.ed-current b{display:block;font-size:12px}
+.ed-brushes,.ed-row,.ed-size,.ed-actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.ed-row{justify-content:space-between}
+.ed-size label{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:11px}
+.ed-size input{width:54px;background:#0b131b;border:1px solid #345273;border-radius:5px;color:#dbe8f6;font:inherit;font-size:11px;padding:3px 5px}
+
+.ed-canvas{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:18px;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 95% at 50% 0%,#1b2129 0%,#0b0e12 72%)}
+.ed-grid{display:grid;grid-template-columns:repeat(var(--ed-w,9),var(--cell));gap:2px;width:max-content;margin:0;flex:none}
+
+/* 地块底色来自 assets/map-tiles.css，这里只加编辑交互 */
+.ed-grid .cell{cursor:crosshair;touch-action:none}
+.ed-grid .cell:hover{outline:2px solid rgba(143,208,255,.85);outline-offset:-2px}
+/* 编辑器里「不可通行」要看得见，方便继续绘制 */
+.ed-grid .cell.void{background:rgba(8,11,14,.72);border-color:rgba(255,255,255,.07)}
+
+.ed-foot{flex:none;display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.ed-foot .btn{margin-left:auto}
+.ed-foot .muted{font-size:10px}
+#editorStatus{color:#cfe3ff}
+
+.map-modal{position:fixed;inset:0;z-index:140;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:rgba(4,7,11,.82);backdrop-filter:blur(6px)}
+.map-modal[hidden]{display:none!important}
+.map-modal-card{width:min(1040px,100%);max-height:min(780px,92vh);display:flex;overflow:hidden;
+  background:#0e151d;border:1px solid #345273;border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+
+.ed-tip{position:fixed;z-index:80;width:min(300px,calc(100vw - 20px));background:#101c28;border:1px solid #3b5d80;
+  border-radius:9px;padding:9px 11px;box-shadow:0 12px 40px rgba(0,0,0,.55);font-size:11px;line-height:1.5;color:#c9d9e9;pointer-events:none}
+.ed-tip[hidden]{display:none!important}
+.ed-tip h4{margin:0 0 4px;font-size:12px;color:#e6f2ff}
+.ed-tip .rule{margin-top:3px;color:#b9c9db}
+.ed-tip b{color:#cfe3ff}
+
+@media (max-width:700px){
+  .editor-page{padding:6px;gap:5px}
+  .ed-head h1{font-size:16px}
+  .ed-head p{display:none}
+  .ed-canvas{padding:8px}
+  :root{--cell:clamp(22px,min(7vw,6vh),42px)}
+  .ed-row{align-items:flex-start}
+  .map-modal{padding:8px}
+  .map-modal-card{max-height:94vh}
+}
