@@ -21,5 +21,14 @@
 /index.html
   Cache-Control: no-cache, must-revalidate
 
+/enemies.html
+  Cache-Control: no-cache, must-revalidate
+
+/sandbox.html
+  Cache-Control: no-cache, must-revalidate
+
+/map-editor.html
+  Cache-Control: no-cache, must-revalidate
+
 /standalone.html
   Cache-Control: no-cache, must-revalidate

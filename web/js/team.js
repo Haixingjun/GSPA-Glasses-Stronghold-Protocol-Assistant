@@ -9,6 +9,9 @@
    · 盟约详情走 #tip：桌面悬停、键盘聚焦、手机点按都能看，层数按当前输入代入数值。
    · 拖拽排序用 pointer 事件（鼠标 + 触屏同一套），只从手柄发起，避免和滚动打架。
    · 盟约图标只有一张线稿，点亮/未激活用 CSS 表达（PRTS 无点亮态素材）。
+   · 可选的叠层内核端口：js/stack-core.js（window.StackCore，UI 无关）提供
+     createLedger / createEventBus / ruleText / sellPriceOf；为守住首屏 gzip 预算，
+     配队默认不加载，需要“按词条试算层数”时再动态插入该脚本即可。
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -55,6 +58,14 @@
   var NO_TRIGGER = '';
   // 判断一条词条是否在「增加 / 转化 / 增幅盟约层数」；只按层数获得，不把「每叠加 N 层加攻击」算进来
   var LAYER_TRAIT_RE = /层数\s*(?:额外)?\s*[+＋]|获得等同于[^。；\n]*层数|叠加等同于[^。；\n]*层数|转化\s*\d+\s*层[^。；\n]*固定层数|临时层数提升至/;
+  // 叠层上限：优先读词条里的「每回合 / 每场战斗至多叠加 N 层」；
+  // 没写上限的按「层数+N」的基础值计；一行里出现多个触发标签时按触发次数累加。
+  var LAYER_CAP_RE = /(?:每回合|每场战斗)?\s*至多(?:叠加)?\s*(\d+)\s*层/g;
+  var LAYER_ADD_RE = /层数\s*[+＋]\s*(\d+)/g;
+  var LAYER_EXTRA_ADD_RE = /层数额外\s*[+＋]\s*\d+/g;
+  var TRIGGER_TAG_RE = /<[^<>]{1,24}>/g;
+  var BOND_RE = /【([^】]+)】/g;
+  var CLAUSE_RE = /[，；,;。]/;
   var els = {};
   var qTimer = null;
 
@@ -144,12 +155,14 @@
       statHtml(s.elite, '精锐') +
       statHtml(s.equip, '装备') +
       statHtml('◈' + s.price, '总售价') +
-      statHtml(s.active + '/' + s.total, '已激活') +
-      statHtml(s.near, '待激活') +
+      statHtml(s.active + '/' + s.total, '已激活', 'is-cov-active') +
+      statHtml(s.empowered, '已强化', 'is-cov-empowered') +
+      statHtml(s.near, '待激活', 'is-cov-idle') +
       '</div>' +
       '<div class="tm-actions">' +
       (s.filled < s.size ? '<button type="button" class="btn tm-batch" data-batch-add>批量添加</button>' : '') +
       '<button type="button" class="btn" data-team-import>导入</button>' +
+      '<button type="button" class="btn" data-team-poster>一图流</button>' +
       '<button type="button" class="btn" data-team-share>分享</button>' +
       '<button type="button" class="btn tm-clear" data-team-clear>清空</button>' +
       '</div>' +
@@ -172,8 +185,8 @@
     return h;
   }
 
-  function statHtml(v, label) {
-    return '<div class="tm-stat"><b>' + esc(v) + '</b><span>' + esc(label) + '</span></div>';
+  function statHtml(v, label, cls) {
+    return '<div class="tm-stat' + (cls ? ' ' + cls : '') + '"><b>' + esc(v) + '</b><span>' + esc(label) + '</span></div>';
   }
 
   function slotsHtml(team, res) {
@@ -312,9 +325,10 @@
     var rows = res.rows;
     var h = '<div class="tm-cov-head">' +
       '<h2>盟约</h2>' +
-      '<span class="tm-cov-sum">已激活 <b>' + res.summary.active + '</b> / ' + res.summary.total +
-      '<span class="dot-sep">·</span>强化 <b>' + res.summary.empowered + '</b>' +
-      '<span class="dot-sep">·</span>待激活 <b>' + res.summary.near + '</b></span>' +
+      '<span class="tm-cov-sum"><span class="is-active">已激活 <b>' + res.summary.active + '</b></span>' +
+      ' / ' + res.summary.total +
+      '<span class="dot-sep">·</span><span class="is-empowered">强化 <b>' + res.summary.empowered + '</b></span>' +
+      '<span class="dot-sep">·</span><span class="is-near">待激活 <b>' + res.summary.near + '</b></span></span>' +
       '</div>';
 
     h += '<div class="tm-covs">';
@@ -398,6 +412,199 @@
     return LAYER_TRAIT_RE.test(String(text == null ? '' : text));
   }
 
+  /**
+   * 把一条词条拆成「盟约 → 一回合最多增加多少层」。
+   * · 有「每回合 / 每场战斗至多叠加 N 层」时直接取 N（同一 clause 多个上限相加）；
+   * · 没有上限时按「层数+N」的基础值计，一行里有多个触发标签（如寒檀）则乘触发次数；
+   * · 「层数额外+1」属于提升效率，不是固定的叠层来源，按 0 处理；
+   * · 用【盟约】写明目标的，按写明的盟约归集；没写目标的留给通用逻辑分摊。
+   */
+  function parseTraitCaps(text) {
+    var out = [];
+    var lines = String(text == null ? '' : text).split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].replace(LAYER_EXTRA_ADD_RE, '');
+      var triggerTags = line.match(TRIGGER_TAG_RE);
+      var mult = triggerTags && triggerTags.length > 1 ? triggerTags.length : 1;
+      var segs = line.split(CLAUSE_RE);
+      for (var j = 0; j < segs.length; j++) {
+        var seg = segs[j];
+        var bonds = [];
+        var bm;
+        BOND_RE.lastIndex = 0;
+        while ((bm = BOND_RE.exec(seg))) {
+          var name = bm[1];
+          if (covByName[name] && bonds.indexOf(name) < 0) bonds.push(name);
+        }
+
+        var cap = 0;
+        var m;
+        LAYER_CAP_RE.lastIndex = 0;
+        while ((m = LAYER_CAP_RE.exec(seg))) {
+          cap += parseInt(m[1], 10) || 0;
+        }
+        if (cap > 0) {
+          out.push({ bonds: bonds, amount: cap, generic: !bonds.length });
+          continue;
+        }
+
+        var base = 0;
+        var adds = 0;
+        LAYER_ADD_RE.lastIndex = 0;
+        while ((m = LAYER_ADD_RE.exec(seg))) {
+          base += parseInt(m[1], 10) || 0;
+          adds++;
+        }
+        if (!adds) continue;
+        out.push({ bonds: bonds, amount: base * mult, generic: !bonds.length });
+      }
+    }
+    return out;
+  }
+
+  /** 通用词条（只写“已激活的盟约 / 核心盟约 / 最高层盟约”）按当前队伍情况归到具体盟约 */
+  function genericBondNames(text, ctx, op) {
+    var s = String(text == null ? '' : text);
+    var active = (ctx && ctx.active) || [];
+    var names = [];
+    var activeNames = [];
+    var selfNames = [];
+    var tags = (op && op.tags) || [];
+    var i;
+    for (i = 0; i < active.length; i++) activeNames.push(active[i].name);
+    for (i = 0; i < tags.length; i++) {
+      if (activeNames.indexOf(tags[i]) >= 0) selfNames.push(tags[i]);
+    }
+
+    if (s.indexOf('核心盟约') >= 0) {
+      var pool = s.indexOf('自身') >= 0 ? selfNames : activeNames;
+      for (i = 0; i < active.length; i++) {
+        if (pool.indexOf(active[i].name) >= 0 && active[i].rank === 'core') names.push(active[i].name);
+      }
+      if (names.length) return names;
+      return s.indexOf('自身') >= 0 ? [] : ['核心盟约'];
+    }
+    if (s.indexOf('层数最多的盟约') >= 0) {
+      if (!active.length) return ['最高层盟约'];
+      var best = active[0];
+      var bestLayer = Number(best.layer) || 0;
+      for (i = 1; i < active.length; i++) {
+        var n = Number(active[i].layer) || 0;
+        if (n > bestLayer) { best = active[i]; bestLayer = n; }
+      }
+      return [best.name];
+    }
+
+    // 只写“自身”的：只算该干员自身 tag 对应的已激活盟约；
+    // 写到“自身及身前一格 / 身后一格”的，相邻干员无法从配队界面确定，按全部已激活盟约取上限。
+    if (s.indexOf('自身') >= 0) {
+      if (s.indexOf('身前一格') >= 0 || s.indexOf('身后一格') >= 0) {
+        return activeNames.length ? activeNames : ['已激活盟约'];
+      }
+      return selfNames;
+    }
+
+    if (!activeNames.length) return ['已激活盟约'];
+    return activeNames;
+  }
+
+  /** 词条 → [{bond, amount, generic}]；写明盟约的按盟约归集，通用词条按已激活盟约分摊 */
+  function traitLayerCaps(text, ctx, op) {
+    var entries = parseTraitCaps(text);
+    var out = [];
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      var names = e.bonds.length ? e.bonds : genericBondNames(text, ctx, op);
+      for (var j = 0; j < names.length; j++) {
+        out.push({ bond: names[j], amount: e.amount, generic: e.generic });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * 特殊叠层上限：Calc.SPECIAL_CAPS 与沙盒“补满叠层”共用同一张表。
+   * 表中没有的干员仍走 traitLayerCaps 的文本解析。
+   */
+  function specialTraitCaps(op, elite, ctx) {
+    var table = global.Calc && global.Calc.SPECIAL_CAPS;
+    var list = table && table[op.name];
+    if (!list || !list.length) return [];
+    var active = (ctx && ctx.active) || [];
+    var activeNames = [];
+    var selfNames = [];
+    var tags = (op && op.tags) || [];
+    var i;
+    for (i = 0; i < active.length; i++) activeNames.push(active[i].name);
+    for (i = 0; i < tags.length; i++) {
+      if (activeNames.indexOf(tags[i]) >= 0) selfNames.push(tags[i]);
+    }
+    var out = [];
+    for (i = 0; i < list.length; i++) {
+      var e = list[i];
+      if (!!e.elite !== !!elite) continue;
+      var names;
+      if (Array.isArray(e.bonds)) names = e.bonds;
+      else if (e.bonds === 'activeSelf') names = selfNames;
+      else if (e.bonds === 'activeAll') names = activeNames;
+      else continue;
+      for (var j = 0; j < names.length; j++) {
+        if (activeNames.indexOf(names[j]) < 0) continue;
+        out.push({ bond: names[j], amount: e.cap, generic: e.bonds === 'activeAll' });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * 当前队伍里已激活的盟约。
+   * · active：排除 special / elite，只留「能承载层数」的盟约，用于分摊「已激活的盟约」类通用词条；
+   * · names ：全部已激活盟约名（含 special / elite），用于过滤叠层上限——
+   *   没点亮的盟约本期不生效，算它的叠层上限没有意义。
+   */
+  function capContext(team) {
+    var active = [];
+    var names = {};
+    try {
+      var res = Calc.evaluate(team, data);
+      for (var i = 0; i < res.rows.length; i++) {
+        var r = res.rows[i];
+        if (r.state !== 'active' && r.state !== 'empowered') continue;
+        names[r.name] = 1;
+        if (r.kind === 'special' || r.kind === 'elite') continue;
+        active.push(r);
+      }
+    } catch (e) { /* 数据异常时按没有已激活盟约处理 */ }
+    return { active: active, names: names };
+  }
+
+  /** 同一干员对同一盟约的多段词条合并成一条，避免明细里重复出现 */
+  function mergeCap(map, bond, amount, op, generic) {
+    if (!amount) return;
+    var row = map[bond];
+    if (!row) {
+      row = map[bond] = { bond: bond, total: 0, parts: [] };
+    }
+    row.total += amount;
+    for (var i = 0; i < row.parts.length; i++) {
+      if (row.parts[i].name === op.name) {
+        row.parts[i].amount += amount;
+        row.parts[i].generic = row.parts[i].generic || !!generic;
+        return;
+      }
+    }
+    row.parts.push({ name: op.name, amount: amount, generic: !!generic });
+  }
+
+  function capRowsOf(map) {
+    var rows = [];
+    for (var k in map) if (map.hasOwnProperty(k)) rows.push(map[k]);
+    rows.sort(function (a, b) {
+      return b.total - a.total || String(a.bond).localeCompare(String(b.bond), 'zh-Hans-CN');
+    });
+    return rows;
+  }
+
   /** 按当前形态（普通 / 精锐）收集词条，并按触发时机分组；重复干员只算一次 */
   function traitGroups(team) {
     var groups = {};
@@ -406,6 +613,8 @@
     var other = 0;
     var picks = 0;
     var multi = 0;
+    var capMap = {};
+    var capCtx = capContext(team);
 
     for (var i = 0; i < team.slots.length; i++) {
       var s = team.slots[i];
@@ -421,6 +630,16 @@
       var text = elite ? (op.eliteText || op.normalText) : op.normalText;
       if (!text) continue;
       var layer = isLayerTrait(text);
+      if (layer) {
+        // 特殊上限表优先（与沙盒一键补满同源）；没有表的干员继续走文本解析。
+        var hasSpecialTable = !!(global.Calc && global.Calc.SPECIAL_CAPS && global.Calc.SPECIAL_CAPS[op.name]);
+        var caps = hasSpecialTable ? specialTraitCaps(op, elite, capCtx) : traitLayerCaps(text, capCtx, op);
+        for (var c = 0; c < caps.length; c++) {
+          // 只统计已激活、且真正能产生叠层的盟约（未点亮的盟约本期不生效）
+          if (!capCtx.names[caps[c].bond]) continue;
+          mergeCap(capMap, caps[c].bond, caps[c].amount, op, caps[c].generic);
+        }
+      }
       if (!layer) other++;
       if (traitsLayerOnly && !layer) continue;
 
@@ -441,7 +660,47 @@
       }
     }
 
-    return { groups: groups, total: total, other: other, allTotal: total + other, picks: picks, multi: multi };
+    var capsByBond = capRowsOf(capMap);
+    return {
+      groups: groups, total: total, other: other, allTotal: total + other,
+      picks: picks, multi: multi, capsByBond: capsByBond, capBondCount: capsByBond.length
+    };
+  }
+
+  /** 词条栏顶部的叠层上限：每个盟约一行，+总数（各干员层数相加） */
+  function traitsCapHtml(bag) {
+    var rows = bag.capsByBond || [];
+    var h = '<div class="tm-traits-cap">' +
+      '<span class="tm-cap-label">单回合叠层上限 · 按盟约</span>';
+    if (!rows.length) {
+      return h + '<div class="tm-cap-empty">暂无可统计的叠层盟约</div></div>';
+    }
+
+    h += '<div class="tm-cap-list">';
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var parts = [];
+      var sources = [];
+      for (var j = 0; j < row.parts.length; j++) {
+        var p = row.parts[j];
+        parts.push(p.amount);
+        sources.push(p.name + (p.generic ? '（通用）' : '') + ' +' + p.amount);
+      }
+      var title = row.bond + '：一回合最多增加 ' + row.total + ' 层（' + sources.join('、') + '）';
+      h += '<div class="tm-cap-row" title="' + esc(title) + '">' +
+        '<div class="tm-cap-rowhead">' +
+        '<span class="tm-cap-cov" style="--h:' + UI.hue(row.bond) + '">' +
+        UI.covSigil(row.bond, 12) + esc(row.bond) + '</span>' +
+        '<b class="tm-cap-total">+' + row.total + '</b>' +
+        '<span class="tm-cap-parts">（' + esc(parts.join('+')) + '）</span>' +
+        '</div>' +
+        '<div class="tm-cap-src">' +
+        sources.map(function (n) { return esc(n); }).join(' · ') +
+        '</div>' +
+        '</div>';
+    }
+    h += '</div></div>';
+    return h;
   }
 
   function traitsHtml(team) {
@@ -511,13 +770,17 @@
     // 收起时才使用拖动后的 top；展开时仍从默认高度展开
     var posStyle = (!open && traitsPos.top != null)
       ? ' style="--traits-top:' + Math.round(traitsPos.top) + 'px"' : '';
+    var topCap = bag.capsByBond && bag.capsByBond.length ? bag.capsByBond[0] : null;
+    var topTitle = topCap
+      ? '最高单回合叠层上限：' + topCap.bond + ' +' + topCap.total + '（共 ' + bag.capBondCount + ' 个盟约）'
+      : '暂无叠层盟约';
 
     return '<aside class="tm-traits' + (open ? '' : ' is-collapsed') + sideCls + '"' + posStyle +
       ' aria-label="配队词条汇总">' +
       '<div class="tm-traits-panel">' +
       '<div class="tm-traits-head">' +
       '<div class="tm-traits-title"><b>词条</b>' +
-      '<span class="tm-traits-count" title="共 ' + bag.total + ' 条词条">' + bag.total + '</span></div>' +
+      '<span class="tm-traits-count" title="共 ' + bag.total + ' 条词条 · ' + bag.capBondCount + ' 个盟约有单回合叠层上限">' + bag.total + '</span></div>' +
       '<button type="button" class="tm-traits-layer" data-traits-layer' +
       ' aria-pressed="' + (traitsLayerOnly ? 'true' : 'false') + '"' +
       ' title="隐藏不增加盟约层数的词条">只看叠层</button>' +
@@ -525,6 +788,7 @@
       ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tm-traits-body"' +
       ' title="收起词条栏">收起</button>' +
       '</div>' +
+      traitsCapHtml(bag) +
       '<p class="tm-traits-sub">' + sub + '</p>' +
       '<div class="tm-traits-body" id="tm-traits-body">' + body + '</div>' +
       '</div>' +
@@ -534,6 +798,7 @@
       '<span class="tm-traits-rail-grip" aria-hidden="true">⠿</span>' +
       '<span class="tm-traits-rail-text">词条</span>' +
       '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
+      '<span class="tm-traits-rail-cap" title="' + esc(topTitle) + '">+' + (topCap ? topCap.total : 0) + '</span>' +
       '<span class="tm-traits-rail-arrow" aria-hidden="true">‹</span>' +
       '</button>' +
       '</aside>';
@@ -634,7 +899,8 @@
       '<span class="pill ' + (c.rank === 'core' ? 'pill-core' : 'pill-add') + '">' +
       (c.rank === 'core' ? '主盟约' : '副盟约') + '</span></div>' +
       '<div class="tip-sec"><h4>条件</h4><p>' + esc(cond) + '</p>' +
-      '<p class="tip-now">当前 <b>' + row.count + ' / ' + row.threshold + '</b>　' + esc(status) +
+      '<p class="tip-now">当前 <b>' + row.count + ' / ' + row.threshold + '</b>　' +
+      '<span class="tip-state is-' + esc(row.state) + '">' + esc(status) + '</span>' +
       (row.bonus ? '　<span class="cov-bonus">调和 +1</span>' : '') + '</p></div>' +
       (num ? '<div class="tip-sec"><h4>数值' + (row.layer ? '（' + row.layer + ' 层）' : '') + '</h4><p>' +
         num + '</p></div>' : '') +
@@ -751,6 +1017,10 @@
     els.sheet.hidden = false;
     document.body.classList.add('sheet-open');
     syncScrim();
+    // 一图流要等面板进 DOM 之后再画（会在 mount 里异步加载头像）
+    if (picker.mode === 'poster' && global.Poster) {
+      global.setTimeout(function () { global.Poster.mount(); }, 0);
+    }
     // 触屏设备不要自动聚焦搜索框：会立刻弹出键盘并把 iOS 页面放大。
     // 桌面（精确指针）保留键盘直达搜索的便利。
     var touch = (global.navigator && global.navigator.maxTouchPoints > 0) ||
@@ -787,6 +1057,9 @@
   function pickerHtml() {
     if (picker.mode === 'share') return shareSheetHtml();
     if (picker.mode === 'import') return importSheetHtml();
+    if (picker.mode === 'poster') {
+      return global.Poster ? global.Poster.sheetHtml() : '';
+    }
 
     var isItem = picker.mode === 'item';
     var isPick = picker.mode === 'pick';
@@ -1454,7 +1727,10 @@
     var team = Store.getTeam();
     if (!team.slots[i]) return;
     team.slots[i].e = !team.slots[i].e;
-    Store.setTeam(team);
+    var changed = Store.setTeam(team);
+    // Store 的 commit 在极端情况下会判定「没有变化」而不通知；词条栏的叠层上限
+    // 必须跟随普通 / 精锐切换，这里兜底重绘一次，避免看起来像精锐无效。
+    if (!changed) refreshTraitsPanel();
   }
 
   function clearSlot(i) {
@@ -1699,6 +1975,12 @@
     if ((el = t.closest('[data-add-slot]'))) { e.preventDefault(); addSlot(); return; }
     if ((el = t.closest('[data-shrink-slot]'))) { e.preventDefault(); shrinkSlot(); return; }
     if ((el = t.closest('[data-team-share]'))) { e.preventDefault(); openSheet(-1, 'share', -1); return; }
+    if ((el = t.closest('[data-team-poster]'))) {
+      e.preventDefault();
+      if (global.Poster) global.Poster.open();
+      else toast('一图流模块没有加载');
+      return;
+    }
     if ((el = t.closest('[data-team-import]'))) { e.preventDefault(); openSheet(-1, 'import', -1); return; }
     if ((el = t.closest('[data-copy-share]'))) { e.preventDefault(); copyShare(); return; }
     if ((el = t.closest('[data-apply-import]'))) { e.preventDefault(); applyImport(); return; }
@@ -1875,6 +2157,104 @@
     return ['', 'I', 'II', 'III', 'IV', 'V', 'VI'][n] || String(n);
   }
 
+  /* ---------------- 一图流数据快照 ---------------- */
+  /**
+   * 一图流用的纯数据快照：只吃 team，不碰 DOM，Node 里可直接断言。
+   * 口径与配队页完全同源（Calc.evaluate + traitGroups），绝不另算一套，
+   * 否则会出现「页面写 +6、图上写 +5」。
+   */
+  function posterModel(team) {
+    ensure();
+    var res = Calc.evaluate(team, data);
+    var bag = traitGroups(team);
+    var pieces = [];
+    var i;
+
+    for (i = 0; i < res.pieces.length; i++) {
+      var p = res.pieces[i];
+      var op = p.op;
+      pieces.push({
+        name: op.name,
+        avatar: op.avatarFull || op.avatar || '',
+        tier: op.tier || 0,
+        tierLabel: op.tierLabel || '',
+        price: op.price == null ? 0 : op.price,
+        elite: !!p.elite,
+        pick: !!p.pick,
+        tags: (op.tags || []).slice(0, 3),
+        equipCount: p.items.length,
+        equipNames: p.items.map(function (x) { return x.item.name; }),
+        morph: p.morph && p.morph.covenant ? p.morph.covenant : ''
+      });
+    }
+
+    var active = [];
+    var near = [];
+    var pending = [];
+    for (i = 0; i < res.rows.length; i++) {
+      var r = res.rows[i];
+      if (r.state !== 'active' && r.state !== 'empowered') {
+        if (r.state === 'near') {
+          near.push(r.name);
+          var pc = covByName[r.name];
+          pending.push({
+            name: r.name, rank: r.rank, state: r.state, kind: r.kind,
+            count: r.count, threshold: r.threshold, layer: r.layer,
+            icon: pc ? (pc.iconFull || pc.icon || '') : ''
+          });
+        }
+        continue;
+      }
+      var c = covByName[r.name];
+      active.push({
+        name: r.name,
+        rank: r.rank,
+        state: r.state,
+        kind: r.kind,
+        count: r.count,
+        threshold: r.threshold,
+        bonus: r.bonus,
+        layer: r.layer,
+        node: r.node,
+        nodes: (r.nodes || []).slice(),
+        empower: r.empowerThreshold,
+        missingEmpower: r.missingEmpower,
+        icon: c ? (c.iconFull || c.icon || '') : ''
+      });
+    }
+
+    var caps = [];
+    for (i = 0; i < bag.capsByBond.length; i++) {
+      var row = bag.capsByBond[i];
+      var cc = covByName[row.bond];
+      caps.push({
+        bond: row.bond,
+        total: row.total,
+        parts: row.parts.map(function (x) {
+          return { name: x.name, amount: x.amount, generic: !!x.generic };
+        }),
+        icon: cc ? (cc.iconFull || cc.icon || '') : ''
+      });
+    }
+
+    return {
+      version: data.version || '',
+      season: (data.specialMeta && data.specialMeta.season) || '',
+      generatedAt: data.generatedAt || '',
+      size: res.summary.size,
+      summary: res.summary,
+      pieces: pieces,
+      covenants: active,
+      near: near,
+      pending: pending,
+      caps: caps,
+      traitCount: bag.total,
+      picks: res.summary.picks,
+      pickLimit: res.summary.pickLimit,
+      dupes: res.dupes.slice()
+    };
+  }
+
   global.Team = {
     init: init,
     render: viewHtml,
@@ -1883,9 +2263,13 @@
     isSheetOpen: isSheetOpen,
     hideTip: hideTip,
     toggleFromList: toggleFromList,
+    posterModel: posterModel,
     // 供测试 / 调试
     shareText: shareText,
     parseShareText: parseShareText,
-    _isLayerTrait: isLayerTrait
+    _isLayerTrait: isLayerTrait,
+    _traitLayerCaps: traitLayerCaps,
+    _specialTraitCaps: specialTraitCaps,
+    _toggleElite: toggleElite
   };
 })(window);

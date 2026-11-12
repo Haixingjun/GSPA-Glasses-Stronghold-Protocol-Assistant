@@ -25,7 +25,25 @@ DIST = os.path.join(ROOT, "dist")
 BUILD = os.path.join(ROOT, "build")
 DEPLOY = os.path.join(ROOT, "deploy")
 ZIP_PATH = os.path.join(BUILD, "gspa-web.zip")
-BUDGET_KB = 120.0   # 2026-11 功能累积（盟约图标标签 / 移动端输入防缩放 / 词条栏拖动）后首屏 117.5 KB；预算留约 2.5 KB 余量
+BUDGET_KB = 145.0   # 2026-11 加入一图流后实测 142.4 KB：qr.js 5.5 + poster.js 13.2（gzip）。
+                    # 这是最后一次「整包进首屏」；再加功能必须做按需加载，不许继续上调这条线。
+
+# 独立子页面也要做同样的指纹替换与引用自检。页面里的 ?v=... 是手工写的，
+# 构建时统一改成内容指纹，避免改了 sandbox.js 却因为版本号没动而读到旧缓存。
+SUB_PAGES = ("sandbox.html", "map-editor.html")
+BUST_RE = r'(href|src)="((?:assets|js|data)/[^"?#]+)(?:\?[^"#]*)?"'
+SUB_ASSETS = {
+    "sandbox.html": (
+        "assets/sandbox.css", "assets/map-tiles.css", "assets/map-picker.css",
+        "js/sandbox.js", "js/sandbox-code.js", "js/stack-core.js", "js/map-presets.js",
+        "data/maps.js", "data/ranges.js", "data/operator_positions.js",
+        "data/operator_ranges.js", "data/operator_rules.js",
+    ),
+    "map-editor.html": (
+        "assets/map-editor.css", "assets/map-tiles.css", "assets/map-picker.css",
+        "js/map-editor.js", "js/map-presets.js", "data/maps.js",
+    ),
+}
 
 
 def read_text(p):
@@ -84,6 +102,12 @@ def main():
         print("index.html 里没有找到 js/ 脚本，先确认页面没被改坏")
         return 1
 
+    # 主页面挂了「沙盒」入口时，目标页面必须一起发布；否则线上就是死链。
+    # 这是本地开发最容易漏的一步（入口改了、sandbox.html 还在 .git/info/exclude）。
+    if re.search(r'href="sandbox\.html"', index_src) and not os.path.exists(os.path.join(WEB, "sandbox.html")):
+        print("index.html 链接了 sandbox.html，但 web/sandbox.html 不存在；不要把入口和目标页拆开发布。")
+        return 1
+
     css_src = read_text(css_path)
     js_src = {n: read_text(os.path.join(WEB, "js", n)) for n in js_names}
     data_src = read_text(data_path)
@@ -98,6 +122,20 @@ def main():
         if os.path.exists(p):
             enemy_extra.append(read_text(p))
 
+    # 沙盒 / 地图编辑器也是独立页面，单独收集源码与依赖，参与指纹和自检。
+    sub_pages = {}
+    sub_extra = {}
+    for name in SUB_PAGES:
+        p = os.path.join(WEB, name)
+        if not os.path.exists(p):
+            continue
+        sub_pages[name] = read_text(p)
+        sub_extra[name] = []
+        for rel in SUB_ASSETS.get(name, ()):
+            q = os.path.join(WEB, rel)
+            if os.path.exists(q):
+                sub_extra[name].append(read_text(q))
+
     # ---------- 指纹：任何资源变了，URL 就变 ----------
     h = hashlib.sha1()
     h.update(css_src.encode("utf-8"))
@@ -107,6 +145,10 @@ def main():
     h.update(enemy_src.encode("utf-8"))
     for body in enemy_extra:
         h.update(body.encode("utf-8"))
+    for name, src in sub_pages.items():
+        h.update(src.encode("utf-8"))
+        for body in sub_extra[name]:
+            h.update(body.encode("utf-8"))
     stamp = h.hexdigest()[:8]
 
     data_meta = {}
@@ -130,11 +172,13 @@ def main():
         attr, url = m.group(1), m.group(2)
         return '%s="%s?v=%s"' % (attr, url, stamp)
 
-    index_out = re.sub(r'(href|src)="((?:assets|js|data)/[^"?#]+)"', bust, index_src)
+    index_out = re.sub(BUST_RE, bust, index_src)
     write_text(os.path.join(DIST, "index.html"), index_out)
     if enemy_src:
-        enemy_out = re.sub(r'(href|src)="((?:assets|js|data)/[^"?#]+)"', bust, enemy_src)
+        enemy_out = re.sub(BUST_RE, bust, enemy_src)
         write_text(os.path.join(DIST, "enemies.html"), enemy_out)
+    for name, src in sub_pages.items():
+        write_text(os.path.join(DIST, name), re.sub(BUST_RE, bust, src))
 
     if os.path.isdir(DEPLOY):
         for name in ("_headers", "robots.txt"):
@@ -160,14 +204,14 @@ def main():
         if src.startswith("data/"):
             body = data_src
         elif src.startswith("js/"):
-            body = js_src.get(src.split("/")[-1], "")
+            body = js_src.get(src.split("/", 1)[1] if "/" in src else src, "")
         else:
             return tag
         body = body.replace("</script", "<\\/script")
         return "<script>\n" + body + "\n</script>"
 
     standalone = re.sub(r'<link\b[^>]*href="([^"]+)"[^>]*>', inline_link, index_src)
-    # 敌人图鉴是独立页面，单文件版没有它的资源与头像；构建时隐藏入口，避免死链。
+    # 敌人图鉴 / 沙盒是独立页面，单文件版没有它们的资源与头像；构建时隐藏入口，避免死链。
     standalone = re.sub(r'<a\b[^>]*data-standalone-hide[^>]*>.*?</a>', '', standalone, flags=re.S)
     standalone = re.sub(r'<script\b[^>]*src="([^"]+)"[^>]*>\s*</script>', inline_script, standalone)
     standalone = standalone.replace(
@@ -251,7 +295,7 @@ def main():
         "部署：把整个 dist/ 目录上传到站点根目录或任意子目录即可。",
         "单文件：dist/standalone.html 可单独发送 / 双击打开，无需其他文件。",
         "\n".join(image_lines),
-        "缓存：资源已带 ?v=%s，index.html 建议 no-cache，静态资源可长缓存。" % stamp,
+        "缓存：资源已带 ?v=%s，index.html / enemies.html / sandbox.html / map-editor.html 建议 no-cache，静态资源可长缓存。" % stamp,
         "",
     ] + lines + [""])
     write_text(os.path.join(DIST, "BUILD_INFO.txt"), info)
@@ -269,12 +313,16 @@ def main():
             refs.append(url.split("?")[0])
         return refs
 
-    idx_html = read_text(os.path.join(DIST, "index.html"))
-    for ref in local_refs(idx_html):
-        if not os.path.exists(os.path.join(DIST, ref)):
-            problems.append("index.html 引用了不存在的文件：" + ref)
-    if re.search(r'(?:src|href)="/(?!/)', idx_html):
-        problems.append("index.html 出现绝对路径（部署到子目录会 404）")
+    for name in ("index.html", "enemies.html", "sandbox.html", "map-editor.html"):
+        page_path = os.path.join(DIST, name)
+        if not os.path.exists(page_path):
+            continue
+        page_html = read_text(page_path)
+        for ref in local_refs(page_html):
+            if not os.path.exists(os.path.join(DIST, ref)):
+                problems.append("%s 引用了不存在的文件：%s" % (name, ref))
+        if re.search(r'(?:src|href)="/(?!/)', page_html):
+            problems.append("%s 出现绝对路径（部署到子目录会 404）" % name)
 
     sa_html = read_text(os.path.join(DIST, "standalone.html"))
     if re.search(r'<script[^>]+src=', sa_html):
@@ -293,6 +341,8 @@ def main():
         problems.append("standalone.html 缺少关闭图标的标记（单文件版不应引用外部图标）")
     if re.search(r'(?:src|href)="/(?!/)', sa_html):
         problems.append("standalone.html 出现绝对路径")
+    if re.search(r'href="(?:enemies|sandbox|map-editor)\.html"', sa_html):
+        problems.append("standalone.html 仍链接独立子页面（应被 data-standalone-hide 移除）")
 
     # data.json 里引用的头像必须随包上传，否则线上会 404（前端会回退，但没必要发坏链）
     data_json = os.path.join(DIST, "data", "data.json")

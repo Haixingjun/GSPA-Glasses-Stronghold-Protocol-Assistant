@@ -159,9 +159,9 @@ Toy 的定位是「绑在视频/动态上的互动小玩具」，不是独立站
 
 ## 六、缓存与发版
 
-- `build_dist.py` 给 `assets/app.css`、`js/*.js`、`data/data.js` 自动加 `?v=<内容指纹>`。
+- `build_dist.py` 给 `assets/*.css`、`js/*.js`、`data/*.js` 自动加 `?v=<内容指纹>`（含 `sandbox.html` / `map-editor.html` 里的手写版本号）。
   内容一变，URL 就变，**用户不会看到新旧混搭的页面**。
-- `index.html` / `standalone.html` 必须 **不缓存**（`deploy/nginx.conf` 与 `_headers` 已配好）。
+- `index.html` / `enemies.html` / `sandbox.html` / `map-editor.html` / `standalone.html` 必须 **不缓存**（`deploy/nginx.conf` 与 `_headers` 已配好）。
 - 如果用户说「还是旧数据」：先看页脚的数据版本，再让他强制刷新一次（`Ctrl+F5`）。
 
 ---

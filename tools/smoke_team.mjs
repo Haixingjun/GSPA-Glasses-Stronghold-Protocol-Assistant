@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 配队视图冒烟测试：用最小 DOM 桩在 Node 里跑完「data → store → calc → ui → team」整条链路。
  * 目的不是替代浏览器，而是抓运行时报错、URL 编解码错误、渲染分支与状态不同步。
  *
@@ -97,7 +97,7 @@ win.console = console;
 win.GSPA_DATA = JSON.parse(fs.readFileSync(new URL('../web/data/data.json', import.meta.url), 'utf8'));
 
 /* ---------------- 按页面顺序加载脚本 ---------------- */
-const scripts = ['store.js', 'search.js', 'calc.js', 'code.js', 'ui.js', 'team.js', 'app.js'];
+const scripts = ['store.js', 'search.js', 'calc.js', 'code.js', 'qr.js', 'ui.js', 'team.js', 'poster.js', 'app.js'];
 for (const f of scripts) {
   const src = fs.readFileSync(new URL('../web/js/' + f, import.meta.url), 'utf8');
   try {
@@ -151,6 +151,23 @@ check('加 3 个炎 → 炎激活且带发光态', () => {
   assert.match(cards.innerHTML, /已激活/);
   // 普通人数盟约也随层数成长（如炎的攻击力 +23+0.9×层数），所以也要给层数输入
   assert.match(cards.innerHTML, /data-layer="炎"/);
+});
+
+check('盟约状态：未激活 / 激活 / 强化使用统一状态类', () => {
+  const team = Calc.emptyTeam(8);
+  ['慕斯', 'Miss.Christine', '哈洛德', '水灯心', '凯瑟琳', '涤火杰西卡', '灰喉', '雪猎']
+    .forEach((n, i) => { team.slots[i] = { k: n, e: false }; });
+  Store.setTeam(team);
+  assert.match(cards.innerHTML, /class="cov is-empowered" data-tip-cov="维多利亚"/);
+  assert.match(cards.innerHTML, /class="cov is-active" data-tip-cov="精准"/);
+  assert.match(cards.innerHTML, /class="cov is-near" data-tip-cov="远见"/);
+  assert.match(cards.innerHTML, /class="cov is-inactive" data-tip-cov="炎"/);
+  assert.match(cards.innerHTML, /tm-stat is-cov-active/);
+  assert.match(cards.innerHTML, /tm-stat is-cov-empowered/);
+  assert.match(cards.innerHTML, /tm-stat is-cov-idle/);
+  assert.match(cards.innerHTML, /class="is-active">已激活/);
+  assert.match(cards.innerHTML, /class="is-empowered">强化/);
+  assert.match(cards.innerHTML, /class="is-near">待激活/);
 });
 
 check('第 9 席：用人事部文档后出现 9 席，且不再显示加席按钮', () => {
@@ -327,6 +344,9 @@ check('词条栏：空队伍显示入口与说明', () => {
   assert.match(html, /aria-expanded="true"/);
   assert.match(html, /休整期结束时 → … → 休整期开始时/);
   assert.match(html, /加入干员后/);
+  assert.match(html, /class="tm-traits-cap"/);
+  assert.match(html, /class="tm-cap-empty">暂无可统计的叠层盟约</);
+  assert.match(html, /class="tm-traits-rail-cap"[^>]*>\+0</);
 });
 
 check('词条栏：收起竖条带拖动提示与吸附说明', () => {
@@ -384,6 +404,162 @@ check('词条栏：叠层手段判定', () => {
   assert.equal(f('<战斗中>部署时【阿戈尔】盟约每叠加20层，使自身及周围四格的干员攻击速度+1'), false);
   assert.equal(f('<获得时>获得一件精准狙击镜'), false);
   assert.equal(f('购买价格为1'), false);
+});
+
+check('词条栏：叠层上限按盟约与触发次数拆分', () => {
+  const caps = Team._traitLayerCaps;
+  const empty = { active: [] };
+  assert.deepEqual(caps('<战斗中>每次开启技能时使已激活的【萨尔贡】层数+1（每回合至多叠加2层）', empty), [
+    { bond: '萨尔贡', amount: 2, generic: false }
+  ]);
+  assert.deepEqual(caps('<休整期结束时><休整期开始时>使已激活的【远见】层数+3', empty), [
+    { bond: '远见', amount: 6, generic: false }
+  ]);
+  assert.deepEqual(caps('<获得时>【炎】层数+8，【远见】层数+4', empty), [
+    { bond: '炎', amount: 8, generic: false },
+    { bond: '远见', amount: 4, generic: false }
+  ]);
+  assert.deepEqual(caps('<战斗中>使已激活的【萨尔贡】【坚守】层数+2（每回合至多叠加4层）', empty), [
+    { bond: '萨尔贡', amount: 4, generic: false },
+    { bond: '坚守', amount: 4, generic: false }
+  ]);
+  // 只写“已激活的盟约”的通用词条按当前已激活盟约分摊
+  assert.deepEqual(caps('使自身已激活的盟约层数+3', { active: [{ name: '炎', rank: 'core', layer: 0 }] }, { tags: ['炎'] }), [
+    { bond: '炎', amount: 3, generic: true }
+  ]);
+  // 自身词条不应算到自身 tag 之外的盟约
+  assert.deepEqual(caps('使自身已激活的盟约层数+3', { active: [{ name: '炎', rank: 'core', layer: 0 }] }, { tags: ['灵巧'] }), []);
+  // 层数收益、效率光环、动态值不算固定叠层来源
+  assert.deepEqual(caps('<战斗中>【奥术】【远见】每叠加3层，本干员攻击速度+1', empty), []);
+  assert.deepEqual(caps('<战斗中>身前一格干员提升盟约层数时，每次提升的层数额外+1（不受叠层上限影响）', empty), []);
+  assert.deepEqual(caps('<获得时>获得等同于当前调度中心等级的【炎】层数', empty), []);
+});
+
+check('词条栏：特殊叠层上限与沙盒共用同一张表', () => {
+  const special = Team._specialTraitCaps;
+  assert.deepEqual(
+    special({ name: '初雪', tags: ['谢拉格'] }, false, { active: [{ name: '谢拉格' }] }),
+    [{ bond: '谢拉格', amount: 16, generic: false }]
+  );
+  assert.deepEqual(
+    special({ name: '初雪', tags: ['谢拉格'] }, true, { active: [{ name: '谢拉格' }] }),
+    [{ bond: '谢拉格', amount: 32, generic: false }]
+  );
+  assert.deepEqual(
+    special({ name: '佩佩', tags: ['萨尔贡'] }, false, { active: [{ name: '炎' }, { name: '迅捷' }] }),
+    [{ bond: '炎', amount: 9, generic: true }, { bond: '迅捷', amount: 9, generic: true }]
+  );
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '初雪', e: false };
+  team.slots[1] = { k: '灵知', e: false };
+  team.slots[2] = { k: '极光', e: false };
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /初雪 \+16/);
+  assert.match(html, /谢拉格<\/span><b class="tm-cap-total">\+/);
+});
+
+check('词条栏：叠层上限只算已激活盟约', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '慕斯', e: false };
+  team.slots[1] = { k: 'Miss.Christine', e: false };
+  team.slots[2] = { k: '哈洛德', e: false };   // 3 名维多利亚 → 激活
+  team.slots[3] = { k: '寒檀', e: false };      // 远见只有 1 人 → 未激活
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /维多利亚<\/span><b class="tm-cap-total">\+/);
+  assert.match(html, /慕斯 \+1/);
+  assert.doesNotMatch(html, /远见<\/span><b class="tm-cap-total"/, '未激活的远见不应计入叠层上限');
+  assert.doesNotMatch(html, /寒檀 \+6/);
+  // 收起竖条显示最高的一条盟约上限
+  assert.match(html, /class="tm-traits-rail-cap"[^>]*>\+\d+</);
+});
+
+check('词条栏：一条词条命中多个已激活盟约时分别统计', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '泡泡', e: false };
+  team.slots[1] = { k: '艾丝黛尔', e: false };
+  team.slots[2] = { k: '莎草', e: false };      // 萨尔贡 3 人 → 激活
+  team.slots[3] = { k: '角峰', e: false };      // 坚守 2 人 → 激活
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /萨尔贡<\/span><b class="tm-cap-total">\+/);
+  assert.match(html, /坚守<\/span><b class="tm-cap-total">\+/);
+  assert.match(html, /泡泡 \+4/);
+});
+
+check('词条栏：通用“已激活盟约”按当前盟约分摊', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '拜松', e: false };
+  team.slots[1] = { k: '矩', e: false };
+  team.slots[2] = { k: '乌有', e: false };
+  team.slots[3] = { k: '帕拉斯', e: false };
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /炎<\/span><b class="tm-cap-total">/);
+  assert.match(html, /帕拉斯（通用） \+9/);
+});
+
+check('词条栏：自身叠层只算自身已激活盟约', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '拜松', e: false };
+  team.slots[1] = { k: '矩', e: false };
+  team.slots[2] = { k: '乌有', e: false };
+  team.slots[3] = { k: '云迹', e: false };   // 自身 tag 是灵巧 / 奇迹，当前只激活炎
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /炎<\/span><b class="tm-cap-total">/);
+  assert.doesNotMatch(html, /云迹（通用）/);
+});
+
+check('词条栏：自身叠层在自身盟约激活后归入该盟约', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '霜叶', e: false };
+  team.slots[1] = { k: '承曦格雷伊', e: false };
+  team.slots[2] = { k: '水灯心', e: false };
+  team.slots[3] = { k: '云迹', e: false };
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /灵巧<\/span><b class="tm-cap-total">\+8</);   // 霜叶 +2 / 云迹 +6
+  assert.match(html, /云迹（通用） \+6/);
+});
+
+check('词条栏：没有已激活盟约时不计叠层上限', () => {
+  // 帕拉斯给「已激活的盟约」+9，但一个盟约都没点亮 → 本期不生效，不应出现在上限里
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '帕拉斯', e: false };
+  Store.setTeam(team);
+  const html = Team.render();
+  assert.match(html, /暂无可统计的叠层盟约/);
+  assert.doesNotMatch(html, /帕拉斯（通用）/);
+});
+
+check('词条栏：切精锐后各盟约叠层上限立即更新（回归）', () => {
+  // 用差值断言：慕斯精锐 +1 层、寒檀精锐 +6 层，不依赖队友贡献的绝对值
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = { k: '慕斯', e: false };
+  team.slots[1] = { k: 'Miss.Christine', e: false };
+  team.slots[2] = { k: '哈洛德', e: false };    // 维多利亚 3 人 → 激活
+  team.slots[3] = { k: '寒檀', e: false };
+  team.slots[4] = { k: '渡桥', e: false };       // 远见 2 人 → 激活
+  Store.setTeam(team);
+
+  function capTotal(bond) {
+    const m = cards.innerHTML.match(new RegExp(bond + '<\\/span><b class="tm-cap-total">\\+(\\d+)<'));
+    return m ? Number(m[1]) : null;
+  }
+
+  const vic0 = capTotal('维多利亚');
+  const far0 = capTotal('远见');
+  assert.ok(vic0 > 0 && far0 > 0, '两个盟约都应在上限表里');
+
+  Team._toggleElite(0);
+  assert.equal(capTotal('维多利亚'), vic0 + 1, '慕斯切精锐应 +1 层');
+  assert.equal(capTotal('远见'), far0, '切慕斯不影响远见');
+
+  Team._toggleElite(3);   // 第 3 席（从 0 数）是寒檀
+  assert.equal(capTotal('远见'), far0 + 6, '寒檀切精锐应 +6 层');
+  assert.match(cards.innerHTML, /tm-tr-elite/);
 });
 
 check('装备面板：列出装备，替换时出现「卸下」', () => {
@@ -686,6 +862,54 @@ check('图鉴：加入 / 移出配队', () => {
   Team.toggleFromList('凯尔希');
   assert.equal(Store.getTeam().slots[2], null, '第 3 名自选被拦截');
 });
+check('一图流：快照带上图标带需要的「可激活」计数', () => {
+  Store.setTeam(Calc.emptyTeam(8));
+  Team.toggleFromList('拜松');
+  Team.toggleFromList('矩');
+  const m = Team.posterModel(Store.getTeam());
+  assert.equal(m.pieces.length, 2);
+  assert.ok(m.pieces[0].avatar, '干员要有头像路径');
+  const yan = m.pending.filter((c) => c.name === '炎')[0];
+  assert.ok(yan, '炎应出现在可激活列表');
+  assert.equal(yan.count, 2);
+  assert.equal(yan.threshold, 3);
+});
+
+check('一图流：已激活与可激活盟约的图标都会预加载', () => {
+  // 回归：曾经只收集了已激活盟约的图标，可激活那一排全退化成「色块 + 首字」
+  Store.setTeam(Calc.emptyTeam(8));
+  ['拜松', '矩', '风絮', '乌有'].forEach((n) => Team.toggleFromList(n));
+  const m = Team.posterModel(Store.getTeam());
+  assert.ok(m.covenants.length > 0, '应有已激活盟约');
+  assert.ok(m.pending.length > 0, '应有可激活盟约');
+  const urls = win.Poster._collectImages(m);
+  for (const c of m.covenants) {
+    assert.ok(urls.indexOf(c.icon) >= 0, '已激活盟约图标没进预加载：' + c.name);
+  }
+  for (const c of m.pending) {
+    if (c.icon) assert.ok(urls.indexOf(c.icon) >= 0, '可激活盟约图标没进预加载：' + c.name);
+  }
+});
+
+check('一图流：面板 HTML 有预览位和三个按钮', () => {
+  const html = win.Poster.sheetHtml();
+  assert.match(html, /poster-preview/);
+  assert.match(html, /data-poster-download/);
+  assert.match(html, /data-poster-copy-code/);
+  assert.match(html, /data-poster-copy-text/);
+});
+
+check('一图流：二维码里放的是本队分享链接，能被解析回来', () => {
+  Store.setTeam(Calc.emptyTeam(8));
+  Team.toggleFromList('拜松');
+  const code = win.Code.encode(Store.getTeam(), win.GSPA_DATA);
+  const url = win.Poster._shareUrl(code);
+  assert.ok(url.indexOf('#/team?c=' + code) > 0, '链接应带 ?c=');
+  const back = win.Code.decode(url, win.GSPA_DATA);
+  assert.ok(back && back.team, '链接里的码应能解码');
+  assert.equal(back.team.slots[0].k, '拜松');
+});
+
 let failed = 0;
 for (const [status, msg] of results) {
   if (status !== 'ok') failed++;

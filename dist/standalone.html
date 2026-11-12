@@ -40,6 +40,15 @@
   --accent2: #ffb454;
   --danger: #ff6b6b;
   --ok: #4ade80;
+  --cov-active: #55c98b;
+  --cov-active-line: rgba(85, 201, 139, 0.45);
+  --cov-active-bg: rgba(85, 201, 139, 0.10);
+  --cov-empowered: #e6b35a;
+  --cov-empowered-line: rgba(230, 179, 90, 0.50);
+  --cov-empowered-bg: rgba(230, 179, 90, 0.10);
+  --cov-idle: #7c8794;
+  --cov-idle-line: rgba(124, 135, 148, 0.38);
+  --cov-idle-bg: rgba(124, 135, 148, 0.06);
   --mark: rgba(255, 190, 90, 0.26);
   --shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
   --radius: 14px;
@@ -62,6 +71,15 @@
   --accent-ink: #ffffff;
   --accent2: #b46b00;
   --danger: #c62828;
+  --cov-active: #1f8a55;
+  --cov-active-line: rgba(31, 138, 85, 0.42);
+  --cov-active-bg: rgba(31, 138, 85, 0.09);
+  --cov-empowered: #9a6a12;
+  --cov-empowered-line: rgba(154, 106, 18, 0.42);
+  --cov-empowered-bg: rgba(154, 106, 18, 0.09);
+  --cov-idle: #7c8896;
+  --cov-idle-line: rgba(124, 136, 150, 0.35);
+  --cov-idle-bg: rgba(124, 136, 150, 0.06);
   --mark: rgba(255, 176, 40, 0.4);
   --shadow: 0 14px 40px rgba(20, 40, 60, 0.16);
 }
@@ -228,11 +246,12 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
 }
 .tab .ico { width: 21px; height: 21px; }
 .tab span { white-space: nowrap; }
+a.tab { text-decoration: none; }
 .tab-n { display: none; font-style: normal; }
 .tab[aria-selected="true"] { color: var(--accent); background: rgba(91, 209, 230, 0.1); }
 .tab:active { transform: scale(0.97); }
 
-/* 6 个 tab 在窄屏上收紧，避免「配队」被挤出屏幕 */
+/* 7 个 tab 在窄屏上收紧，避免「沙盒」被挤出屏幕 */
 @media (max-width: 479px) {
   .tabs { gap: 0; padding-left: 2px; padding-right: 2px; }
   .tab { padding: 4px 1px; font-size: 10.5px; gap: 1px; }
@@ -262,6 +281,12 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
     border-radius: 5px; background: var(--bg3);
   }
   .tab[aria-selected="true"] .tab-n { color: var(--accent); background: rgba(91, 209, 230, 0.14); }
+}
+
+/* 7 个 tab 在 768–899px（平板竖屏）收紧：默认内边距下「沙盒」会落到可视区外，需要横向滑动才点得到 */
+@media (min-width: 768px) and (max-width: 899px) {
+  .tabs { gap: 4px; }
+  .tab { padding: 6px 9px; gap: 5px; font-size: 13px; }
 }
 
 /* ---------- 5. 主布局 ---------- */
@@ -1118,6 +1143,33 @@ body.sheet-open { overflow: hidden; }
   background: rgba(91, 209, 230, 0.14);
   color: var(--accent);
 }
+/* 一回合叠层上限：按盟约分行，+总数（各干员层数相加） */
+.tm-traits-cap {
+  padding: 7px 12px 6px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(91, 209, 230, 0.09), transparent 78%);
+}
+.tm-cap-label { display: block; margin-bottom: 3px; font-size: 10.5px; color: var(--fg3); white-space: nowrap; }
+.tm-cap-list { display: flex; flex-direction: column; }
+.tm-cap-row { padding: 4px 0; border-top: 1px dashed var(--line); }
+.tm-cap-rowhead { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px; }
+.tm-cap-cov {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 650; color: var(--fg2);
+  white-space: nowrap;
+}
+.tm-cap-total {
+  font-size: 14px; font-weight: 750; line-height: 1.2;
+  color: var(--accent); font-variant-numeric: tabular-nums;
+}
+.tm-cap-parts {
+  font-size: 10.5px; color: var(--fg2); font-variant-numeric: tabular-nums;
+}
+.tm-cap-src {
+  margin-top: 1px; font-size: 9.5px; line-height: 1.4; color: var(--fg3);
+  word-break: break-word;
+}
+.tm-cap-empty { font-size: 10.5px; line-height: 1.5; color: var(--fg3); }
 .tm-traits-sub {
   margin: 0; padding: 0 12px 8px;
   border-bottom: 1px solid var(--line);
@@ -1152,6 +1204,10 @@ body.is-traits-dragging .tm-traits { transition: none; }
 }
 .tm-traits-rail-count {
   font-size: 10.5px; font-weight: 700; line-height: 1;
+  color: var(--fg3); font-variant-numeric: tabular-nums;
+}
+.tm-traits-rail-cap {
+  font-size: 10.5px; font-weight: 750; line-height: 1;
   color: var(--accent); font-variant-numeric: tabular-nums;
 }
 .tm-traits-rail-arrow { font-size: 13px; line-height: 1; color: var(--fg3); }
@@ -1228,6 +1284,11 @@ body.is-traits-dragging .tm-traits { transition: none; }
   font-size: 14px; font-weight: 700; color: var(--fg);
   font-variant-numeric: tabular-nums;
 }
+.tm-stat.is-cov-active { border-color: var(--cov-active-line); }
+.tm-stat.is-cov-active b { color: var(--cov-active); }
+.tm-stat.is-cov-empowered { border-color: var(--cov-empowered-line); }
+.tm-stat.is-cov-empowered b { color: var(--cov-empowered); }
+.tm-stat.is-cov-idle b { color: var(--cov-idle); }
 .tm-clear { flex: none; }
 .tm-hint {
   margin: 0; padding: 8px 11px; border-radius: 9px;
@@ -1352,6 +1413,12 @@ body.is-traits-dragging .tm-traits { transition: none; }
 }
 .tm-cov-sum { font-size: 11.5px; color: var(--fg3); }
 .tm-cov-sum b { color: var(--fg2); font-variant-numeric: tabular-nums; }
+.tm-cov-sum .is-active,
+.tm-cov-sum .is-active b { color: var(--cov-active); }
+.tm-cov-sum .is-empowered,
+.tm-cov-sum .is-empowered b { color: var(--cov-empowered); }
+.tm-cov-sum .is-near,
+.tm-cov-sum .is-near b { color: var(--cov-idle); }
 .tm-cov-sum .dot-sep { opacity: 0.5; margin: 0 4px; }
 
 .tm-covs {
@@ -1366,9 +1433,10 @@ body.is-traits-dragging .tm-traits { transition: none; }
   opacity: 0.62;
   transition: opacity 0.15s, border-color 0.15s, background 0.15s;
 }
-.cov.is-active { opacity: 1; border-color: rgba(91, 209, 230, 0.42); background: rgba(91, 209, 230, 0.07); }
-.cov.is-empowered { opacity: 1; border-color: rgba(255, 180, 84, 0.5); background: rgba(255, 180, 84, 0.08); }
-.cov.is-near { opacity: 0.92; border-color: rgba(255, 180, 84, 0.32); }
+.cov.is-inactive { opacity: 0.58; border-color: var(--cov-idle-line); background: var(--cov-idle-bg); }
+.cov.is-near { opacity: 0.9; border-style: dashed; border-color: var(--cov-idle-line); background: var(--cov-idle-bg); }
+.cov.is-active { opacity: 1; border-color: var(--cov-active-line); background: var(--cov-active-bg); }
+.cov.is-empowered { opacity: 1; border-color: var(--cov-empowered-line); background: var(--cov-empowered-bg); }
 .cov.is-conflict { opacity: 1; border-color: rgba(255, 107, 107, 0.5); background: rgba(255, 107, 107, 0.08); }
 
 .cov-top { display: flex; align-items: center; gap: 7px; }
@@ -1380,20 +1448,20 @@ body.is-traits-dragging .tm-traits { transition: none; }
 .cov-name em { font-style: normal; font-size: 9px; font-weight: 500; color: var(--fg3); }
 .cov-num { font-size: 10.5px; color: var(--fg3); font-variant-numeric: tabular-nums; }
 .cov-num b { font-size: 13px; color: var(--fg2); }
-.cov.is-active .cov-num b { color: var(--accent); }
-.cov.is-empowered .cov-num b { color: var(--accent2); }
+.cov.is-active .cov-num b { color: var(--cov-active); }
+.cov.is-empowered .cov-num b { color: var(--cov-empowered); }
 
 .cov-bar { height: 3px; border-radius: 2px; background: var(--bg3); overflow: hidden; }
 .cov-bar i { display: block; height: 100%; background: var(--line2); transition: width 0.2s ease; }
-.cov.is-near .cov-bar i { background: var(--accent2); opacity: 0.6; }
-.cov.is-active .cov-bar i { background: var(--accent); }
-.cov.is-empowered .cov-bar i { background: var(--accent2); }
+.cov.is-near .cov-bar i { background: var(--cov-idle); opacity: 0.65; }
+.cov.is-active .cov-bar i { background: var(--cov-active); }
+.cov.is-empowered .cov-bar i { background: var(--cov-empowered); }
 
 .cov-foot { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; min-height: 16px; }
-.cov-state { font-size: 10.5px; color: var(--fg3); }
-.cov.is-active .cov-state { color: var(--accent); }
-.cov.is-empowered .cov-state { color: var(--accent2); }
-.cov.is-near .cov-state { color: var(--accent2); }
+.cov-state { font-size: 10.5px; color: var(--cov-idle); }
+.cov.is-active .cov-state { color: var(--cov-active); }
+.cov.is-empowered .cov-state { color: var(--cov-empowered); }
+.cov.is-near .cov-state { color: var(--cov-idle); }
 .cov.is-conflict .cov-state { color: var(--danger); }
 .cov-bonus {
   font-size: 9.5px; padding: 0 4px; border-radius: 4px; line-height: 1.7;
@@ -1408,15 +1476,17 @@ body.is-traits-dragging .tm-traits { transition: none; }
 }
 .cov-layer input:focus { outline: none; border-color: var(--accent); }
 .cov-nodes { display: inline-flex; gap: 1px; font-variant-numeric: tabular-nums; }
-.cov-nodes b { color: var(--accent2); }
+.cov-nodes b { color: var(--cov-idle); }
+.cov.is-active .cov-nodes b { color: var(--cov-active); }
+.cov.is-empowered .cov-nodes b { color: var(--cov-empowered); }
 .cov-nodes i { font-style: normal; opacity: 0.5; }
 
 /* 点亮 / 灰暗：同一张线稿，用滤镜与光晕表达状态 */
 .cov .icon { transition: filter 0.18s, box-shadow 0.18s; }
 .cov.is-inactive .icon-img, .cov.is-near .icon-img { filter: grayscale(0.55) brightness(0.7); opacity: 0.8; }
-.cov.is-active .icon { box-shadow: 0 0 0 1px rgba(91, 209, 230, 0.5), 0 0 14px rgba(91, 209, 230, 0.32); }
+.cov.is-active .icon { box-shadow: 0 0 0 1px var(--cov-active-line), 0 0 14px rgba(85, 201, 139, 0.32); }
 .cov.is-active .icon-img { filter: brightness(1.18) saturate(1.1); }
-.cov.is-empowered .icon { box-shadow: 0 0 0 1px rgba(255, 180, 84, 0.55), 0 0 16px rgba(255, 180, 84, 0.36); }
+.cov.is-empowered .icon { box-shadow: 0 0 0 1px var(--cov-empowered-line), 0 0 16px rgba(230, 179, 90, 0.36); }
 .cov.is-empowered .icon-img { filter: brightness(1.2) saturate(1.15); }
 .cov.is-conflict .icon { box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.5); }
 .cov.is-conflict .icon-img { filter: grayscale(0.3) brightness(0.85); }
@@ -1563,7 +1633,7 @@ body.is-dragging .slot { pointer-events: none; }
 
 /* 盟约块可点开详情 */
 .cov { cursor: pointer; }
-.cov:hover { border-color: var(--line2); }
+.cov:hover { filter: brightness(1.06); }
 .cov:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cov-cal { font-style: normal; color: var(--accent); font-size: 10px; }
 
@@ -1589,6 +1659,11 @@ body.is-dragging .slot { pointer-events: none; }
 .tip-sec p { margin: 0; word-break: break-word; }
 .tip-sec p + p { margin-top: 4px; }
 .tip-now b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.tip-state.is-active { color: var(--cov-active); }
+.tip-state.is-empowered { color: var(--cov-empowered); }
+.tip-state.is-near,
+.tip-state.is-inactive { color: var(--cov-idle); }
+.tip-state.is-conflict { color: var(--danger); }
 .tip-foot {
   margin-top: 9px; padding-top: 7px; border-top: 1px solid var(--line);
   font-size: 11.5px; color: var(--fg3);
@@ -1759,6 +1834,53 @@ body.is-dragging .slot { pointer-events: none; }
   .slot-morph select { height: 28px; }
 }
 
+/* ---------- 19. 配队一图流 ----------
+   预览用 <img> 显示一张 1080 宽的长图；手机上靠长按保存。
+   面板本身不参与出图，出图完全由 js/poster.js 在 canvas 上画。 */
+.poster-sheet { min-height: 0; }
+.poster-preview {
+  flex: 1 1 auto; min-height: 120px;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: 12px 14px 4px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), transparent 60%),
+    var(--bg2);
+}
+.poster-preview::-webkit-scrollbar { width: 6px; }
+.poster-preview::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+.poster-img {
+  display: block; width: 100%; height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  -webkit-user-drag: none;
+}
+.poster-loading,
+.poster-fail {
+  margin: 0; padding: 40px 10px; text-align: center;
+  font-size: 13px; color: var(--fg3);
+}
+.poster-fail { color: var(--danger); }
+.poster-bar {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 10px 14px 4px; border-top: 1px solid var(--line);
+  flex: none;
+}
+.poster-bar .btn { flex: 1 1 auto; justify-content: center; }
+.poster-note {
+  margin: 0; padding: 8px 14px; flex: none;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 180, 84, 0.08);
+  font-size: 11.5px; line-height: 1.65; color: var(--accent2);
+}
+.poster-tip {
+  margin: 0; padding: 2px 14px 12px;
+  font-size: 11px; line-height: 1.5; color: var(--fg3);
+}
+@media (max-width: 480px) {
+  .poster-bar .btn { flex: 1 1 40%; font-size: 12.5px; padding: 8px 6px; }
+}
+
 </style>
 <script>window.GSPA_NO_AVATARS = true; window.GSPA_NO_ICONS = true;</script>
 </head>
@@ -1786,6 +1908,7 @@ body.is-dragging .slot { pointer-events: none; }
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.4 12.6 4.2 4.2 9-9.6"/></symbol>
   <symbol id="i-team" viewBox="0 0 24 24"><rect x="3.4" y="3.8" width="7.2" height="7.2" rx="1.7"/><rect x="13.4" y="3.8" width="7.2" height="7.2" rx="1.7"/><rect x="3.4" y="13.6" width="7.2" height="7.2" rx="1.7"/><path d="M17 13.4v7.6M13.2 17.2h7.6"/></symbol>
   <symbol id="i-enemy" viewBox="0 0 24 24"><path d="M4.5 8.7 12 4.2l7.5 4.5v6.6L12 19.8l-7.5-4.5z"/><path d="M8.6 10.4h1.2M14.2 10.4h1.2M9.5 14.1c1.6 1.1 3.4 1.1 5 0"/></symbol>
+  <symbol id="i-sandbox" viewBox="0 0 24 24"><rect x="3.6" y="3.6" width="16.8" height="16.8" rx="2.4"/><path d="M9.2 3.6v16.8M14.8 3.6v16.8M3.6 9.2h16.8M3.6 14.8h16.8"/></symbol>
 </svg>
 
 <header class="topbar">
@@ -1842,6 +1965,7 @@ body.is-dragging .slot { pointer-events: none; }
     <svg class="ico" aria-hidden="true"><use href="#i-team"/></svg>
     <span>配队</span><em class="tab-badge">BETA</em>
   </button>
+  
 </nav>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -3012,6 +3136,56 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
 
   var MORPH_ITEM = '变形同构体';
 
+  /**
+   * 仍然只有 special 文本、但已有明确“每回合/每场至多 N 层”的叠层上限。
+   * 沙盒的“补满叠层”与配队词条栏共用这张表，避免两边各解析一遍文本。
+   *
+   * bonds:
+   *   ['谢拉格']      固定盟约
+   *   'activeSelf'    目标自身已激活的盟约
+   *   'activeAll'     全队已激活的盟约（配队无法确定相邻目标时的上限口径）
+   * target: 'self' | 'selfAndBehind1'
+   * scope:  'round' | 'battle'
+   */
+  var SPECIAL_CAPS = {
+    '初雪': [
+      { elite: false, bonds: ['谢拉格'], cap: 16, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['谢拉格'], cap: 32, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '圣聆初雪': [
+      { elite: false, bonds: ['谢拉格'], cap: 24, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['谢拉格'], cap: 48, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '妮芙': [
+      { elite: false, bonds: ['迅捷'], cap: 20, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['迅捷'], cap: 40, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '烛煌': [
+      { elite: false, bonds: ['炎', '维多利亚'], cap: 12, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['炎', '维多利亚'], cap: 24, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '余': [
+      { elite: false, bonds: 'activeSelf', cap: 8, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: 'activeSelf', cap: 16, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '佩佩': [
+      { elite: false, bonds: 'activeAll', cap: 9, scope: 'round', target: 'selfAndBehind1', event: 'onCombat' },
+      { elite: true, bonds: 'activeAll', cap: 18, scope: 'round', target: 'selfAndBehind1', event: 'onCombat' }
+    ],
+    '溯光星源': [
+      { elite: false, bonds: ['奥术'], cap: 18, scope: 'round', target: 'self', event: 'onPrepEnd' },
+      { elite: true, bonds: ['奥术'], cap: 36, scope: 'round', target: 'self', event: 'onPrepEnd' }
+    ],
+    '耀骑士临光': [
+      { elite: false, bonds: 'activeSelf', cap: 12, scope: 'round', target: 'self', event: 'onKnockdown' },
+      { elite: true, bonds: 'activeSelf', cap: 24, scope: 'round', target: 'self', event: 'onKnockdown' }
+    ],
+    '浊心斯卡蒂': [
+      { elite: false, bonds: ['阿戈尔'], cap: 20, scope: 'battle', target: 'self', event: 'onDeploy' },
+      { elite: true, bonds: ['阿戈尔'], cap: 40, scope: 'battle', target: 'self', event: 'onDeploy' }
+    ]
+  };
+
   var RANK_ORDER = { core: 0, additional: 1 };
   var STATE_ORDER = { empowered: 0, active: 1, conflict: 2, near: 3, inactive: 4 };
 
@@ -3039,24 +3213,35 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
    * 百分数才带 + 号；秒 / 点这类单位只给数值。
    * 层数为 0 时不做替换（返回整段文字），避免满屏 (23+0.9×0)。
    */
-  function layerSegments(text, layer) {
+  function layerSegments(text, layer, force) {
     var s = String(text == null ? '' : text);
     var L = num(layer);
     var out = [];
     if (!s) return out;
-    if (!L) { out.push({ t: 'text', v: s }); return out; }
+    if (!L && !force) { out.push({ t: 'text', v: s }); return out; }
 
     var last = 0, m;
     LAYER_SEG.lastIndex = 0;
     while ((m = LAYER_SEG.exec(s)) !== null) {
-      if (m.index > last) out.push({ t: 'text', v: s.slice(last, m.index) });
+      // 公式前已经写了 +/- 时，把这个符号并入结果，避免出现「++53%」。
+      var prefixedSign = '';
+      var before = s.slice(last, m.index);
+      if (m.index > last) {
+        var prev = s.charAt(m.index - 1);
+        if (prev === '+' || prev === '-') {
+          prefixedSign = prev;
+          before = s.slice(last, m.index - 1);
+        }
+        if (before) out.push({ t: 'text', v: before });
+      }
 
       var base = parseFloat(m[1]);
       var sign = m[2];
       var per = parseFloat(m[3]) * (sign === '-' ? -1 : 1);
       var pct = m[4] || '';
       var value = base + per * L;
-      var head = (pct && value > 0 ? '+' : '') + round3(value) + pct;
+      var valueSign = value > 0 ? (prefixedSign || (pct ? '+' : '')) : '';
+      var head = valueSign + round3(value) + pct;
 
       out.push({
         t: 'num',
@@ -3071,10 +3256,10 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
 
   /**
    * 纯文本版：数值在前、算式在后。例：+113%（23%+0.9%×100）
-   * 层数为 0 时原样返回。
+   * 层数为 0 时原样返回；force=true 时也代入 0 层，用于「当前数值」这类必须给出结果的位置。
    */
-  function substLayers(text, layer) {
-    var segs = layerSegments(text, layer);
+  function substLayers(text, layer, force) {
+    var segs = layerSegments(text, layer, force);
     var out = '';
     for (var i = 0; i < segs.length; i++) {
       out += segs[i].t === 'num' ? (segs[i].v + '（' + segs[i].f + '）') : segs[i].v;
@@ -3332,6 +3517,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
   global.Calc = {
     RULES: RULES,
     MORPH_ITEM: MORPH_ITEM,
+    SPECIAL_CAPS: SPECIAL_CAPS,
     evaluate: evaluate,
     emptyTeam: emptyTeam,
     nextEmptySlot: nextEmptySlot,
@@ -5130,6 +5316,540 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
 </script>
 <script>
 /* ==========================================================================
+   qr.js — 最小二维码编码器（byte 模式 / 纠错级 M / 版本 1–10）
+   --------------------------------------------------------------------------
+   为什么自己写：本站零外部请求、单文件版要能离线双击，不能用在线 QR 接口，
+   也不值得为了一个二维码引第三方库。
+
+   只实现一图流真正需要的子集（不做数字 / 字母 / 汉字模式，不做多纠错级）：
+     · 模式：0100（8-bit byte），内容按 UTF-8 编码；
+     · 纠错：M 级（约 15% 容错，能扛微信二次压缩与截图裁边）；
+     · 版本：1–10 自动选最小可容纳的版本；V7 起写版本信息。
+   容量：V6-M 106 字节、V7-M 122 字节，足够放下本项目的分享链接（约 105 字节）。
+
+   输出：{ version, size, modules }，modules 为 size×size 的 Uint8Array（1=黑）。
+   绘制（画多大、留多少静区）交给调用方，本文件不碰 DOM / canvas。
+   语法保持 ES5，与 calc.js / team.js 一致，避免老 WebView 白屏。
+   ========================================================================== */
+(function (global) {
+  'use strict';
+
+  /** 版本 → 分块表：[块数, 每块数据码字, 每块纠错码字]，M 级 */
+  var BLOCKS_M = [
+    null,
+    [[1, 16, 10]],
+    [[1, 28, 16]],
+    [[1, 44, 26]],
+    [[2, 32, 18]],
+    [[2, 43, 24]],
+    [[4, 27, 16]],
+    [[4, 31, 18]],
+    [[2, 38, 22], [2, 39, 22]],
+    [[3, 36, 22], [2, 37, 22]],
+    [[4, 43, 26], [1, 44, 26]]
+  ];
+
+  /** 版本 → 校正图形中心坐标（行列共用） */
+  var ALIGN = [
+    null, [], [6, 18], [6, 22], [6, 26], [6, 30],
+    [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50]
+  ];
+
+  /** 版本 7–10 的版本信息 18 bit（BCH(18,6)，不含异或） */
+  var VER_INFO = [0, 0, 0, 0, 0, 0, 0, 0x07C94, 0x085BC, 0x09A99, 0x0A4D3];
+
+  var MAX_VERSION = 10;
+
+  /* ---------------- GF(256) ---------------- */
+  var EXP = new Uint8Array(512);
+  var LOG = new Uint8Array(256);
+  (function initGF() {
+    var x = 1;
+    for (var i = 0; i < 255; i++) {
+      EXP[i] = x;
+      LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11d;
+    }
+    for (i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+
+  function gfMul(a, b) {
+    if (!a || !b) return 0;
+    return EXP[LOG[a] + LOG[b]];
+  }
+
+  /** 生成多项式 ∏(x - α^i)，返回 [最高次 ... 常数项]，长度 = degree + 1 */
+  function genPoly(degree) {
+    var poly = [1];
+    for (var i = 0; i < degree; i++) {
+      var next = [];
+      for (var j = 0; j < poly.length + 1; j++) next.push(0);
+      for (j = 0; j < poly.length; j++) {
+        next[j] ^= poly[j];
+        next[j + 1] ^= gfMul(poly[j], EXP[i]);
+      }
+      poly = next;
+    }
+    return poly;
+  }
+
+  /** 一个数据块 → 纠错码字 */
+  function rsEC(data, ecLen) {
+    var gen = genPoly(ecLen);
+    var res = [];
+    var i;
+    for (i = 0; i < ecLen; i++) res.push(0);
+    for (i = 0; i < data.length; i++) {
+      var factor = data[i] ^ res[0];
+      res.shift();
+      res.push(0);
+      if (factor) {
+        for (var j = 0; j < ecLen; j++) res[j] ^= gfMul(gen[j + 1], factor);
+      }
+    }
+    return res;
+  }
+
+  /* ---------------- 位缓冲 ---------------- */
+  function BitBuf() {
+    this.bits = [];
+  }
+  BitBuf.prototype.put = function (value, len) {
+    for (var i = len - 1; i >= 0; i--) this.bits.push((value >> i) & 1);
+  };
+  BitBuf.prototype.size = function () { return this.bits.length; };
+  BitBuf.prototype.toBytes = function () {
+    var out = [];
+    for (var i = 0; i < this.bits.length; i += 8) {
+      var b = 0;
+      for (var j = 0; j < 8; j++) b = (b << 1) | (this.bits[i + j] || 0);
+      out.push(b);
+    }
+    return out;
+  };
+
+  /** UTF-8 编码（分享链接是 ASCII，但名字里可能有中文，保持正确性） */
+  function utf8Bytes(str) {
+    var s = String(str == null ? '' : str);
+    var out = [];
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+      } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+        var c2 = s.charCodeAt(i + 1);
+        if (c2 >= 0xdc00 && c2 <= 0xdfff) {
+          var cp = 0x10000 + ((c - 0xd800) << 10) + (c2 - 0xdc00);
+          out.push(0xf0 | (cp >> 18), 0x80 | ((cp >> 12) & 63), 0x80 | ((cp >> 6) & 63), 0x80 | (cp & 63));
+          i++;
+        } else {
+          out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+        }
+      } else {
+        out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+      }
+    }
+    return out;
+  }
+
+  /** 某版本的数据码字总数 */
+  function dataCodewords(version) {
+    var groups = BLOCKS_M[version];
+    var n = 0;
+    for (var i = 0; i < groups.length; i++) n += groups[i][0] * groups[i][1];
+    return n;
+  }
+
+  /** byte 模式的最大字节数：4 bit 模式 + 8/16 bit 计数，剩下的整字节都放数据 */
+  function capacityBytes(version) {
+    var header = version >= 10 ? 20 : 12;
+    return Math.floor((dataCodewords(version) * 8 - header) / 8);
+  }
+
+  function pickVersion(byteLen) {
+    for (var v = 1; v <= MAX_VERSION; v++) {
+      if (capacityBytes(v) >= byteLen) return v;
+    }
+    return -1;
+  }
+
+  /* ---------------- 数据 → 最终码字序列 ---------------- */
+  function buildCodewords(bytes, version) {
+    var total = dataCodewords(version);
+    var buf = new BitBuf();
+    buf.put(0x4, 4);                       // byte 模式
+    buf.put(bytes.length, version >= 10 ? 16 : 8);   // 计数：V1–9 为 8 bit
+    for (var i = 0; i < bytes.length; i++) buf.put(bytes[i], 8);
+
+    // 终止符：最多 4 个 0
+    var cap = total * 8;
+    var term = Math.min(4, cap - buf.size());
+    for (i = 0; i < term; i++) buf.bits.push(0);
+    while (buf.size() % 8) buf.bits.push(0);
+
+    var data = buf.toBytes();
+    var pad = [0xec, 0x11];
+    for (i = 0; data.length < total; i++) data.push(pad[i & 1]);
+
+    // 分块 + 纠错
+    var groups = BLOCKS_M[version];
+    var blocks = [];
+    var offset = 0;
+    var g, b;
+    for (g = 0; g < groups.length; g++) {
+      for (b = 0; b < groups[g][0]; b++) {
+        var len = groups[g][1];
+        var chunk = data.slice(offset, offset + len);
+        offset += len;
+        blocks.push({ data: chunk, ec: rsEC(chunk, groups[g][2]) });
+      }
+    }
+
+    // 交织
+    var out = [];
+    var maxData = 0;
+    for (b = 0; b < blocks.length; b++) maxData = Math.max(maxData, blocks[b].data.length);
+    for (i = 0; i < maxData; i++) {
+      for (b = 0; b < blocks.length; b++) {
+        if (i < blocks[b].data.length) out.push(blocks[b].data[i]);
+      }
+    }
+    var ecLen = blocks[0].ec.length;
+    for (i = 0; i < ecLen; i++) {
+      for (b = 0; b < blocks.length; b++) out.push(blocks[b].ec[i]);
+    }
+    return out;
+  }
+
+  /* ---------------- 矩阵 ---------------- */
+  function Matrix(version) {
+    this.version = version;
+    this.size = version * 4 + 17;
+    this.m = new Int8Array(this.size * this.size);   // -1 未填 / 0 白 / 1 黑
+    this.fn = new Uint8Array(this.size * this.size); // 1 = 功能图形（数据不能覆盖）
+    for (var i = 0; i < this.m.length; i++) this.m[i] = -1;
+  }
+
+  Matrix.prototype.set = function (x, y, v, isFn) {
+    this.m[y * this.size + x] = v ? 1 : 0;
+    if (isFn !== false) this.fn[y * this.size + x] = 1;
+  };
+
+  Matrix.prototype.get = function (x, y) {
+    return this.m[y * this.size + x];
+  };
+
+  function drawFinder(mx, ox, oy) {
+    // 7×7 定位图形 + 1 格静区
+    for (var y = -1; y <= 7; y++) {
+      for (var x = -1; x <= 7; x++) {
+        var px = ox + x, py = oy + y;
+        if (px < 0 || py < 0 || px >= mx.size || py >= mx.size) continue;
+        var on = (x >= 0 && x <= 6 && y >= 0 && y <= 6) &&
+          (x === 0 || x === 6 || y === 0 || y === 6 ||
+            (x >= 2 && x <= 4 && y >= 2 && y <= 4));
+        mx.set(px, py, on ? 1 : 0);
+      }
+    }
+  }
+
+  function drawAlignment(mx, cx, cy) {
+    for (var y = -2; y <= 2; y++) {
+      for (var x = -2; x <= 2; x++) {
+        var on = Math.max(Math.abs(x), Math.abs(y)) !== 1; // 5×5：外框 + 中心
+        mx.set(cx + x, cy + y, on ? 1 : 0);
+      }
+    }
+  }
+
+  function isFinderZone(px, py, size) {
+    return (px < 8 && py < 8) ||
+      (px >= size - 8 && py < 8) ||
+      (px < 8 && py >= size - 8);
+  }
+
+  function addFunctionPatterns(mx) {
+    var size = mx.size;
+    var i, j;
+
+    drawFinder(mx, 0, 0);
+    drawFinder(mx, size - 7, 0);
+    drawFinder(mx, 0, size - 7);
+
+    // 定时图形
+    for (i = 8; i < size - 8; i++) {
+      mx.set(i, 6, i % 2 === 0 ? 1 : 0);
+      mx.set(6, i, i % 2 === 0 ? 1 : 0);
+    }
+
+    // 校正图形
+    var centers = ALIGN[mx.version];
+    for (i = 0; i < centers.length; i++) {
+      for (j = 0; j < centers.length; j++) {
+        var cx = centers[i], cy = centers[j];
+        if (isFinderZone(cx, cy, size)) continue;
+        drawAlignment(mx, cx, cy);
+      }
+    }
+
+    // 固定黑点
+    mx.set(8, size - 8, 1);
+
+    // 先占位格式信息区，避免数据写进去
+    for (i = 0; i < 9; i++) {
+      if (i !== 6) { mx.set(i, 8, 0); mx.set(8, i, 0); }
+    }
+    for (i = 0; i < 8; i++) {
+      mx.set(size - 1 - i, 8, 0);
+      mx.set(8, size - 1 - i, 0);
+    }
+
+    // 版本信息区（V7+）
+    if (mx.version >= 7) {
+      for (i = 0; i < 6; i++) {
+        for (j = 0; j < 3; j++) {
+          mx.set(size - 11 + j, i, 0);
+          mx.set(i, size - 11 + j, 0);
+        }
+      }
+    }
+  }
+
+  /** 数据位按「两列一折」从右下往左上填 */
+  function placeData(mx, codewords) {
+    var size = mx.size;
+    var bit = 0;
+    var total = codewords.length * 8;
+    var up = true;
+
+    for (var right = size - 1; right > 0; right -= 2) {
+      if (right === 6) right = 5;   // 跳过定时列
+      for (var vert = 0; vert < size; vert++) {
+        var y = up ? size - 1 - vert : vert;
+        for (var k = 0; k < 2; k++) {
+          var x = right - k;
+          if (mx.fn[y * size + x]) continue;
+          var v = 0;
+          if (bit < total) {
+            v = (codewords[bit >> 3] >> (7 - (bit & 7))) & 1;
+            bit++;
+          }
+          mx.m[y * size + x] = v;
+        }
+      }
+      up = !up;
+    }
+  }
+
+  /* ---------------- 掩码 ---------------- */
+  function maskAt(pattern, x, y) {
+    switch (pattern) {
+      case 0: return (x + y) % 2 === 0;
+      case 1: return y % 2 === 0;
+      case 2: return x % 3 === 0;
+      case 3: return (x + y) % 3 === 0;
+      case 4: return (Math.floor(y / 2) + Math.floor(x / 3)) % 2 === 0;
+      case 5: return ((x * y) % 2) + ((x * y) % 3) === 0;
+      case 6: return (((x * y) % 2) + ((x * y) % 3)) % 2 === 0;
+      default: return (((x + y) % 2) + ((x * y) % 3)) % 2 === 0;
+    }
+  }
+
+  function applyMask(mx, pattern) {
+    var size = mx.size;
+    for (var y = 0; y < size; y++) {
+      for (var x = 0; x < size; x++) {
+        if (mx.fn[y * size + x]) continue;
+        if (maskAt(pattern, x, y)) mx.m[y * size + x] ^= 1;
+      }
+    }
+  }
+
+  function penalty(mx) {
+    var size = mx.size;
+    var m = mx.m;
+    var score = 0;
+    var x, y, i, run, dark = 0;
+
+    // 规则 1：连续同色 ≥5
+    for (y = 0; y < size; y++) {
+      run = 1;
+      for (x = 1; x < size; x++) {
+        if (m[y * size + x] === m[y * size + x - 1]) {
+          run++;
+        } else {
+          if (run >= 5) score += 3 + (run - 5);
+          run = 1;
+        }
+      }
+      if (run >= 5) score += 3 + (run - 5);
+    }
+    for (x = 0; x < size; x++) {
+      run = 1;
+      for (y = 1; y < size; y++) {
+        if (m[y * size + x] === m[(y - 1) * size + x]) {
+          run++;
+        } else {
+          if (run >= 5) score += 3 + (run - 5);
+          run = 1;
+        }
+      }
+      if (run >= 5) score += 3 + (run - 5);
+    }
+
+    // 规则 2：2×2 同色
+    for (y = 0; y < size - 1; y++) {
+      for (x = 0; x < size - 1; x++) {
+        var v = m[y * size + x];
+        if (v === m[y * size + x + 1] &&
+            v === m[(y + 1) * size + x] &&
+            v === m[(y + 1) * size + x + 1]) score += 3;
+      }
+    }
+
+    // 规则 3：1:1:3:1:1 类似定位图形的组合（前后带 4 个浅色）
+    var p1 = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0];
+    var p2 = [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1];
+    for (y = 0; y < size; y++) {
+      for (x = 0; x <= size - 11; x++) {
+        var ok1 = true, ok2 = true;
+        for (i = 0; i < 11; i++) {
+          var v2 = m[y * size + x + i];
+          if (v2 !== p1[i]) ok1 = false;
+          if (v2 !== p2[i]) ok2 = false;
+        }
+        if (ok1) score += 40;
+        if (ok2) score += 40;
+      }
+    }
+    for (x = 0; x < size; x++) {
+      for (y = 0; y <= size - 11; y++) {
+        var okA = true, okB = true;
+        for (i = 0; i < 11; i++) {
+          var v3 = m[(y + i) * size + x];
+          if (v3 !== p1[i]) okA = false;
+          if (v3 !== p2[i]) okB = false;
+        }
+        if (okA) score += 40;
+        if (okB) score += 40;
+      }
+    }
+
+    // 规则 4：黑块比例偏离 50%
+    for (i = 0; i < m.length; i++) if (m[i]) dark++;
+    var pct = dark * 100 / m.length;
+    score += Math.floor(Math.abs(pct - 50) / 5) * 10;
+
+    return score;
+  }
+
+  /* ---------------- 格式信息 ---------------- */
+  function formatBits(mask) {
+    var ecBits = 0;                 // M 级 = 00
+    var v = (ecBits << 3) | mask;
+    var poly = 0x537;
+    var val = v << 10;
+    for (var i = 14; i >= 10; i--) {
+      if ((val >> i) & 1) val ^= poly << (i - 10);
+    }
+    return (((v << 10) | val) ^ 0x5412) & 0x7fff;
+  }
+
+  function writeFormat(mx, mask) {
+    var size = mx.size;
+    var bits = formatBits(mask);
+    var i;
+
+    // 按 ISO 18004 的位序摆放：bit i 的位置是固定的两套镜像
+    for (i = 0; i < 15; i++) {
+      var on = (bits >> i) & 1;
+
+      // 第一份：左上角
+      if (i < 6) {
+        mx.set(8, i, on);                    // 列 8，行 0–5
+      } else if (i < 8) {
+        mx.set(8, i + 1, on);                // 列 8，行 7、8
+      } else {
+        mx.set(8, size - 15 + i, on);        // 列 8，行 size-7 – size-1
+      }
+
+      // 第二份：右上 + 左下
+      if (i < 8) {
+        mx.set(size - 1 - i, 8, on);         // 行 8，列 size-1 – size-8
+      } else if (i === 8) {
+        mx.set(7, 8, on);                    // 行 8，列 7
+      } else {
+        mx.set(14 - i, 8, on);               // 行 8，列 5 – 0
+      }
+    }
+
+    // 固定黑点（写完格式信息后再确认一次）
+    mx.set(8, size - 8, 1);
+  }
+
+  function writeVersionInfo(mx) {
+    if (mx.version < 7) return;
+    var size = mx.size;
+    var bits = VER_INFO[mx.version];
+    for (var i = 0; i < 18; i++) {
+      var on = (bits >> i) & 1;
+      mx.set(size - 11 + (i % 3), Math.floor(i / 3), on);
+      mx.set(Math.floor(i / 3), size - 11 + (i % 3), on);
+    }
+  }
+
+  /* ---------------- 对外 ---------------- */
+  /**
+   * @param {string} text
+   * @param {number} [forceMask] 测试用：强制指定掩码，不传则按标准罚分自动选
+   * @returns {{version:number,size:number,modules:Uint8Array,mask:number}|null}
+   */
+  function encode(text, forceMask) {
+    var bytes = utf8Bytes(text);
+    var version = pickVersion(bytes.length);
+    if (version < 0) return null;
+
+    var codewords = buildCodewords(bytes, version);
+    var best = null;
+    var bestScore = Infinity;
+    var bestMask = -1;
+    var first = forceMask == null ? 0 : forceMask;
+    var last = forceMask == null ? 7 : forceMask;
+
+    for (var mask = first; mask <= last; mask++) {
+      var mx = new Matrix(version);
+      addFunctionPatterns(mx);
+      placeData(mx, codewords);
+      writeVersionInfo(mx);
+      applyMask(mx, mask);
+      writeFormat(mx, mask);
+      var score = penalty(mx);
+      if (score < bestScore) {
+        bestScore = score;
+        best = mx;
+        bestMask = mask;
+      }
+    }
+
+    // func：功能图形掩码（定位 / 定时 / 校正 / 格式 / 版本），绘制时用来决定「实心方块」还是「圆点」
+    return { version: best.version, size: best.size, modules: best.m, mask: bestMask, func: best.fn };
+  }
+
+  global.Qr = {
+    encode: encode,
+    capacityBytes: function (v) { return capacityBytes(v); },
+    pickVersion: function (text) { return pickVersion(utf8Bytes(text).length); },
+    _formatBits: formatBits,
+    _utf8Bytes: utf8Bytes
+  };
+})(window);
+
+</script>
+<script>
+/* ==========================================================================
    team.js — 配队视图：席位、装备、盟约激活面板、选人 / 选装备、悬停详情、拖拽排序
    --------------------------------------------------------------------------
    设计要点
@@ -5140,6 +5860,9 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
    · 盟约详情走 #tip：桌面悬停、键盘聚焦、手机点按都能看，层数按当前输入代入数值。
    · 拖拽排序用 pointer 事件（鼠标 + 触屏同一套），只从手柄发起，避免和滚动打架。
    · 盟约图标只有一张线稿，点亮/未激活用 CSS 表达（PRTS 无点亮态素材）。
+   · 可选的叠层内核端口：js/stack-core.js（window.StackCore，UI 无关）提供
+     createLedger / createEventBus / ruleText / sellPriceOf；为守住首屏 gzip 预算，
+     配队默认不加载，需要“按词条试算层数”时再动态插入该脚本即可。
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -5186,6 +5909,14 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
   var NO_TRIGGER = '';
   // 判断一条词条是否在「增加 / 转化 / 增幅盟约层数」；只按层数获得，不把「每叠加 N 层加攻击」算进来
   var LAYER_TRAIT_RE = /层数\s*(?:额外)?\s*[+＋]|获得等同于[^。；\n]*层数|叠加等同于[^。；\n]*层数|转化\s*\d+\s*层[^。；\n]*固定层数|临时层数提升至/;
+  // 叠层上限：优先读词条里的「每回合 / 每场战斗至多叠加 N 层」；
+  // 没写上限的按「层数+N」的基础值计；一行里出现多个触发标签时按触发次数累加。
+  var LAYER_CAP_RE = /(?:每回合|每场战斗)?\s*至多(?:叠加)?\s*(\d+)\s*层/g;
+  var LAYER_ADD_RE = /层数\s*[+＋]\s*(\d+)/g;
+  var LAYER_EXTRA_ADD_RE = /层数额外\s*[+＋]\s*\d+/g;
+  var TRIGGER_TAG_RE = /<[^<>]{1,24}>/g;
+  var BOND_RE = /【([^】]+)】/g;
+  var CLAUSE_RE = /[，；,;。]/;
   var els = {};
   var qTimer = null;
 
@@ -5275,12 +6006,14 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       statHtml(s.elite, '精锐') +
       statHtml(s.equip, '装备') +
       statHtml('◈' + s.price, '总售价') +
-      statHtml(s.active + '/' + s.total, '已激活') +
-      statHtml(s.near, '待激活') +
+      statHtml(s.active + '/' + s.total, '已激活', 'is-cov-active') +
+      statHtml(s.empowered, '已强化', 'is-cov-empowered') +
+      statHtml(s.near, '待激活', 'is-cov-idle') +
       '</div>' +
       '<div class="tm-actions">' +
       (s.filled < s.size ? '<button type="button" class="btn tm-batch" data-batch-add>批量添加</button>' : '') +
       '<button type="button" class="btn" data-team-import>导入</button>' +
+      '<button type="button" class="btn" data-team-poster>一图流</button>' +
       '<button type="button" class="btn" data-team-share>分享</button>' +
       '<button type="button" class="btn tm-clear" data-team-clear>清空</button>' +
       '</div>' +
@@ -5303,8 +6036,8 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     return h;
   }
 
-  function statHtml(v, label) {
-    return '<div class="tm-stat"><b>' + esc(v) + '</b><span>' + esc(label) + '</span></div>';
+  function statHtml(v, label, cls) {
+    return '<div class="tm-stat' + (cls ? ' ' + cls : '') + '"><b>' + esc(v) + '</b><span>' + esc(label) + '</span></div>';
   }
 
   function slotsHtml(team, res) {
@@ -5443,9 +6176,10 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var rows = res.rows;
     var h = '<div class="tm-cov-head">' +
       '<h2>盟约</h2>' +
-      '<span class="tm-cov-sum">已激活 <b>' + res.summary.active + '</b> / ' + res.summary.total +
-      '<span class="dot-sep">·</span>强化 <b>' + res.summary.empowered + '</b>' +
-      '<span class="dot-sep">·</span>待激活 <b>' + res.summary.near + '</b></span>' +
+      '<span class="tm-cov-sum"><span class="is-active">已激活 <b>' + res.summary.active + '</b></span>' +
+      ' / ' + res.summary.total +
+      '<span class="dot-sep">·</span><span class="is-empowered">强化 <b>' + res.summary.empowered + '</b></span>' +
+      '<span class="dot-sep">·</span><span class="is-near">待激活 <b>' + res.summary.near + '</b></span></span>' +
       '</div>';
 
     h += '<div class="tm-covs">';
@@ -5529,6 +6263,199 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     return LAYER_TRAIT_RE.test(String(text == null ? '' : text));
   }
 
+  /**
+   * 把一条词条拆成「盟约 → 一回合最多增加多少层」。
+   * · 有「每回合 / 每场战斗至多叠加 N 层」时直接取 N（同一 clause 多个上限相加）；
+   * · 没有上限时按「层数+N」的基础值计，一行里有多个触发标签（如寒檀）则乘触发次数；
+   * · 「层数额外+1」属于提升效率，不是固定的叠层来源，按 0 处理；
+   * · 用【盟约】写明目标的，按写明的盟约归集；没写目标的留给通用逻辑分摊。
+   */
+  function parseTraitCaps(text) {
+    var out = [];
+    var lines = String(text == null ? '' : text).split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].replace(LAYER_EXTRA_ADD_RE, '');
+      var triggerTags = line.match(TRIGGER_TAG_RE);
+      var mult = triggerTags && triggerTags.length > 1 ? triggerTags.length : 1;
+      var segs = line.split(CLAUSE_RE);
+      for (var j = 0; j < segs.length; j++) {
+        var seg = segs[j];
+        var bonds = [];
+        var bm;
+        BOND_RE.lastIndex = 0;
+        while ((bm = BOND_RE.exec(seg))) {
+          var name = bm[1];
+          if (covByName[name] && bonds.indexOf(name) < 0) bonds.push(name);
+        }
+
+        var cap = 0;
+        var m;
+        LAYER_CAP_RE.lastIndex = 0;
+        while ((m = LAYER_CAP_RE.exec(seg))) {
+          cap += parseInt(m[1], 10) || 0;
+        }
+        if (cap > 0) {
+          out.push({ bonds: bonds, amount: cap, generic: !bonds.length });
+          continue;
+        }
+
+        var base = 0;
+        var adds = 0;
+        LAYER_ADD_RE.lastIndex = 0;
+        while ((m = LAYER_ADD_RE.exec(seg))) {
+          base += parseInt(m[1], 10) || 0;
+          adds++;
+        }
+        if (!adds) continue;
+        out.push({ bonds: bonds, amount: base * mult, generic: !bonds.length });
+      }
+    }
+    return out;
+  }
+
+  /** 通用词条（只写“已激活的盟约 / 核心盟约 / 最高层盟约”）按当前队伍情况归到具体盟约 */
+  function genericBondNames(text, ctx, op) {
+    var s = String(text == null ? '' : text);
+    var active = (ctx && ctx.active) || [];
+    var names = [];
+    var activeNames = [];
+    var selfNames = [];
+    var tags = (op && op.tags) || [];
+    var i;
+    for (i = 0; i < active.length; i++) activeNames.push(active[i].name);
+    for (i = 0; i < tags.length; i++) {
+      if (activeNames.indexOf(tags[i]) >= 0) selfNames.push(tags[i]);
+    }
+
+    if (s.indexOf('核心盟约') >= 0) {
+      var pool = s.indexOf('自身') >= 0 ? selfNames : activeNames;
+      for (i = 0; i < active.length; i++) {
+        if (pool.indexOf(active[i].name) >= 0 && active[i].rank === 'core') names.push(active[i].name);
+      }
+      if (names.length) return names;
+      return s.indexOf('自身') >= 0 ? [] : ['核心盟约'];
+    }
+    if (s.indexOf('层数最多的盟约') >= 0) {
+      if (!active.length) return ['最高层盟约'];
+      var best = active[0];
+      var bestLayer = Number(best.layer) || 0;
+      for (i = 1; i < active.length; i++) {
+        var n = Number(active[i].layer) || 0;
+        if (n > bestLayer) { best = active[i]; bestLayer = n; }
+      }
+      return [best.name];
+    }
+
+    // 只写“自身”的：只算该干员自身 tag 对应的已激活盟约；
+    // 写到“自身及身前一格 / 身后一格”的，相邻干员无法从配队界面确定，按全部已激活盟约取上限。
+    if (s.indexOf('自身') >= 0) {
+      if (s.indexOf('身前一格') >= 0 || s.indexOf('身后一格') >= 0) {
+        return activeNames.length ? activeNames : ['已激活盟约'];
+      }
+      return selfNames;
+    }
+
+    if (!activeNames.length) return ['已激活盟约'];
+    return activeNames;
+  }
+
+  /** 词条 → [{bond, amount, generic}]；写明盟约的按盟约归集，通用词条按已激活盟约分摊 */
+  function traitLayerCaps(text, ctx, op) {
+    var entries = parseTraitCaps(text);
+    var out = [];
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      var names = e.bonds.length ? e.bonds : genericBondNames(text, ctx, op);
+      for (var j = 0; j < names.length; j++) {
+        out.push({ bond: names[j], amount: e.amount, generic: e.generic });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * 特殊叠层上限：Calc.SPECIAL_CAPS 与沙盒“补满叠层”共用同一张表。
+   * 表中没有的干员仍走 traitLayerCaps 的文本解析。
+   */
+  function specialTraitCaps(op, elite, ctx) {
+    var table = global.Calc && global.Calc.SPECIAL_CAPS;
+    var list = table && table[op.name];
+    if (!list || !list.length) return [];
+    var active = (ctx && ctx.active) || [];
+    var activeNames = [];
+    var selfNames = [];
+    var tags = (op && op.tags) || [];
+    var i;
+    for (i = 0; i < active.length; i++) activeNames.push(active[i].name);
+    for (i = 0; i < tags.length; i++) {
+      if (activeNames.indexOf(tags[i]) >= 0) selfNames.push(tags[i]);
+    }
+    var out = [];
+    for (i = 0; i < list.length; i++) {
+      var e = list[i];
+      if (!!e.elite !== !!elite) continue;
+      var names;
+      if (Array.isArray(e.bonds)) names = e.bonds;
+      else if (e.bonds === 'activeSelf') names = selfNames;
+      else if (e.bonds === 'activeAll') names = activeNames;
+      else continue;
+      for (var j = 0; j < names.length; j++) {
+        if (activeNames.indexOf(names[j]) < 0) continue;
+        out.push({ bond: names[j], amount: e.cap, generic: e.bonds === 'activeAll' });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * 当前队伍里已激活的盟约。
+   * · active：排除 special / elite，只留「能承载层数」的盟约，用于分摊「已激活的盟约」类通用词条；
+   * · names ：全部已激活盟约名（含 special / elite），用于过滤叠层上限——
+   *   没点亮的盟约本期不生效，算它的叠层上限没有意义。
+   */
+  function capContext(team) {
+    var active = [];
+    var names = {};
+    try {
+      var res = Calc.evaluate(team, data);
+      for (var i = 0; i < res.rows.length; i++) {
+        var r = res.rows[i];
+        if (r.state !== 'active' && r.state !== 'empowered') continue;
+        names[r.name] = 1;
+        if (r.kind === 'special' || r.kind === 'elite') continue;
+        active.push(r);
+      }
+    } catch (e) { /* 数据异常时按没有已激活盟约处理 */ }
+    return { active: active, names: names };
+  }
+
+  /** 同一干员对同一盟约的多段词条合并成一条，避免明细里重复出现 */
+  function mergeCap(map, bond, amount, op, generic) {
+    if (!amount) return;
+    var row = map[bond];
+    if (!row) {
+      row = map[bond] = { bond: bond, total: 0, parts: [] };
+    }
+    row.total += amount;
+    for (var i = 0; i < row.parts.length; i++) {
+      if (row.parts[i].name === op.name) {
+        row.parts[i].amount += amount;
+        row.parts[i].generic = row.parts[i].generic || !!generic;
+        return;
+      }
+    }
+    row.parts.push({ name: op.name, amount: amount, generic: !!generic });
+  }
+
+  function capRowsOf(map) {
+    var rows = [];
+    for (var k in map) if (map.hasOwnProperty(k)) rows.push(map[k]);
+    rows.sort(function (a, b) {
+      return b.total - a.total || String(a.bond).localeCompare(String(b.bond), 'zh-Hans-CN');
+    });
+    return rows;
+  }
+
   /** 按当前形态（普通 / 精锐）收集词条，并按触发时机分组；重复干员只算一次 */
   function traitGroups(team) {
     var groups = {};
@@ -5537,6 +6464,8 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var other = 0;
     var picks = 0;
     var multi = 0;
+    var capMap = {};
+    var capCtx = capContext(team);
 
     for (var i = 0; i < team.slots.length; i++) {
       var s = team.slots[i];
@@ -5552,6 +6481,16 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       var text = elite ? (op.eliteText || op.normalText) : op.normalText;
       if (!text) continue;
       var layer = isLayerTrait(text);
+      if (layer) {
+        // 特殊上限表优先（与沙盒一键补满同源）；没有表的干员继续走文本解析。
+        var hasSpecialTable = !!(global.Calc && global.Calc.SPECIAL_CAPS && global.Calc.SPECIAL_CAPS[op.name]);
+        var caps = hasSpecialTable ? specialTraitCaps(op, elite, capCtx) : traitLayerCaps(text, capCtx, op);
+        for (var c = 0; c < caps.length; c++) {
+          // 只统计已激活、且真正能产生叠层的盟约（未点亮的盟约本期不生效）
+          if (!capCtx.names[caps[c].bond]) continue;
+          mergeCap(capMap, caps[c].bond, caps[c].amount, op, caps[c].generic);
+        }
+      }
       if (!layer) other++;
       if (traitsLayerOnly && !layer) continue;
 
@@ -5572,7 +6511,47 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       }
     }
 
-    return { groups: groups, total: total, other: other, allTotal: total + other, picks: picks, multi: multi };
+    var capsByBond = capRowsOf(capMap);
+    return {
+      groups: groups, total: total, other: other, allTotal: total + other,
+      picks: picks, multi: multi, capsByBond: capsByBond, capBondCount: capsByBond.length
+    };
+  }
+
+  /** 词条栏顶部的叠层上限：每个盟约一行，+总数（各干员层数相加） */
+  function traitsCapHtml(bag) {
+    var rows = bag.capsByBond || [];
+    var h = '<div class="tm-traits-cap">' +
+      '<span class="tm-cap-label">单回合叠层上限 · 按盟约</span>';
+    if (!rows.length) {
+      return h + '<div class="tm-cap-empty">暂无可统计的叠层盟约</div></div>';
+    }
+
+    h += '<div class="tm-cap-list">';
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var parts = [];
+      var sources = [];
+      for (var j = 0; j < row.parts.length; j++) {
+        var p = row.parts[j];
+        parts.push(p.amount);
+        sources.push(p.name + (p.generic ? '（通用）' : '') + ' +' + p.amount);
+      }
+      var title = row.bond + '：一回合最多增加 ' + row.total + ' 层（' + sources.join('、') + '）';
+      h += '<div class="tm-cap-row" title="' + esc(title) + '">' +
+        '<div class="tm-cap-rowhead">' +
+        '<span class="tm-cap-cov" style="--h:' + UI.hue(row.bond) + '">' +
+        UI.covSigil(row.bond, 12) + esc(row.bond) + '</span>' +
+        '<b class="tm-cap-total">+' + row.total + '</b>' +
+        '<span class="tm-cap-parts">（' + esc(parts.join('+')) + '）</span>' +
+        '</div>' +
+        '<div class="tm-cap-src">' +
+        sources.map(function (n) { return esc(n); }).join(' · ') +
+        '</div>' +
+        '</div>';
+    }
+    h += '</div></div>';
+    return h;
   }
 
   function traitsHtml(team) {
@@ -5642,13 +6621,17 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     // 收起时才使用拖动后的 top；展开时仍从默认高度展开
     var posStyle = (!open && traitsPos.top != null)
       ? ' style="--traits-top:' + Math.round(traitsPos.top) + 'px"' : '';
+    var topCap = bag.capsByBond && bag.capsByBond.length ? bag.capsByBond[0] : null;
+    var topTitle = topCap
+      ? '最高单回合叠层上限：' + topCap.bond + ' +' + topCap.total + '（共 ' + bag.capBondCount + ' 个盟约）'
+      : '暂无叠层盟约';
 
     return '<aside class="tm-traits' + (open ? '' : ' is-collapsed') + sideCls + '"' + posStyle +
       ' aria-label="配队词条汇总">' +
       '<div class="tm-traits-panel">' +
       '<div class="tm-traits-head">' +
       '<div class="tm-traits-title"><b>词条</b>' +
-      '<span class="tm-traits-count" title="共 ' + bag.total + ' 条词条">' + bag.total + '</span></div>' +
+      '<span class="tm-traits-count" title="共 ' + bag.total + ' 条词条 · ' + bag.capBondCount + ' 个盟约有单回合叠层上限">' + bag.total + '</span></div>' +
       '<button type="button" class="tm-traits-layer" data-traits-layer' +
       ' aria-pressed="' + (traitsLayerOnly ? 'true' : 'false') + '"' +
       ' title="隐藏不增加盟约层数的词条">只看叠层</button>' +
@@ -5656,6 +6639,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tm-traits-body"' +
       ' title="收起词条栏">收起</button>' +
       '</div>' +
+      traitsCapHtml(bag) +
       '<p class="tm-traits-sub">' + sub + '</p>' +
       '<div class="tm-traits-body" id="tm-traits-body">' + body + '</div>' +
       '</div>' +
@@ -5665,6 +6649,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '<span class="tm-traits-rail-grip" aria-hidden="true">⠿</span>' +
       '<span class="tm-traits-rail-text">词条</span>' +
       '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
+      '<span class="tm-traits-rail-cap" title="' + esc(topTitle) + '">+' + (topCap ? topCap.total : 0) + '</span>' +
       '<span class="tm-traits-rail-arrow" aria-hidden="true">‹</span>' +
       '</button>' +
       '</aside>';
@@ -5765,7 +6750,8 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '<span class="pill ' + (c.rank === 'core' ? 'pill-core' : 'pill-add') + '">' +
       (c.rank === 'core' ? '主盟约' : '副盟约') + '</span></div>' +
       '<div class="tip-sec"><h4>条件</h4><p>' + esc(cond) + '</p>' +
-      '<p class="tip-now">当前 <b>' + row.count + ' / ' + row.threshold + '</b>　' + esc(status) +
+      '<p class="tip-now">当前 <b>' + row.count + ' / ' + row.threshold + '</b>　' +
+      '<span class="tip-state is-' + esc(row.state) + '">' + esc(status) + '</span>' +
       (row.bonus ? '　<span class="cov-bonus">调和 +1</span>' : '') + '</p></div>' +
       (num ? '<div class="tip-sec"><h4>数值' + (row.layer ? '（' + row.layer + ' 层）' : '') + '</h4><p>' +
         num + '</p></div>' : '') +
@@ -5882,6 +6868,10 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     els.sheet.hidden = false;
     document.body.classList.add('sheet-open');
     syncScrim();
+    // 一图流要等面板进 DOM 之后再画（会在 mount 里异步加载头像）
+    if (picker.mode === 'poster' && global.Poster) {
+      global.setTimeout(function () { global.Poster.mount(); }, 0);
+    }
     // 触屏设备不要自动聚焦搜索框：会立刻弹出键盘并把 iOS 页面放大。
     // 桌面（精确指针）保留键盘直达搜索的便利。
     var touch = (global.navigator && global.navigator.maxTouchPoints > 0) ||
@@ -5918,6 +6908,9 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
   function pickerHtml() {
     if (picker.mode === 'share') return shareSheetHtml();
     if (picker.mode === 'import') return importSheetHtml();
+    if (picker.mode === 'poster') {
+      return global.Poster ? global.Poster.sheetHtml() : '';
+    }
 
     var isItem = picker.mode === 'item';
     var isPick = picker.mode === 'pick';
@@ -6585,7 +7578,10 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var team = Store.getTeam();
     if (!team.slots[i]) return;
     team.slots[i].e = !team.slots[i].e;
-    Store.setTeam(team);
+    var changed = Store.setTeam(team);
+    // Store 的 commit 在极端情况下会判定「没有变化」而不通知；词条栏的叠层上限
+    // 必须跟随普通 / 精锐切换，这里兜底重绘一次，避免看起来像精锐无效。
+    if (!changed) refreshTraitsPanel();
   }
 
   function clearSlot(i) {
@@ -6830,6 +7826,12 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     if ((el = t.closest('[data-add-slot]'))) { e.preventDefault(); addSlot(); return; }
     if ((el = t.closest('[data-shrink-slot]'))) { e.preventDefault(); shrinkSlot(); return; }
     if ((el = t.closest('[data-team-share]'))) { e.preventDefault(); openSheet(-1, 'share', -1); return; }
+    if ((el = t.closest('[data-team-poster]'))) {
+      e.preventDefault();
+      if (global.Poster) global.Poster.open();
+      else toast('一图流模块没有加载');
+      return;
+    }
     if ((el = t.closest('[data-team-import]'))) { e.preventDefault(); openSheet(-1, 'import', -1); return; }
     if ((el = t.closest('[data-copy-share]'))) { e.preventDefault(); copyShare(); return; }
     if ((el = t.closest('[data-apply-import]'))) { e.preventDefault(); applyImport(); return; }
@@ -7006,6 +8008,104 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     return ['', 'I', 'II', 'III', 'IV', 'V', 'VI'][n] || String(n);
   }
 
+  /* ---------------- 一图流数据快照 ---------------- */
+  /**
+   * 一图流用的纯数据快照：只吃 team，不碰 DOM，Node 里可直接断言。
+   * 口径与配队页完全同源（Calc.evaluate + traitGroups），绝不另算一套，
+   * 否则会出现「页面写 +6、图上写 +5」。
+   */
+  function posterModel(team) {
+    ensure();
+    var res = Calc.evaluate(team, data);
+    var bag = traitGroups(team);
+    var pieces = [];
+    var i;
+
+    for (i = 0; i < res.pieces.length; i++) {
+      var p = res.pieces[i];
+      var op = p.op;
+      pieces.push({
+        name: op.name,
+        avatar: op.avatarFull || op.avatar || '',
+        tier: op.tier || 0,
+        tierLabel: op.tierLabel || '',
+        price: op.price == null ? 0 : op.price,
+        elite: !!p.elite,
+        pick: !!p.pick,
+        tags: (op.tags || []).slice(0, 3),
+        equipCount: p.items.length,
+        equipNames: p.items.map(function (x) { return x.item.name; }),
+        morph: p.morph && p.morph.covenant ? p.morph.covenant : ''
+      });
+    }
+
+    var active = [];
+    var near = [];
+    var pending = [];
+    for (i = 0; i < res.rows.length; i++) {
+      var r = res.rows[i];
+      if (r.state !== 'active' && r.state !== 'empowered') {
+        if (r.state === 'near') {
+          near.push(r.name);
+          var pc = covByName[r.name];
+          pending.push({
+            name: r.name, rank: r.rank, state: r.state, kind: r.kind,
+            count: r.count, threshold: r.threshold, layer: r.layer,
+            icon: pc ? (pc.iconFull || pc.icon || '') : ''
+          });
+        }
+        continue;
+      }
+      var c = covByName[r.name];
+      active.push({
+        name: r.name,
+        rank: r.rank,
+        state: r.state,
+        kind: r.kind,
+        count: r.count,
+        threshold: r.threshold,
+        bonus: r.bonus,
+        layer: r.layer,
+        node: r.node,
+        nodes: (r.nodes || []).slice(),
+        empower: r.empowerThreshold,
+        missingEmpower: r.missingEmpower,
+        icon: c ? (c.iconFull || c.icon || '') : ''
+      });
+    }
+
+    var caps = [];
+    for (i = 0; i < bag.capsByBond.length; i++) {
+      var row = bag.capsByBond[i];
+      var cc = covByName[row.bond];
+      caps.push({
+        bond: row.bond,
+        total: row.total,
+        parts: row.parts.map(function (x) {
+          return { name: x.name, amount: x.amount, generic: !!x.generic };
+        }),
+        icon: cc ? (cc.iconFull || cc.icon || '') : ''
+      });
+    }
+
+    return {
+      version: data.version || '',
+      season: (data.specialMeta && data.specialMeta.season) || '',
+      generatedAt: data.generatedAt || '',
+      size: res.summary.size,
+      summary: res.summary,
+      pieces: pieces,
+      covenants: active,
+      near: near,
+      pending: pending,
+      caps: caps,
+      traitCount: bag.total,
+      picks: res.summary.picks,
+      pickLimit: res.summary.pickLimit,
+      dupes: res.dupes.slice()
+    };
+  }
+
   global.Team = {
     init: init,
     render: viewHtml,
@@ -7014,10 +8114,1102 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     isSheetOpen: isSheetOpen,
     hideTip: hideTip,
     toggleFromList: toggleFromList,
+    posterModel: posterModel,
     // 供测试 / 调试
     shareText: shareText,
     parseShareText: parseShareText,
-    _isLayerTrait: isLayerTrait
+    _isLayerTrait: isLayerTrait,
+    _traitLayerCaps: traitLayerCaps,
+    _specialTraitCaps: specialTraitCaps,
+    _toggleElite: toggleElite
+  };
+})(window);
+
+</script>
+<script>
+/* ==========================================================================
+   poster.js — 配队「一图流」：数据快照 → 布局 → Canvas 出图
+   --------------------------------------------------------------------------
+   设计要点
+   · 版式是「手机竖版长图」：固定 1080 逻辑宽、高度自适应，正文 ≥30px，
+     缩到 390px 屏宽仍有 ~11px，不用放大也能读；不是把网页截下来。
+   · 数据只吃 Team.posterModel()（与配队页同一套判定），这里不重算盟约；
+     二维码内容是 Code.encode() 的配队码拼出的深链，扫码直达这套配队。
+   · 配色全部读当前主题的 CSS 变量（--cov-active / --cov-empowered / --cov-idle …），
+     所以美术风格改了不用动这里。二维码例外：永远黑白，保证能扫。
+   · 布局先算成「绘制指令列表」（layout），再一次性画到 canvas（paint）：
+     高度可以边排边加，不用两遍渲染或画超大画布再裁。
+   · 单文件版 / 关闭图片 / file:// 三种情况都不加载图片，直接用色块 + 首字。
+   · 不碰 DOM 直到 open()；模块加载时不创建 canvas，避免 Node 冒烟测试崩。
+   ========================================================================== */
+(function (global) {
+  'use strict';
+
+  var Store = global.Store;
+  var Team = global.Team;
+
+  var SITE_FALLBACK = 'https://haixingjun.github.io/GSPA-Glasses-Stronghold-Protocol-Assistant/';
+  var MAX_PIXELS = 6.5e6;    // 输出约 1620 宽：手机够清晰，PNG 又不会大到 2 MB+
+  var MAX_SIDE = 7000;       // 单边上限（老 iOS 画布长边更小）
+
+  /* ---------------- 版式常量（手机竖版） ---------------- */
+  var C = {
+    w: 1080,
+    pad: 60,
+    gap: 20,
+    radius: 20,
+    avatar: 112,
+    tileH: 184,
+    capH: 122,
+    qr: 300
+  };
+
+  /* 字号：缩到 390px 屏宽时约 ×0.36；正文 32px ≈ 11.5px，标题 54px ≈ 19px。
+     最小字号不低于 28——再小在手机上就要放大了。 */
+  var F = {
+    h1: 54, meta: 30, section: 44, note: 30,
+    name: 44, sub: 32, tag: 32,
+    covName: 38, covNum: 42, covState: 30,
+    capBond: 38, capTotal: 46, capParts: 32, capSrc: 30,
+    codeLabel: 30, code: 40, url: 28, legal: 28
+  };
+
+  var state = { token: 0, blob: '', canvas: null, filename: '' };
+
+  /* ---------------- 基础工具 ---------------- */
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function cssVar(name, fallback) {
+    try {
+      var v = global.getComputedStyle
+        ? global.getComputedStyle(document.documentElement).getPropertyValue(name)
+        : '';
+      v = String(v || '').replace(/\s+/g, ' ').trim();
+      return v || fallback;
+    } catch (e) { return fallback; }
+  }
+
+  function theme() {
+    var light = String(document.documentElement.getAttribute('data-theme') || '') === 'light';
+    return {
+      light: light,
+      bg: cssVar('--bg', '#0b0f14'),
+      bg1: cssVar('--bg1', '#111721'),
+      bg2: cssVar('--bg2', '#171f2a'),
+      bg3: cssVar('--bg3', '#1e2835'),
+      line: cssVar('--line', '#232e3b'),
+      line2: cssVar('--line2', '#33414f'),
+      fg: cssVar('--fg', '#e7eef6'),
+      fg2: cssVar('--fg2', '#a2b0bf'),
+      fg3: cssVar('--fg3', '#6e7c8b'),
+      accent: cssVar('--accent', '#5bd1e6'),
+      active: cssVar('--cov-active', '#55c98b'),
+      activeBg: cssVar('--cov-active-bg', 'rgba(85,201,139,.1)'),
+      activeLine: cssVar('--cov-active-line', 'rgba(85,201,139,.45)'),
+      empowered: cssVar('--cov-empowered', '#e6b35a'),
+      empoweredBg: cssVar('--cov-empowered-bg', 'rgba(230,179,90,.1)'),
+      empoweredLine: cssVar('--cov-empowered-line', 'rgba(230,179,90,.5)'),
+      idle: cssVar('--cov-idle', '#7c8794'),
+      idleBg: cssVar('--cov-idle-bg', 'rgba(124,135,148,.06)'),
+      idleLine: cssVar('--cov-idle-line', 'rgba(124,135,148,.38)'),
+      font: cssVar('--font', '-apple-system, "PingFang SC", "Microsoft YaHei", sans-serif'),
+      mono: cssVar('--mono', 'ui-monospace, Consolas, monospace')
+    };
+  }
+
+  function fontOf(size, weight, mono) {
+    return (weight || 600) + ' ' + size + 'px ' + (mono ? cssVar('--mono', 'Consolas, monospace') : cssVar('--font', 'sans-serif'));
+  }
+
+  function hslOf(name, sat, light) {
+    var h = 200;
+    try { h = global.UI && UI.hue ? UI.hue(name) : 200; } catch (e) { h = 200; }
+    return 'hsl(' + h + ' ' + (sat || 62) + '% ' + (light || 58) + '%)';
+  }
+
+  /** 缺图回退用的首字：与页面 avatarHtml 一致的取法 */
+  function initialOf(name) {
+    var s = String(name == null ? '' : name).replace(/^[“"'\s]+/, '');
+    return s ? s.charAt(0) : '?';
+  }
+
+  /**
+   * 缺图回退：头像用「同色相淡底 + 彩色首字」，图标用「深色底座 + 浅色首字」，
+   * 与 app.css 的 .avatar / .icon 回退观感一致（不另造一套视觉）。
+   */
+  function fallbackAvatar(b, x, y, size, r, name, pal) {
+    var h = hueOf(name);
+    b.rect(x, y, size, size, r, 'hsla(' + h + ', 60%, 58%, 0.16)', 'hsla(' + h + ', 60%, 58%, 0.3)', 1);
+    b.text(x + size / 2, y + size / 2 - size * 0.22, initialOf(name), Math.round(size * 0.42), 700,
+      pal.light ? 'hsl(' + h + ', 55%, 38%)' : 'hsl(' + h + ', 70%, 74%)', { align: 'center' });
+  }
+
+  /** 图标底座：PRTS 图标是透明底白色线稿，浅色主题下必须有深色底，否则白线看不见（同页面 .icon） */
+  function iconBase(b, x, y, size, r, light) {
+    b.rect(x, y, size, size, r, '#1d242d',
+      light ? 'rgba(15,23,32,.22)' : 'rgba(255,255,255,.12)', 1);
+  }
+
+  function fallbackIcon(b, x, y, size, r, name, pal) {
+    b.rect(x, y, size, size, r, '#1b222b', pal.light ? 'rgba(15,23,32,.22)' : 'rgba(255,255,255,.16)', 1);
+    b.text(x + size / 2, y + size / 2 - size * 0.24, initialOf(name), Math.round(size * 0.44), 600,
+      '#c9d4e0', { align: 'center' });
+  }
+
+  function hueOf(name) {
+    try { return global.UI && UI.hue ? UI.hue(name) : 200; } catch (e) { return 200; }
+  }
+
+  function measureCtx() {
+    var c = document.createElement('canvas');
+    c.width = 8;
+    c.height = 8;
+    return c.getContext('2d');
+  }
+
+  function widthOf(ctx, text, font) {
+    ctx.font = font;
+    return ctx.measureText(String(text)).width;
+  }
+
+  /** 单行装不下就缩字号，再装不下就截断加省略号 */
+  function fitText(ctx, text, size, minSize, maxW, weight, mono) {
+    var s = String(text == null ? '' : text);
+    var f = fontOf(size, weight, mono);
+    if (widthOf(ctx, s, f) <= maxW) return { text: s, size: size, font: f };
+    for (var k = size - 2; k >= minSize; k -= 2) {
+      f = fontOf(k, weight, mono);
+      if (widthOf(ctx, s, f) <= maxW) return { text: s, size: k, font: f };
+    }
+    f = fontOf(minSize, weight, mono);
+    var out = s;
+    while (out.length > 1 && widthOf(ctx, out + '…', f) > maxW) out = out.slice(0, -1);
+    return { text: out + '…', size: minSize, font: f };
+  }
+
+  /** 按字符折行（URL 没有空格，必须逐字断） */
+  function wrapText(ctx, text, font, maxW, maxLines) {
+    var s = String(text == null ? '' : text);
+    var lines = [];
+    var cur = '';
+    for (var i = 0; i < s.length; i++) {
+      var next = cur + s.charAt(i);
+      if (widthOf(ctx, next, font) > maxW && cur) {
+        lines.push(cur);
+        cur = s.charAt(i);
+        if (maxLines && lines.length >= maxLines) { cur = ''; break; }
+      } else {
+        cur = next;
+      }
+    }
+    if (cur) lines.push(cur);
+    if (maxLines && lines.length >= maxLines) {
+      var last = lines[maxLines - 1];
+      while (last.length > 1 && widthOf(ctx, last + '…', font) > maxW) last = last.slice(0, -1);
+      lines[maxLines - 1] = last + '…';
+      lines = lines.slice(0, maxLines);
+    }
+    return lines;
+  }
+
+  /** 追加圆角矩形到当前路径（不 beginPath）：画描边环 / 挖洞时用 */
+  function roundRectAdd(ctx, x, y, w, h, r) {
+    var rr = Math.max(0, Math.min(r || 0, Math.min(w, h) / 2));
+    ctx.moveTo(x + rr, y);
+    ctx.lineTo(x + w - rr, y);
+    ctx.arcTo(x + w, y, x + w, y + rr, rr);
+    ctx.lineTo(x + w, y + h - rr);
+    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+    ctx.lineTo(x + rr, y + h);
+    ctx.arcTo(x, y + h, x, y + h - rr, rr);
+    ctx.lineTo(x, y + rr);
+    ctx.arcTo(x, y, x + rr, y, rr);
+    ctx.closePath();
+  }
+
+  function roundRectPath(ctx, x, y, w, h, r) {
+    var rr = Math.max(0, Math.min(r || 0, Math.min(w, h) / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.lineTo(x + w - rr, y);
+    ctx.arcTo(x + w, y, x + w, y + rr, rr);
+    ctx.lineTo(x + w, y + h - rr);
+    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+    ctx.lineTo(x + rr, y + h);
+    ctx.arcTo(x, y + h, x, y + h - rr, rr);
+    ctx.lineTo(x, y + rr);
+    ctx.arcTo(x, y, x + rr, y, rr);
+    ctx.closePath();
+  }
+
+  /* ---------------- 链接 ---------------- */
+  function isLocalHost(host) {
+    return /^(localhost|127\.|0\.0\.0\.0|\[?::1\]?|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(String(host || ''));
+  }
+
+  /** 二维码里放哪个站点：线上域名优先，本地调试回退到固定线上地址 */
+  function linkBase() {
+    if (global.GSPA_SITE) return String(global.GSPA_SITE);
+    var loc = global.location || {};
+    var proto = String(loc.protocol || '');
+    var origin = String(loc.origin || '');
+    if (/^https?:$/.test(proto) && origin && !isLocalHost(loc.hostname)) {
+      var path = String(loc.pathname || '/');
+      if (path.charAt(path.length - 1) !== '/') path = path.replace(/[^/]*$/, '');
+      return origin + (path || '/');
+    }
+    return SITE_FALLBACK;
+  }
+
+  function shareUrl(code) {
+    var base = linkBase();
+    if (base.charAt(base.length - 1) !== '/') base += '/';
+    return base + '#/team?c=' + code;
+  }
+
+  /* ---------------- 图片 ---------------- */
+  /**
+   * 这张图为什么不带头像/图标：
+   *   standalone = 单文件版（构建时就不内嵌素材）  toggle = 顶栏图片开关关着
+   *   file       = file:// 打开，浏览器禁止把本地图片导出到画布（运行时才发现）
+   */
+  function imagesDisabled() {
+    try {
+      if (global.GSPA_NO_AVATARS || global.GSPA_NO_ICONS) return 'standalone';
+      var body = document.body;
+      if (body && body.classList && body.classList.contains('no-avatars')) return 'toggle';
+    } catch (e) { /* 忽略 */ }
+    return '';
+  }
+
+  function wantAvatars() {
+    try {
+      if (global.GSPA_NO_AVATARS) return false;
+      if (document.body.classList.contains('no-avatars')) return false;
+    } catch (e) { /* 忽略 */ }
+    return true;
+  }
+
+  function wantIcons() {
+    try {
+      if (global.GSPA_NO_ICONS) return false;
+      if (document.body.classList.contains('no-avatars')) return false;
+    } catch (e) { /* 忽略 */ }
+    return true;
+  }
+
+  function collectImages(model) {
+    var urls = [];
+    var seen = {};
+    function add(u) {
+      if (!u || seen[u]) return;
+      seen[u] = 1;
+      urls.push(u);
+    }
+    var i;
+    if (wantAvatars()) {
+      for (i = 0; i < model.pieces.length; i++) add(model.pieces[i].avatar);
+    }
+    if (wantIcons()) {
+      // 盟约图标带里「已激活」与「可激活」都要画图标，两边都得预加载
+      for (i = 0; i < model.covenants.length; i++) add(model.covenants[i].icon);
+      for (i = 0; i < (model.pending || []).length; i++) add(model.pending[i].icon);
+      for (i = 0; i < model.caps.length; i++) add(model.caps[i].icon);
+    }
+    return urls;
+  }
+
+  function loadImages(urls, done) {
+    var images = {};
+    if (!urls.length) { done(images); return; }
+    var left = urls.length;
+    var settled = false;
+    function finish() {
+      if (settled) return;
+      settled = true;
+      done(images);
+    }
+    var timer = global.setTimeout(finish, 6000);
+    function step() {
+      left--;
+      if (left <= 0) {
+        global.clearTimeout(timer);
+        finish();
+      }
+    }
+    for (var i = 0; i < urls.length; i++) {
+      (function (u) {
+        var img = new global.Image();
+        img.onload = function () { images[u] = img; step(); };
+        img.onerror = function () { step(); };
+        img.src = u;
+      })(urls[i]);
+    }
+  }
+
+  /* ---------------- 布局：生成绘制指令 ---------------- */
+  function Builder(ctx, pal) {
+    this.ctx = ctx;
+    this.pal = pal;
+    this.ops = [];
+    this.y = C.pad;
+  }
+  Builder.prototype.rect = function (x, y, w, h, r, fill, stroke, lw, dash) {
+    this.ops.push({
+      t: 'rect', x: x, y: y, w: w, h: h, r: r || 0,
+      fill: fill, stroke: stroke, lw: lw || 1, dash: dash || null
+    });
+  };
+  Builder.prototype.line = function (x1, y1, x2, y2, color, w) {
+    this.ops.push({ t: 'line', x1: x1, y1: y1, x2: x2, y2: y2, color: color, w: w || 1 });
+  };
+  Builder.prototype.text = function (x, y, str, size, weight, color, opts) {
+    var o = opts || {};
+    var f = fontOf(size, weight, o.mono);
+    this.ops.push({
+      t: 'text', x: x, y: y, text: String(str), font: f, size: size,
+      fill: color, align: o.align || 'left'
+    });
+    return size * 1.25;
+  };
+  Builder.prototype.img = function (key, x, y, w, h, r, name, alpha) {
+    this.ops.push({
+      t: 'img', key: key, x: x, y: y, w: w, h: h, r: r,
+      hue: hueOf(name), letter: initialOf(name), light: !!this.pal.light,
+      alpha: alpha == null ? 1 : alpha
+    });
+  };
+  Builder.prototype.bar = function (x, y, w, h, pct, bg, fg) {
+    this.ops.push({ t: 'bar', x: x, y: y, w: w, h: h, pct: Math.max(0, Math.min(1, pct || 0)), bg: bg, fg: fg });
+  };
+  Builder.prototype.qr = function (qr, x, y, card) {
+    this.ops.push({
+      t: 'qr', qr: qr, x: x, y: y, size: card,
+      card: this.pal.light ? '#ffffff' : '#f6f8fa',
+      dark: this.pal.light ? '#10161d' : '#0c1117',
+      border: this.pal.light ? 'rgba(15,23,32,.16)' : 'rgba(255,255,255,.16)'
+    });
+  };
+  Builder.prototype.gap = function (h) { this.y += h; };
+
+  function sectionHead(b, title, note) {
+    var pal = b.pal;
+    b.rect(C.pad, b.y + 6, 6, 34, 3, pal.accent);
+    b.text(C.pad + 20, b.y, title, F.section, 700, pal.fg);
+    if (note) b.text(C.w - C.pad, b.y + 10, note, F.note, 500, pal.fg3, { align: 'right' });
+    b.y += 60;
+  }
+
+  function layoutHeader(b, model, bits) {
+    var pal = b.pal;
+    b.text(C.pad, b.y, 'GSPA 配队', F.h1, 700, pal.fg);
+    // 赛季名（如「卫戍协议：规程」）；不放生成时间——一图流会被反复转发，时间只会过期
+    var season = String(model.season || '').replace(/·/g, '：');
+    if (season) {
+      b.text(C.w - C.pad, b.y + 12, season, F.meta, 500, pal.fg3, { align: 'right' });
+    }
+    b.y += F.h1 * 1.3;
+    b.line(C.pad, b.y, C.w - C.pad, b.y, pal.line, 2);
+    b.y += 28;
+  }
+
+  /** 右对齐的小图例：彩色圆点 + 文字（强化 / 激活 / 可激活） */
+  function legend(b, rightX, y, items) {
+    var pal = b.pal;
+    var gap = 20;
+    var dot = 12;
+    var widths = [];
+    var total = 0;
+    var i;
+    for (i = 0; i < items.length; i++) {
+      var w = dot + 8 + widthOf(b.ctx, items[i].text, fontOf(F.note, 500));
+      widths.push(w);
+      total += w + (i ? gap : 0);
+    }
+    var x = rightX - total;
+    for (i = 0; i < items.length; i++) {
+      b.rect(x, y + 12, dot, dot, dot / 2, items[i].color);
+      b.text(x + dot + 8, y, items[i].text, F.note, 500, pal.fg3);
+      x += widths[i] + gap;
+    }
+  }
+
+  function layoutOperators(b, model) {
+    var pal = b.pal;
+    sectionHead(b, '干员', model.pieces.length ? model.pieces.length + ' 名' : '');
+    if (!model.pieces.length) {
+      b.text(C.pad, b.y, '先在配队页加入干员，再回来生成一图流。', F.sub, 500, pal.fg3);
+      b.y += 70;
+      return;
+    }
+
+    var cols = 2;
+    var gap = C.gap;
+    var tileW = (C.w - C.pad * 2 - gap) / 2;
+    var rows = Math.ceil(model.pieces.length / cols);
+    for (var i = 0; i < model.pieces.length; i++) {
+      var p = model.pieces[i];
+      var cx = C.pad + (i % cols) * (tileW + gap);
+      var cy = b.y + Math.floor(i / cols) * (C.tileH + gap);
+      b.rect(cx, cy, tileW, C.tileH, C.radius, pal.bg1, pal.line);
+
+      var av = C.avatar;
+      if (wantAvatars() && p.avatar) {
+        b.img(p.avatar, cx + 20, cy + (C.tileH - av) / 2, av, av, 16, p.name);
+      } else {
+        fallbackAvatar(b, cx + 20, cy + (C.tileH - av) / 2, av, 16, p.name, pal);
+      }
+
+      var tx = cx + 20 + av + 22;
+      var tw = tileW - (tx - cx) - 20;
+      var name = fitText(b.ctx, p.name, F.name, 30, tw - (p.elite ? 76 : 0), 700);
+      b.text(tx, cy + 22, name.text, name.size, 700, pal.fg);
+
+      if (p.elite) {
+        var bw = 58;
+        b.rect(cx + tileW - bw - 18, cy + 24, bw, 34, 8, pal.empoweredBg, pal.empoweredLine);
+        b.text(cx + tileW - bw / 2 - 18, cy + 29, '精锐', 24, 600, pal.empowered, { align: 'center' });
+      }
+
+      var metaParts = [];
+      if (p.pick) metaParts.push('自选');
+      else if (p.tierLabel) metaParts.push(p.tierLabel);
+      if (p.equipCount) metaParts.push('装备 ' + p.equipCount);
+      metaParts.push('◈' + p.price);
+      b.text(tx, cy + 82, metaParts.join(' · '), F.sub, 500, pal.fg2);
+
+      var tags = p.tags.slice(0, 2);
+      var tx2 = tx;
+      for (var k = 0; k < tags.length; k++) {
+        var dot = hslOf(tags[k]);
+        b.rect(tx2, cy + 138, 13, 13, 6, dot);
+        var w = widthOf(b.ctx, tags[k], fontOf(F.tag, 500));
+        b.text(tx2 + 21, cy + 130, tags[k], F.tag, 500, pal.fg2);
+        tx2 += 21 + w + 18;
+        if (tx2 > tx + tw) break;
+      }
+      if (p.morph) b.text(tx2, cy + 130, '· 转职 ' + p.morph, F.tag, 500, pal.idle);
+    }
+    b.y += rows * (C.tileH + gap) + 14;
+  }
+
+  /**
+   * 盟约图标带：用图标直接表达「强化 / 激活 / 可激活」，不再单独排一排数字。
+   * PRTS 只有一套线稿图标，状态靠描边颜色 + 图标亮度区分（和配队页一致）：
+   *   强化 = 琥珀实线框 · 激活 = 绿色实线框 · 可激活 = 灰色虚线框（图标压暗）
+   */
+  function layoutCovenantBand(b, model) {
+    var pal = b.pal;
+    var rows = [];
+    var i;
+
+    // 已强化 → 已激活 → 可激活；同档按达成率
+    for (i = 0; i < model.covenants.length; i++) rows.push(model.covenants[i]);
+    rows.sort(function (a, c) {
+      var order = { empowered: 0, active: 1 };
+      var d = (order[a.state] == null ? 9 : order[a.state]) - (order[c.state] == null ? 9 : order[c.state]);
+      if (d) return d;
+      var ra = a.threshold ? a.count / a.threshold : 0;
+      var rc = c.threshold ? c.count / c.threshold : 0;
+      return rc - ra;
+    });
+    for (i = 0; i < (model.pending || []).length; i++) rows.push(model.pending[i]);
+
+    var legendItems = [
+      { color: pal.empowered, text: '强化 ' + model.summary.empowered },
+      { color: pal.active, text: '激活 ' + (model.summary.active - model.summary.empowered) },
+      { color: pal.idle, text: '可激活 ' + model.summary.near }
+    ];
+
+    var headY = b.y;
+    b.rect(C.pad, headY + 6, 6, 34, 3, pal.accent);
+    b.text(C.pad + 20, headY, '盟约', F.section, 700, pal.fg);
+    if (rows.length) legend(b, C.w - C.pad, headY + 8, legendItems);
+    b.y += 60;
+
+    if (!rows.length) {
+      b.text(C.pad, b.y, '这套配队还没有点亮任何盟约。', F.sub, 500, pal.fg3);
+      b.y += 56;
+      return;
+    }
+
+    var cols = 6;
+    var gap = 10;
+    var cellW = (C.w - C.pad * 2 - gap * (cols - 1)) / cols;
+    var icon = 62;
+    var cellH = 172;
+    var lineCount = Math.ceil(rows.length / cols);
+
+    for (i = 0; i < rows.length; i++) {
+      var c = rows[i];
+      var cx = C.pad + (i % cols) * (cellW + gap);
+      var cy = b.y + Math.floor(i / cols) * cellH;
+      var on = c.state === 'empowered';
+      var near = c.state === 'near';
+      var color = on ? pal.empowered : (near ? pal.idle : pal.active);
+      var lineColor = on ? pal.empoweredLine : (near ? pal.idleLine : pal.activeLine);
+      var bgColor = on ? pal.empoweredBg : (near ? pal.idleBg : pal.activeBg);
+
+      var ix = cx + (cellW - icon) / 2;
+      var iy = cy + 6;
+      // 状态框
+      b.rect(ix - 5, iy - 5, icon + 10, icon + 10, 15, bgColor, lineColor, near ? 1.5 : 2, near ? [6, 5] : null);
+      if (wantIcons() && c.icon) {
+        iconBase(b, ix, iy, icon, 10, pal.light);
+        b.img(c.icon, ix, iy, icon, icon, 10, c.name, near ? 0.55 : 1);
+      } else {
+        fallbackIcon(b, ix, iy, icon, 10, c.name, pal);
+      }
+
+      var nameFit = fitText(b.ctx, c.name, 32, 22, cellW - 6, 700);
+      b.text(cx + cellW / 2, cy + 82, nameFit.text, nameFit.size, 700, near ? pal.fg2 : pal.fg, { align: 'center' });
+
+      // 只标「人数/门槛」；玩家自己填的层数不上图（层数只影响数值，不代表激活状态）
+      b.text(cx + cellW / 2, cy + 130, c.count + '/' + c.threshold, 26, on ? 700 : 500, color, { align: 'center' });
+    }
+
+    b.y += lineCount * cellH + 16;
+    if (model.dupes && model.dupes.length) {
+      b.text(C.pad, b.y, '重复干员只计一次：' + model.dupes.join('、'), F.note, 500, pal.idle);
+      b.y += 44;
+    }
+  }
+
+  function layoutCaps(b, model) {
+    var pal = b.pal;
+    sectionHead(b, '单回合叠层上限', '按词条估算');
+    if (!model.caps.length) {
+      b.text(C.pad, b.y, '当前队伍没有可统计的叠层词条。', F.sub, 500, pal.fg3);
+      b.y += 60;
+      return;
+    }
+
+    var limit = 8;
+    var shown = model.caps.slice(0, limit);
+    for (var i = 0; i < shown.length; i++) {
+      var r = shown[i];
+      var y = b.y + i * C.capH;
+      b.rect(C.pad, y, C.w - C.pad * 2, C.capH - 10, 14, pal.bg1, pal.line);
+
+      var icon = 34;
+      if (wantIcons() && r.icon) {
+        iconBase(b, C.pad + 16, y + 14, icon, 8, pal.light);
+        b.img(r.icon, C.pad + 16, y + 14, icon, icon, 8, r.bond);
+      } else {
+        fallbackIcon(b, C.pad + 16, y + 14, icon, 8, r.bond, pal);
+      }
+
+      var x = C.pad + 16 + icon + 12;
+      b.text(x, y + 10, r.bond, F.capBond, 700, pal.fg);
+
+      var parts = [];
+      for (var j = 0; j < r.parts.length; j++) parts.push(r.parts[j].amount);
+      var totalText = '+' + r.total;
+      var tw = widthOf(b.ctx, r.bond, fontOf(F.capBond, 700));
+      var tx = x + tw + 16;
+      b.text(tx, y + 6, totalText, F.capTotal, 700, pal.accent);
+      var tw2 = widthOf(b.ctx, totalText, fontOf(F.capTotal, 700));
+      b.text(tx + tw2 + 8, y + 20, '（' + parts.join('+') + '）', F.capParts, 500, pal.fg2);
+
+      var src = [];
+      for (j = 0; j < r.parts.length; j++) {
+        src.push(r.parts[j].name + (r.parts[j].generic ? '（通用）' : '') + ' +' + r.parts[j].amount);
+      }
+      var srcFit = fitText(b.ctx, src.join(' · '), F.capSrc, 24, C.w - C.pad * 2 - 32, 500);
+      b.text(C.pad + 16, y + 68, srcFit.text, srcFit.size, 500, pal.fg3);
+    }
+    b.y += shown.length * C.capH + 8;
+    if (model.caps.length > limit) {
+      b.text(C.pad, b.y, '另有 ' + (model.caps.length - limit) + ' 个盟约的叠层未列出（按总数排序取前 ' + limit + '）',
+        F.note, 500, pal.fg3);
+      b.y += 44;
+    }
+  }
+
+  function layoutFooter(b, model, bits) {
+    var pal = b.pal;
+    b.y += 8;
+
+    var panelW = C.w - C.pad * 2;
+    var qrBox = 272;
+    var padIn = 24;
+    var qrX = C.pad + padIn;
+    var qrY = b.y + padIn;
+    var textX = qrX + qrBox + 30;
+    var textW = C.pad + panelW - padIn - textX;
+
+    // 先按文字估高，再画面板（面板高度取二维码与文字块的最大值）
+    var y = qrY;
+    // 配队码永远排一行：太长就缩字号（换行断在码中间最难抄）
+    var codeFit = fitText(b.ctx, bits.code, F.code, 28, textW, 700, true);
+    var urlLines = wrapText(b.ctx, bits.url, fontOf(F.url, 500, true), textW, 3);
+    var textH = 40 + codeFit.size * 1.3 + 14 +
+      urlLines.length * F.url * 1.34 + 14 + F.legal * 1.3 + 10 + F.legal * 1.3;
+    var panelH = Math.max(qrBox, textH) + padIn * 2;
+
+    b.rect(C.pad, b.y, panelW, panelH, 20, pal.bg1, pal.line);
+    if (bits.qr) {
+      b.qr(bits.qr, qrX, qrY, qrBox);
+    } else {
+      b.rect(qrX, qrY, qrBox, qrBox, 16, pal.bg2, pal.idleLine);
+      b.text(qrX + qrBox / 2, qrY + qrBox / 2 - 14, '二维码不可用', F.note, 500, pal.fg3, { align: 'center' });
+    }
+
+    b.text(textX, y, '配队码', F.codeLabel, 600, pal.fg3);
+    y += 40;
+    b.text(textX, y, codeFit.text, codeFit.size, 700, pal.fg, { mono: true });
+    y += codeFit.size * 1.3;
+
+    y += 14;
+    for (var i = 0; i < urlLines.length; i++) {
+      b.text(textX, y, urlLines[i], F.url, 500, pal.accent, { mono: true });
+      y += F.url * 1.34;
+    }
+
+    y += 14;
+    b.text(textX, y, '非官方工具，数据请以游戏内为准', F.legal, 500, pal.fg3);
+    y += F.legal * 1.3 + 10;
+    b.text(textX, y, '素材版权：鹰角网络 / PRTS Wiki', F.legal, 500, pal.fg3);
+
+    b.y += panelH + 24;
+  }
+
+  /** 布局：只吃 ctx 量文字宽度，不真的画 */
+  function layout(ctx, model, bits, pal) {
+    var b = new Builder(ctx, pal);
+    layoutHeader(b, model, bits);
+    layoutCovenantBand(b, model);
+    layoutOperators(b, model);
+    layoutCaps(b, model);
+    layoutFooter(b, model, bits);
+    return { w: C.w, h: Math.ceil(b.y) + C.pad, ops: b.ops };
+  }
+
+  /* ---------------- 绘制 ---------------- */
+  function paint(canvas, plan, pal, images, scale) {
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 背景：平铺纯色。渐变会让每一行像素都不同，PNG 压不下去（2.3MB → 0.9MB）
+    ctx.fillStyle = pal.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.scale(scale, scale);
+    ctx.textBaseline = 'top';
+
+    for (var i = 0; i < plan.ops.length; i++) {
+      var op = plan.ops[i];
+      if (op.t === 'rect') {
+        roundRectPath(ctx, op.x, op.y, op.w, op.h, op.r);
+        if (op.fill) { ctx.fillStyle = op.fill; ctx.fill(); }
+        if (op.stroke) {
+          ctx.strokeStyle = op.stroke;
+          ctx.lineWidth = op.lw;
+          if (op.dash) ctx.setLineDash(op.dash);
+          ctx.stroke();
+          if (op.dash) ctx.setLineDash([]);
+        }
+      } else if (op.t === 'line') {
+        ctx.beginPath();
+        ctx.moveTo(op.x1, op.y1);
+        ctx.lineTo(op.x2, op.y2);
+        ctx.strokeStyle = op.color;
+        ctx.lineWidth = op.w;
+        ctx.stroke();
+      } else if (op.t === 'text') {
+        ctx.font = op.font;
+        ctx.fillStyle = op.fill;
+        ctx.textAlign = op.align;
+        ctx.fillText(op.text, op.x, op.y);
+        ctx.textAlign = 'left';
+      } else if (op.t === 'bar') {
+        roundRectPath(ctx, op.x, op.y, op.w, op.h, op.h / 2);
+        ctx.fillStyle = op.bg;
+        ctx.fill();
+        var pw = Math.max(op.h, op.w * op.pct);
+        roundRectPath(ctx, op.x, op.y, pw, op.h, op.h / 2);
+        ctx.fillStyle = op.fg;
+        ctx.fill();
+      } else if (op.t === 'img') {
+        var img = images[op.key];
+        if (img && img.complete && img.naturalWidth) {
+          ctx.save();
+          roundRectPath(ctx, op.x, op.y, op.w, op.h, op.r);
+          ctx.clip();
+          if (op.alpha != null && op.alpha !== 1) ctx.globalAlpha = op.alpha;
+          ctx.drawImage(img, op.x, op.y, op.w, op.h);
+          ctx.restore();
+        } else {
+          // 缺图 / 关闭图片 / file://：与页面 .avatar 回退同款（淡色底 + 彩色首字）
+          roundRectPath(ctx, op.x, op.y, op.w, op.h, op.r);
+          ctx.fillStyle = 'hsla(' + op.hue + ', 60%, 58%, 0.16)';
+          ctx.fill();
+          ctx.strokeStyle = 'hsla(' + op.hue + ', 60%, 58%, 0.3)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.font = fontOf(Math.round(op.h * 0.42), 700);
+          ctx.fillStyle = op.light ? 'hsl(' + op.hue + ', 55%, 38%)' : 'hsl(' + op.hue + ', 70%, 74%)';
+          ctx.textAlign = 'center';
+          ctx.fillText(op.letter, op.x + op.w / 2, op.y + op.h / 2 - Math.round(op.h * 0.22));
+          ctx.textAlign = 'left';
+        }
+      } else if (op.t === 'qr') {
+        paintQr(ctx, op, scale);
+      }
+    }
+  }
+
+  /**
+   * 二维码用设备像素画：模块边长取整，避免缩放出现半像素灰边。
+   * 视觉：圆角浅色卡片 + 圆点数据模块 + 圆角定位眼（三只「眼睛」保持实心，扫码器靠它们定位）；
+   * 对比度仍是深码浅底（不用反色），静区仍是 4 模块，只把「刺眼的白方块 + 满屏方点」软化。
+   */
+  function paintQr(ctx, op, scale) {
+    var qr = op.qr;
+    var size = qr.size;
+    var total = size + 8;                         // 4 模块静区 ×2
+    var m = Math.max(2, Math.floor(op.size * scale / total));
+    var card = m * total;
+    var x0 = Math.round(op.x * scale + (op.size * scale - card) / 2);
+    var y0 = Math.round(op.y * scale + (op.size * scale - card) / 2);
+    var radius = Math.min(card * 0.055, 22);
+
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // 卡片：柔和白（不是纯白），圆角；浅色主题下靠描边分层
+    roundRectPath(ctx, x0, y0, card, card, radius);
+    ctx.fillStyle = op.card || '#f6f8fa';
+    ctx.fill();
+    if (op.border) {
+      ctx.strokeStyle = op.border;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    var qx = x0 + 4 * m;
+    var qy = y0 + 4 * m;
+    var dark = op.dark || '#0c1117';
+    var eyes = [[0, 0], [size - 7, 0], [0, size - 7]];
+    var i, x, y;
+
+    function eyeIndex(mx, my) {
+      for (var k = 0; k < 3; k++) {
+        if (mx >= eyes[k][0] && mx < eyes[k][0] + 7 &&
+            my >= eyes[k][1] && my < eyes[k][1] + 7) return k;
+      }
+      return -1;
+    }
+
+    // 数据模块圆点、功能模块实心：定时 / 校正 / 格式信息保持方正，解码器更好对位
+    ctx.fillStyle = dark;
+    for (y = 0; y < size; y++) {
+      for (x = 0; x < size; x++) {
+        if (!qr.modules[y * size + x]) continue;
+        if (eyeIndex(x, y) >= 0) continue;
+        var px = qx + x * m;
+        var py = qy + y * m;
+        if (qr.func && qr.func[y * size + x]) {
+          ctx.fillRect(px, py, m, m);
+        } else {
+          // 微圆角实心块：比直角柔和，又不会碎成满屏小圆点
+          roundRectPath(ctx, px, py, m, m, Math.max(1, m * 0.16));
+          ctx.fill();
+        }
+      }
+    }
+
+    // 三只定位眼：1 模块宽的圆角环 + 3×3 圆角芯
+    for (i = 0; i < 3; i++) {
+      var ox = qx + eyes[i][0] * m;
+      var oy = qy + eyes[i][1] * m;
+      ctx.beginPath();
+      roundRectAdd(ctx, ox, oy, 7 * m, 7 * m, m * 1.3);
+      roundRectAdd(ctx, ox + m, oy + m, 5 * m, 5 * m, m * 0.9);
+      ctx.fill('evenodd');
+      roundRectPath(ctx, ox + 2 * m, oy + 2 * m, 3 * m, 3 * m, m * 0.85);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  /* ---------------- 组装 ---------------- */
+  function fileStamp() {
+    var d = new Date();
+    function p(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes());
+  }
+
+  function build() {
+    var data = Store.getData();
+    var team = Store.getTeam();
+    var model = Team.posterModel(team);
+    var pal = theme();
+    var code = global.Code.encode(team, data);
+    var url = shareUrl(code);
+    var qr = global.Qr.encode(url);
+
+    // 闭环自检：码读回来必须还是这套队，否则宁可不画二维码
+    var back = global.Code.decode(code, data);
+    var okCode = !!(back && back.team && sameTeam(back.team, team));
+    if (!okCode) qr = null;
+
+    var bits = { code: code, url: url, qr: qr };
+    state.filename = 'GSPA-配队-' + fileStamp() + '.png';
+
+    var ctx = measureCtx();
+    var plan = layout(ctx, model, bits, pal);
+
+    var scale = 2;
+    while (scale > 1 && (plan.w * scale > 2200 || plan.h * scale > MAX_SIDE ||
+      plan.w * plan.h * scale * scale > MAX_PIXELS)) {
+      scale -= 0.25;
+    }
+    if (plan.h * scale > MAX_SIDE) scale = Math.max(0.6, MAX_SIDE / plan.h);
+
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.round(plan.w * scale);
+    canvas.height = Math.round(plan.h * scale);
+
+    return {
+      canvas: canvas, plan: plan, pal: pal, scale: scale, model: model,
+      images: collectImages(model), needsQr: !!qr, code: code, url: url
+    };
+  }
+
+  function sameTeam(a, b) {
+    if (!a || !b) return false;
+    var n = Math.max(a.size || 0, b.size || 0);
+    for (var i = 0; i < n; i++) {
+      var x = (a.slots || [])[i] || null;
+      var y = (b.slots || [])[i] || null;
+      if (!x !== !y) return false;
+      if (!x) continue;
+      if (x.k !== y.k || x.p !== y.p || !!x.e !== !!y.e || x.m !== y.m) return false;
+      var xi = x.it || [];
+      var yi = y.it || [];
+      if (xi.length !== yi.length) return false;
+      for (var j = 0; j < xi.length; j++) {
+        var xk = xi[j] && xi[j].k;
+        var yk = yi[j] && yi[j].k;
+        if (xk !== yk || !!(xi[j] && xi[j].e) !== !!(yi[j] && yi[j].e)) return false;
+      }
+    }
+    var la = a.layers || {};
+    var lb = b.layers || {};
+    var keys = {};
+    var k;
+    for (k in la) if (la.hasOwnProperty(k)) keys[k] = 1;
+    for (k in lb) if (lb.hasOwnProperty(k)) keys[k] = 1;
+    for (k in keys) {
+      if (!keys.hasOwnProperty(k)) continue;
+      if ((la[k] || 0) !== (lb[k] || 0)) return false;
+    }
+    return true;
+  }
+
+  /** 导出 PNG；画布被本地图片污染（file://）时回调 null，由调用方降级 */
+  function makeBlobUrl(canvas, cb) {
+    var done = false;
+    function once(url) {
+      if (done) return;
+      done = true;
+      cb(url);
+    }
+    try {
+      if (canvas.toBlob) {
+        canvas.toBlob(function (blob) {
+          if (!blob) { once(null); return; }
+          try { once(URL.createObjectURL(blob)); } catch (e) { once(null); }
+        }, 'image/png');
+      } else {
+        once(canvas.toDataURL('image/png'));
+      }
+    } catch (e) {
+      once(null);
+    }
+  }
+
+  function showNote(kind) {
+    var el = document.getElementById('poster-note');
+    if (!el) return;
+    var msg = '';
+    if (kind === 'file') {
+      msg = '这张图不含头像与图标：用 file:// 直接打开时，浏览器禁止把本地图片导出到画布。' +
+        '用本地 http 预览（例如在 web/ 下执行 python -m http.server）或线上地址打开，就能带图。';
+    } else if (kind === 'standalone') {
+      msg = '这张图不含头像与图标：单文件版为了体积没有内嵌这两类素材，用在线版或目录版打开即可带图。';
+    } else if (kind === 'toggle') {
+      msg = '这张图不含头像与图标：顶栏的图片开关当前是关闭状态。';
+    }
+    if (!msg) {
+      el.hidden = true;
+      el.textContent = '';
+      return;
+    }
+    el.textContent = msg;
+    el.hidden = false;
+  }
+
+  /* ---------------- 出图面板 ---------------- */
+  function sheetHtml() {
+    return '<div class="sheet-in poster-sheet">' +
+      '<div class="sheet-head">' +
+      '<div class="sheet-title"><b>配队一图流</b><small>手机竖版 · 长按可保存</small></div>' +
+      '<button type="button" class="d-close" data-sheet-close aria-label="关闭">' +
+      '<svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>' +
+      '</div>' +
+      '<div class="poster-preview" id="poster-preview"><p class="poster-loading">正在生成…</p></div>' +
+      '<p class="poster-note" id="poster-note" hidden></p>' +
+      '<div class="poster-bar">' +
+      '<button type="button" class="btn btn-primary" data-poster-download>下载 PNG</button>' +
+      '<button type="button" class="btn" data-poster-copy-code>复制配队码</button>' +
+      '<button type="button" class="btn" data-poster-copy-text>复制分享文本</button>' +
+      '</div>' +
+      '<p class="poster-tip">手机上长按图片保存；二维码扫开直达这套配队。</p>' +
+      '</div>';
+  }
+
+  function mount() {
+    var box = document.getElementById('poster-preview');
+    if (!box) return;
+    showNote('');
+    var token = ++state.token;
+    var parts;
+    try {
+      parts = build();
+    } catch (e) {
+      box.innerHTML = '<p class="poster-fail">生成失败：' + esc(e && e.message ? e.message : e) + '</p>';
+      return;
+    }
+
+    // 单文件版 / 用户关图：一进来就说清楚，不必等出图
+    var known = imagesDisabled();
+    if (known) showNote(known);
+
+    function finish(url) {
+      if (token !== state.token) return;
+      if (state.blob && state.blob.indexOf('blob:') === 0) {
+        try { URL.revokeObjectURL(state.blob); } catch (e) { /* 忽略 */ }
+      }
+      state.blob = url;
+      state.canvas = parts.canvas;
+      box.innerHTML = '<img class="poster-img" alt="配队一图流" src="' + esc(url) + '">';
+      var tip = document.querySelector('.poster-tip');
+      if (tip) {
+        tip.innerHTML = '手机上长按图片保存（' + parts.canvas.width + '×' + parts.canvas.height + '）';
+      }
+    }
+
+    loadImages(parts.images, function (images) {
+      if (token !== state.token) return;
+      paint(parts.canvas, parts.plan, parts.pal, images, parts.scale);
+      makeBlobUrl(parts.canvas, function (url) {
+        if (token !== state.token) return;
+        if (url) { finish(url); return; }
+
+        // 画布被本地图片污染（file://）：换一张干净画布重画「无图版」再导出
+        var clean = document.createElement('canvas');
+        clean.width = parts.canvas.width;
+        clean.height = parts.canvas.height;
+        paint(clean, parts.plan, parts.pal, {}, parts.scale);
+        makeBlobUrl(clean, function (url2) {
+          if (token !== state.token) return;
+          if (!url2) {
+            box.innerHTML = '<p class="poster-fail">当前环境不允许导出图片，请换用线上版或本地 http 预览。</p>';
+            return;
+          }
+          finish(url2);
+          showNote('file');
+        });
+      });
+    });
+  }
+
+  function open() {
+    if (!global.Team || !Team.openSheet) return;
+    Team.openSheet(-1, 'poster', -1);
+  }
+
+  function download() {
+    if (!state.blob) return;
+    var a = document.createElement('a');
+    a.href = state.blob;
+    a.download = state.filename || 'GSPA-配队.png';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function copyText(text, okMsg) {
+    var done = function () { toast(okMsg); };
+    if (global.navigator && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text, okMsg); });
+    } else {
+      legacyCopy(text, okMsg);
+    }
+  }
+
+  function legacyCopy(text, okMsg) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', 'readonly');
+    ta.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    if (ta.parentNode) ta.parentNode.removeChild(ta);
+    toast(ok ? okMsg : '复制失败，请手动选中复制');
+  }
+
+  function toast(msg) {
+    if (global.App && global.App.toast) global.App.toast(msg);
+  }
+
+  function bind() {
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('[data-poster-download]')) {
+        e.preventDefault();
+        if (state.blob) download();
+        else toast('图片还没生成好');
+        return;
+      }
+      if (t.closest('[data-poster-copy-code]')) {
+        e.preventDefault();
+        var data = Store.getData();
+        copyText(global.Code.encode(Store.getTeam(), data), '配队码已复制');
+        return;
+      }
+      if (t.closest('[data-poster-copy-text]')) {
+        e.preventDefault();
+        copyText(Team.shareText(), '分享文本已复制');
+      }
+    }, false);
+  }
+
+  if (document && document.addEventListener) bind();
+
+  global.Poster = {
+    open: open,
+    mount: mount,
+    sheetHtml: sheetHtml,
+    // 供测试 / 调试
+    _build: build,
+    _layout: layout,
+    _collectImages: collectImages,
+    _shareUrl: shareUrl,
+    _linkBase: linkBase
   };
 })(window);
 

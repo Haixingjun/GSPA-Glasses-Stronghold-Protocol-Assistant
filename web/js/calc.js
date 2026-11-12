@@ -36,6 +36,56 @@
 
   var MORPH_ITEM = '变形同构体';
 
+  /**
+   * 仍然只有 special 文本、但已有明确“每回合/每场至多 N 层”的叠层上限。
+   * 沙盒的“补满叠层”与配队词条栏共用这张表，避免两边各解析一遍文本。
+   *
+   * bonds:
+   *   ['谢拉格']      固定盟约
+   *   'activeSelf'    目标自身已激活的盟约
+   *   'activeAll'     全队已激活的盟约（配队无法确定相邻目标时的上限口径）
+   * target: 'self' | 'selfAndBehind1'
+   * scope:  'round' | 'battle'
+   */
+  var SPECIAL_CAPS = {
+    '初雪': [
+      { elite: false, bonds: ['谢拉格'], cap: 16, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['谢拉格'], cap: 32, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '圣聆初雪': [
+      { elite: false, bonds: ['谢拉格'], cap: 24, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['谢拉格'], cap: 48, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '妮芙': [
+      { elite: false, bonds: ['迅捷'], cap: 20, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['迅捷'], cap: 40, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '烛煌': [
+      { elite: false, bonds: ['炎', '维多利亚'], cap: 12, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: ['炎', '维多利亚'], cap: 24, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '余': [
+      { elite: false, bonds: 'activeSelf', cap: 8, scope: 'round', target: 'self', event: 'onCombat' },
+      { elite: true, bonds: 'activeSelf', cap: 16, scope: 'round', target: 'self', event: 'onCombat' }
+    ],
+    '佩佩': [
+      { elite: false, bonds: 'activeAll', cap: 9, scope: 'round', target: 'selfAndBehind1', event: 'onCombat' },
+      { elite: true, bonds: 'activeAll', cap: 18, scope: 'round', target: 'selfAndBehind1', event: 'onCombat' }
+    ],
+    '溯光星源': [
+      { elite: false, bonds: ['奥术'], cap: 18, scope: 'round', target: 'self', event: 'onPrepEnd' },
+      { elite: true, bonds: ['奥术'], cap: 36, scope: 'round', target: 'self', event: 'onPrepEnd' }
+    ],
+    '耀骑士临光': [
+      { elite: false, bonds: 'activeSelf', cap: 12, scope: 'round', target: 'self', event: 'onKnockdown' },
+      { elite: true, bonds: 'activeSelf', cap: 24, scope: 'round', target: 'self', event: 'onKnockdown' }
+    ],
+    '浊心斯卡蒂': [
+      { elite: false, bonds: ['阿戈尔'], cap: 20, scope: 'battle', target: 'self', event: 'onDeploy' },
+      { elite: true, bonds: ['阿戈尔'], cap: 40, scope: 'battle', target: 'self', event: 'onDeploy' }
+    ]
+  };
+
   var RANK_ORDER = { core: 0, additional: 1 };
   var STATE_ORDER = { empowered: 0, active: 1, conflict: 2, near: 3, inactive: 4 };
 
@@ -63,24 +113,35 @@
    * 百分数才带 + 号；秒 / 点这类单位只给数值。
    * 层数为 0 时不做替换（返回整段文字），避免满屏 (23+0.9×0)。
    */
-  function layerSegments(text, layer) {
+  function layerSegments(text, layer, force) {
     var s = String(text == null ? '' : text);
     var L = num(layer);
     var out = [];
     if (!s) return out;
-    if (!L) { out.push({ t: 'text', v: s }); return out; }
+    if (!L && !force) { out.push({ t: 'text', v: s }); return out; }
 
     var last = 0, m;
     LAYER_SEG.lastIndex = 0;
     while ((m = LAYER_SEG.exec(s)) !== null) {
-      if (m.index > last) out.push({ t: 'text', v: s.slice(last, m.index) });
+      // 公式前已经写了 +/- 时，把这个符号并入结果，避免出现「++53%」。
+      var prefixedSign = '';
+      var before = s.slice(last, m.index);
+      if (m.index > last) {
+        var prev = s.charAt(m.index - 1);
+        if (prev === '+' || prev === '-') {
+          prefixedSign = prev;
+          before = s.slice(last, m.index - 1);
+        }
+        if (before) out.push({ t: 'text', v: before });
+      }
 
       var base = parseFloat(m[1]);
       var sign = m[2];
       var per = parseFloat(m[3]) * (sign === '-' ? -1 : 1);
       var pct = m[4] || '';
       var value = base + per * L;
-      var head = (pct && value > 0 ? '+' : '') + round3(value) + pct;
+      var valueSign = value > 0 ? (prefixedSign || (pct ? '+' : '')) : '';
+      var head = valueSign + round3(value) + pct;
 
       out.push({
         t: 'num',
@@ -95,10 +156,10 @@
 
   /**
    * 纯文本版：数值在前、算式在后。例：+113%（23%+0.9%×100）
-   * 层数为 0 时原样返回。
+   * 层数为 0 时原样返回；force=true 时也代入 0 层，用于「当前数值」这类必须给出结果的位置。
    */
-  function substLayers(text, layer) {
-    var segs = layerSegments(text, layer);
+  function substLayers(text, layer, force) {
+    var segs = layerSegments(text, layer, force);
     var out = '';
     for (var i = 0; i < segs.length; i++) {
       out += segs[i].t === 'num' ? (segs[i].v + '（' + segs[i].f + '）') : segs[i].v;
@@ -356,6 +417,7 @@
   global.Calc = {
     RULES: RULES,
     MORPH_ITEM: MORPH_ITEM,
+    SPECIAL_CAPS: SPECIAL_CAPS,
     evaluate: evaluate,
     emptyTeam: emptyTeam,
     nextEmptySlot: nextEmptySlot,

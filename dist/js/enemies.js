@@ -665,6 +665,8 @@
       }).join('') + '</div>';
     }
     if (m.note) html += '<div class="info-card"><b>备注</b>：' + esc(m.note) + '</div>';
+    html += '<p class="count" style="margin-top:10px"><a href="sandbox.html?map=' + esc(m.id) + '-' + (currentField + 1) +
+      '">在沙盘中打开这张场地</a>（按解包网格叠层摆位）</p>';
 
     var jump = m.terrain.filter(function (t) { return t.tag; })[0];
     if (jump) {

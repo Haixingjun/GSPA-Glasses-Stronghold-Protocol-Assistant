@@ -30,6 +30,10 @@ build/edge-*/
 build/*.log
 build/standalone_dom.html
 build/*.zip
+# 沙盒本地演示包：由 web/ 复制出来方便双击/发给别人，源码仍在 web/，不重复入库
+build/sandbox-demo/
+# 一次性核对导出（仅本地，无脚本引用）
+build/ops.json
 
 # ---- 大图 / 历史截图（只留本地，避免仓库被几 MB 的截图撑大）----
 /*.jpg
@@ -38,6 +42,8 @@ build/*.png
 
 # ---- 手动备份包（web/ 的 zip 快照，只留本地；数据表备份见 source/*.xlsx）----
 source/*.zip
+# 解包关卡原始 JSON（build_map_presets.py 可重新下载，产物是 web/data/maps.js）
+source/autochess-levels/
 
 # ---- Office 打开 Excel 时生成的临时锁文件 ----
 ~$*
@@ -49,6 +55,9 @@ source/*.zip
 .env
 .env.*
 !.env.example
+
+# ---- 本地验收 / 调试暂存（截图、下载缓存、构建日志）----
+.tmp_check/
 
 # ─────────────────────────────────────────────
 # 注意：dist/ 是例外，必须提交。

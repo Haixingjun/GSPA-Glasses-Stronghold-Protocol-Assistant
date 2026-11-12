@@ -264,7 +264,12 @@ test('层数数值：数值在前、算式在后，百分数带 + 号', () => {
   const arc = data.covenants.find((c) => c.name === '奥术').valueText;
   assert.match(Calc.substLayers(arc, 80), /-34（-30-0\.05×80）/, '负系数');
 
+  const egir = data.covenants.find((c) => c.name === '阿戈尔').valueText;
+  assert.match(Calc.substLayers(egir, 18, true), /生命值\+53%（35%\+1%×18）/, '前缀 + 不应变成 ++');
+  assert.ok(!Calc.substLayers(egir, 18, true).includes('++'), '不应出现 ++');
+
   assert.equal(Calc.substLayers(sal, 0), sal, '0 层保持原文');
+  assert.match(Calc.substLayers(sal, 0, true), /\+20%（20%\+0\.025%×0）/, 'force 时 0 层也代入');
   assert.equal(Calc.hasLayerFormula(sal), true);
   assert.equal(Calc.hasLayerFormula(data.covenants.find((c) => c.name === '调和').valueText), false);
 });
