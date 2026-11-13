@@ -164,6 +164,11 @@ sandboxSrc = sandboxSrc.replace(
     resetSandbox: resetSandbox,
     addToHand: addToHand,
     placeHand: placeHand,
+    placeFromWarehouse: placeFromWarehouse,
+    beginPending: beginPending,
+    confirmPending: confirmPending,
+    clearAllLayers: clearAllLayers,
+    hasLayerState: hasLayerState,
     triggerEvent: triggerEvent,
     handleEvent: handleEvent,
     applyRule: applyRule,
@@ -182,6 +187,8 @@ sandboxSrc = sandboxSrc.replace(
     applySandboxSnapshot: applySandboxSnapshot,
     makeSandboxCode: makeSandboxCode,
     importSandboxCode: importSandboxCode,
+    clearWhFilters: clearWhFilters,
+    syncWhControls: syncWhControls,
     buildFeedbackObject: buildFeedbackObject,
     buildFeedbackText: buildFeedbackText,
     applyPreset: applyPreset,
@@ -233,6 +240,41 @@ ok('阶段进度条：data-phase 随休整期 / 作战期切换', () => {
   sb.renderAll();
   assert.equal(pp.getAttribute('data-phase'), 'combat');
   assert.match(pp.getAttribute('aria-label'), /作战期/);
+});
+
+ok('沙盒筛选器：一键清除全部条件（搜索 / 阶数 / 盟约 / 触发时机 / 配队码）', () => {
+  const s = reset();
+  s.whFilter.q = '幽灵';
+  s.whFilter.tiers = [1];
+  s.whFilter.tags = ['阿戈尔'];
+  s.whFilter.triggers = ['战斗中'];
+  s.whFilter.tagMode = 'and';
+  s.whFilter.onlyTeam = true;
+  s.teamFilter = ['幽灵鲨'];
+  sb.syncWhControls();
+  assert.equal(nodes.get('whClearAllBtn').disabled, false, '有条件时清除按钮可用');
+  sb.clearWhFilters();
+  assert.equal(s.whFilter.q, '', '搜索词应清空');
+  assert.equal(s.whFilter.tiers.length, 0);
+  assert.equal(s.whFilter.tags.length, 0);
+  assert.equal(s.whFilter.triggers.length, 0);
+  assert.equal(s.whFilter.tagMode, 'or', '盟约匹配模式回到「任一」');
+  assert.equal(s.whFilter.onlyTeam, false, '配队码筛选应关闭');
+  assert.equal(nodes.get('whFilterBadge').hidden, true, '无筛选时徽标隐藏');
+  assert.equal(nodes.get('whClearAllBtn').disabled, true, '已无筛选时清除按钮禁用');
+  assert.equal(nodes.get('whSearch').value, '', '搜索框同步清空');
+});
+
+ok('沙盒筛选器：清空后恢复完整列表', () => {
+  const s = reset();
+  const total = s.warehouse.length;
+  s.whFilter.tags = ['阿戈尔'];
+  sb.renderAll();
+  const filtered = nodes.get('warehouseCount').textContent;
+  assert.ok(filtered !== total + ' / ' + total, '筛选后计数应缩小');
+  assert.match(filtered, new RegExp(' / ' + total + '$'), '分母始终是仓库总数');
+  sb.clearWhFilters();
+  assert.equal(nodes.get('warehouseCount').textContent, total + ' / ' + total, '清除后恢复全部干员');
 });
 
 ok('沙盒筛选器：阶数 / 盟约 / 触发时机多选', () => {
@@ -935,7 +977,7 @@ ok('阿戈尔：战斗开始链式吞噬，按等阶加层且同一目标只加�
   assert.ok(!s.logs.some((l) => l.text.includes('立刻复活')), '3 名阿戈尔不应触发 6 人复活');
 });
 
-ok('阿戈尔：递归吞噬按前一名干员归属，叠层单独标注', () => {
+ok('阿戈尔：每名阿戈尔沿链留标记，同一目标只产生一条层数事件', () => {
   const s = reset();
   s.phase = 'combat';
   addBoard('安哲拉', false, 0, 0, 'right');
@@ -943,25 +985,64 @@ ok('阿戈尔：递归吞噬按前一名干员归属，叠层单独标注', () =
   addBoard('深巡', false, 0, 2, 'right');
   addBoard('灰喉', false, 0, 3, 'right');
   const plan = sb.planEgirDevour();
-  assert.equal(plan.marks.map((m) => m.from.name).join(','), '安哲拉,克莱门莎,深巡');
-  assert.equal(plan.marks.map((m) => m.to.name).join(','), '克莱门莎,深巡,灰喉');
+  assert.equal(plan.marks.length, 6, '3 名阿戈尔应分别标记身后整条链（3+2+1）');
+  assert.equal(plan.marks.filter((m) => m.to.name === '灰喉').length, 3, '灰喉应同时被 3 名阿戈尔吞噬');
   sb.applyEgirDevour();
   const ev = s.stackEvents.filter((e) => e.kind === 'bond:devour');
   assert.equal(ev.length, 3, '每个目标只应产生一条吞噬层事件');
   ev.forEach((e) => assert.equal(e.op, '阿戈尔吞噬', '吞噬层不应记在干员头上'));
-  [
-    '阿戈尔吞噬 · 安哲拉 → 克莱门莎',
-    '阿戈尔吞噬 · 克莱门莎 → 深巡',
-    '阿戈尔吞噬 · 深巡 → 灰喉'
-  ].forEach((needle, i) => {
-    assert.ok(ev[i].source.includes(needle), '第 ' + (i + 1) + ' 段应由前一名干员发起：' + ev[i].source);
-  });
+  assert.ok(ev[0].source.includes('阿戈尔吞噬 · 安哲拉 → 克莱门莎'), ev[0].source);
+  assert.ok(ev[1].source.includes('阿戈尔吞噬 · 安哲拉、克莱门莎 → 深巡'), ev[1].source);
+  assert.ok(ev[2].source.includes('阿戈尔吞噬 · 安哲拉、克莱门莎、深巡 → 灰喉'), ev[2].source);
   s.phase = 'combat';
   sb.handleEvent('battleEnd');
   const row = s.lastReport.rows.find((r) => r.bond === '阿戈尔');
   assert.ok(row, '报表应有阿戈尔行');
   assert.ok(row.sources.some((src) => src.name === '阿戈尔吞噬'), '吞噬层应单独标注为「阿戈尔吞噬」');
   assert.ok(!row.sources.some((src) => src.name === '安哲拉'), '吞噬层不应记在安哲拉头上');
+});
+
+ok('阿戈尔：两人身前一格相同时同时吞噬，各自留标记且层数只加一次', () => {
+  const s = reset();
+  s.phase = 'combat';
+  addBoard('深巡', false, 0, 0, 'right');
+  addBoard('安哲拉', false, 0, 1, 'up');
+  addBoard('幽灵鲨', false, 0, 2, 'left');
+  const plan = sb.planEgirDevour();
+  assert.equal(plan.marks.length, 2, '深巡与幽灵鲨应各留一条标记');
+  assert.ok(plan.marks.every((m) => m.to.name === '安哲拉'), '两个标记都应指向安哲拉');
+  assert.equal(plan.marks.map((m) => m.from.name).sort().join(','), '幽灵鲨,深巡', '两名阿戈尔都应成为吞噬者');
+  const tier = (n) => ctx.window.GSPA_DATA.operators.find((o) => o.name === n).tier;
+  const gains = sb.applyEgirDevour();
+  assert.equal(gains, tier('安哲拉'), '同一目标只按等阶加一次（实际 ' + gains + '）');
+  const ev = s.stackEvents.filter((e) => e.kind === 'bond:devour');
+  assert.equal(ev.length, 1, '同一目标只产生一条层数事件');
+  assert.ok(ev[0].source.includes('深巡、幽灵鲨 → 安哲拉'), '层数来源应列出全部吞噬者：' + ev[0].source);
+  assert.equal(ev[0].markerUids && ev[0].markerUids.length, 2, '事件应记录 2 个吞噬者');
+  assert.ok(s.logs.some((l) => l.text.includes('2 次吞噬标记')), '日志应说明是 2 次吞噬标记');
+});
+
+ok('阿戈尔：8 人单链时每人标记身后整条链，层数仍按目标只算一次', () => {
+  const s = reset();
+  s.phase = 'combat';
+  addBoard('克莱门莎', false, 3, 1, 'up');
+  addBoard('深巡', false, 1, 1, 'right');
+  addBoard('幽灵鲨', false, 2, 1, 'up');
+  addBoard('歌蕾蒂娅', false, 1, 3, 'down');
+  addBoard('浊心斯卡蒂', false, 1, 2, 'right');
+  addBoard('水月', false, 2, 3, 'left');
+  addBoard('乌尔比安', false, 2, 2, 'down');
+  addBoard('归溟幽灵鲨', false, 3, 2, 'right');
+  const plan = sb.planEgirDevour();
+  assert.equal(plan.members.length, 8, '应有 8 名阿戈尔');
+  assert.equal(plan.marks.filter((m) => m.from.name === '克莱门莎').length, 7, '克莱门莎应沿链标记全部 7 人');
+  assert.equal(plan.marks.length, 28, '8 人单链应产生 7+6+5+4+3+2+1 = 28 条标记');
+  const tier = (n) => ctx.window.GSPA_DATA.operators.find((o) => o.name === n).tier;
+  const expected = ['幽灵鲨', '深巡', '浊心斯卡蒂', '歌蕾蒂娅', '水月', '乌尔比安', '归溟幽灵鲨']
+    .reduce((sum, n) => sum + tier(n), 0);
+  const gains = sb.applyEgirDevour();
+  assert.equal(gains, expected, '层数只按不同目标加一次（实际 ' + gains + '）');
+  assert.equal(s.stackEvents.filter((e) => e.kind === 'bond:devour').length, 7, '7 个目标 = 7 条层数事件');
 });
 
 ok('阿戈尔：相互吞噬时更靠左的干员优先', () => {
@@ -974,6 +1055,7 @@ ok('阿戈尔：相互吞噬时更靠左的干员优先', () => {
   assert.equal(plan.marks.length, 1, '相互吞噬只结算一次');
   assert.equal(plan.marks[0].from.name, '安哲拉', '更靠左的安哲拉先发起');
   assert.equal(plan.marks[0].to.name, '克莱门莎');
+  assert.equal(plan.marks.filter((m) => m.from.name === '克莱门莎').length, 0, '被优先的一方不再反吃');
   assert.equal(sb.applyEgirDevour(), 6, '克莱门莎 VI 阶应 +6');
 });
 
@@ -1222,6 +1304,86 @@ ok('场地三：17×5，保留 r12 传送点、没有侵入点', () => {
   assert.equal(sb.mapInfo().w, 17);
   assert.equal(sb.mapInfo().h, 5);
   sb.applyPreset({ id: '', title: '空白训练场', w: 9, h: 5, tiles: Array.from({ length: 5 }, function () { return Array(9).fill('ground'); }) }, { force: true });
+});
+
+ok('仓库直接部署：不经过待部署区也能上场', () => {
+  const s = reset();
+  s.phase = 'prep';
+  const beforeHand = s.hand.length;
+  sb.placeFromWarehouse('灰喉', 0, 0, 'right');
+  assert.equal(s.board.length, 1, '应直接上场');
+  assert.equal(s.board[0].name, '灰喉');
+  assert.equal(s.board[0].elite, false, '仓库直接部署默认普通（非精锐）');
+  assert.equal(s.hand.length, beforeHand, '不应改变待部署区');
+  assert.ok(s.logs.some((l) => l.text.includes('部署 灰喉')), '应记录部署');
+});
+
+ok('仓库直接部署：作战期同样触发「战斗中·部署时」', () => {
+  const s = reset();
+  s.phase = 'combat';
+  addBoard('深巡', false, 0, 0, 'right');
+  addBoard('安哲拉', false, 0, 1, 'right');
+  sb.placeFromWarehouse('幽灵鲨', 0, 2, 'right');
+  assert.equal(s.board.length, 3);
+  assert.equal(s.board[2].name, '幽灵鲨');
+  assert.ok(layer('阿戈尔') >= 1, '幽灵鲨部署时应触发阿戈尔 +1（实际 ' + layer('阿戈尔') + '）');
+});
+
+ok('仓库拖拽的待放置流程：方向选择后直接上场', () => {
+  const s = reset();
+  s.phase = 'prep';
+  const beforeHand = s.hand.length;
+  sb.beginPending('灰喉', 0, 0, null, { fromWarehouse: true });
+  assert.ok(s.pending && s.pending.fromWarehouse, '应进入待放置状态');
+  assert.equal(s.pending.handId, null, '仓库来源没有手牌 id');
+  assert.equal(s.pending.elite, false, '仓库来源默认普通');
+  sb.confirmPending('left');
+  assert.equal(s.board.length, 1);
+  assert.equal(s.board[0].name, '灰喉');
+  assert.equal(s.board[0].dir, 'left', '应按选择的朝向部署');
+  assert.equal(s.pending, null);
+  assert.equal(s.hand.length, beforeHand, '不应改变待部署区');
+});
+
+ok('一键归零：固定层 / 临时层 / 上限计数 / 层数事件全部清空', () => {
+  const s = reset();
+  s.phase = 'combat';
+  s.layers['阿戈尔'] = 12;
+  s.layers['精准'] = 3;
+  s.temp['乌萨斯'] = 2;
+  s.counters['a'] = 4;
+  s.battleCounters['b'] = 5;
+  s.totalCounters['c'] = 6;
+  s.stackEvents.push({ bond: '阿戈尔', amount: 12 });
+  s.lastReport = { label: '作战期', round: 1, rows: [], caps: [] };
+  assert.equal(sb.hasLayerState(), true);
+  sb.clearAllLayers();
+  assert.equal(layer('阿戈尔'), 0);
+  assert.equal(layer('精准'), 0);
+  assert.equal(sb.state().temp['乌萨斯'] || 0, 0);
+  assert.equal(Object.keys(s.counters).length, 0, '每回合上限计数应清空');
+  assert.equal(Object.keys(s.battleCounters).length, 0, '每场战斗上限计数应清空');
+  assert.equal(Object.keys(s.totalCounters).length, 0, '总层数计数应清空');
+  assert.equal(s.stackEvents.length, 0, '层数事件应清空');
+  assert.equal(s.lastReport, null, '旧报表应失效');
+  assert.equal(sb.hasLayerState(), false);
+  assert.ok(s.logs.some((l) => l.text.includes('所有叠层已归零')));
+});
+
+ok('一键归零后「补满叠层」可以重新结算', () => {
+  const s = reset();
+  s.phase = 'combat';
+  addBoard('幽灵鲨', false, 0, 0, 'right');
+  addBoard('深巡', false, 0, 1, 'right');
+  addBoard('安哲拉', false, 0, 2, 'right');
+  sb.handleEvent('battleCap');
+  const first = layer('阿戈尔');
+  assert.ok(first > 0, '补满应至少加 1 层（实际 ' + first + '）');
+  sb.clearAllLayers();
+  assert.equal(layer('阿戈尔'), 0);
+  s.phase = 'combat';
+  sb.handleEvent('battleCap');
+  assert.equal(layer('阿戈尔'), first, '归零后上限计数也应重置，能重新补满');
 });
 
 console.log('\n' + passed + ' 项通过' + (process.exitCode ? '，存在失败' : ''));

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 配队视图冒烟测试：用最小 DOM 桩在 Node 里跑完「data → store → calc → ui → team」整条链路。
  * 目的不是替代浏览器，而是抓运行时报错、URL 编解码错误、渲染分支与状态不同步。
  *
@@ -217,7 +217,7 @@ check('变形同构体缺伙伴：出现手动选择与提示', () => {
   team.slots[0] = { k: '拜松', e: false, it: [{ k: '变形同构体', e: false }] };
   Store.setTeam(team);
   assert.match(cards.innerHTML, /data-morph="0"/);
-  assert.match(cards.innerHTML, /变形同构体还缺/);
+  assert.match(cards.innerHTML, /变形同构体缺少/);
 
   const t2 = Store.getTeam();
   t2.slots[0].m = '维多利亚';
@@ -353,7 +353,7 @@ check('词条栏：收起竖条带拖动提示与吸附说明', () => {
   Store.setTeam(Calc.emptyTeam(8));
   const html = Team.render();
   assert.match(html, /class="tm-traits-rail-grip"/);
-  assert.match(html, /拖到屏幕左半边松手吸附左侧/);
+  assert.match(html, /拖至屏幕左半侧释放即吸附左侧/);
 });
 
 check('词条栏：全队词条按触发时机排序，并含无触发时机', () => {
@@ -630,7 +630,7 @@ check('分享：面板里有代码、链接和说明文本', () => {
   const text = Team.shareText();
   assert.match(text, /GSPA3\.[A-Za-z0-9_-]+/);
   assert.match(text, /#\/team\?c=/);
-  assert.match(text, /我分享了一个卫戍协议配队/);
+  assert.match(text, /分享一套卫戍协议配队/);
 
   Team.openSheet(-1, 'share', -1);
   assert.match(sheet.innerHTML, /分享配队/);

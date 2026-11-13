@@ -1,0 +1,101 @@
+/* 地块外观：沙盘 / 地图编辑共用
+   颜色按用户口径：高台棕、特殊高台橙、沼泽绿、源石红、侵入点红 X、终点蓝罗德岛。 */
+.sw{width:11px;height:11px;border-radius:2px;display:inline-block;border:1px solid rgba(255,255,255,.2)}
+.sw.ground{background:#3d6f96}
+.sw.high{background:#7a4a22}
+.sw.highSpecial{background:#d97a1f}
+.sw.floor{background:#2f3742;border-style:dashed}
+.sw.void{background:#0d1117;border-color:rgba(255,255,255,.18)}
+.sw.spawn{background:#d0342c}
+.sw.goal{background:#2f6fb0}
+.sw.box{background:#8a5a2b}
+
+.cell{
+  width:var(--cell);height:var(--cell);border-radius:4px;position:relative;cursor:pointer;
+  background:#3d6f96;border:1px solid rgba(255,255,255,.16);
+  box-shadow:none;transition:filter .12s,box-shadow .12s;
+  user-select:none;
+}
+.cell:hover{filter:brightness(1.12)}
+
+/* 高台：棕色 */
+.cell.high,.cell.highAny{background:#7a4a22;border-color:#ab7440}
+
+/* 特殊高台：橙色 + ★ */
+.cell.highSpecial{background:#d97a1f;border-color:#f4ab62}
+.cell.highSpecial::after{
+  content:"★";position:absolute;inset:0;display:grid;place-items:center;
+  font-size:calc(var(--cell) * .42);line-height:1;color:#3a2400;
+}
+
+/* 不可部署：深灰虚线 */
+.cell.floor{background:#2f3742;border:1px dashed rgba(255,255,255,.24)}
+
+/* 不可通行：透明 */
+.cell.void{background:transparent;border-color:transparent;box-shadow:none;cursor:default}
+
+/* 侵入点：浅底 + 红色 X */
+.cell.spawn{background:#cbd5df;border-color:#b45a52}
+.cell.spawn::after{
+  content:"✕";position:absolute;inset:0;display:grid;place-items:center;
+  font-size:calc(var(--cell) * .54);line-height:1;font-weight:700;color:#d0342c;
+}
+
+/* 终点：浅底 + 蓝色罗德岛标记 */
+.cell.goal{background:#dbe5ee;border-color:#7fa8ca}
+.cell.goal::after{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 22 12 12 22 2 12Z' fill='none' stroke='%232f6fb0' stroke-width='2'/%3E%3Cpath d='M12 7 17 12 12 17 7 12Z' fill='%232f6fb0'/%3E%3C/svg%3E");
+  background-size:64%;background-position:center;background-repeat:no-repeat;
+}
+
+/* 箱子：叠在地块上的半透明木箱，不替换地形 */
+.box-mark{
+  position:absolute;left:50%;top:50%;width:58%;height:58%;transform:translate(-50%,-50%);
+  border-radius:3px;border:2px solid rgba(240,214,170,.9);
+  background:rgba(96,58,24,.68);box-shadow:0 2px 6px rgba(0,0,0,.5);
+  pointer-events:none;z-index:2;
+}
+.box-mark::before,.box-mark::after{
+  content:"";position:absolute;left:9%;right:9%;top:calc(50% - 1px);height:2px;
+  background:rgba(240,214,170,.85);
+}
+.box-mark::before{transform:rotate(45deg)}
+.box-mark::after{transform:rotate(-45deg)}
+
+/* 传送点 */
+.cell.telin{background:#1f7f8c;border-color:#74dbe4}
+.cell.telout{background:#6b4bb0;border-color:#b9a3f2}
+.cell.telin::after,.cell.telout::after{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-size:calc(var(--cell) * .40);line-height:1;color:#fff;
+}
+.cell.telin::after{content:"▶"}
+.cell.telout::after{content:"◀"}
+
+/* 特殊地形 */
+.cell.mire{background:#3f8f4a;border-color:#7fd08c}
+.cell.infection{background:#b23a3a;border-color:#e88383}
+.cell.speedup{background:#2f6f74;border-color:#6fc3c9}
+.cell.duel{background:#7a6234;border-color:#c3a25e}
+/* 沼泽写「沼」 */
+.cell.mire::after{
+  content:"沼";position:absolute;left:0;right:0;bottom:6%;text-align:center;
+  font-size:calc(var(--cell) * .30);line-height:1;color:rgba(255,255,255,.95);
+}
+/* 源石：红色地块 + 流血标志 */
+.cell.infection::after{
+  content:"";position:absolute;left:50%;top:52%;width:26%;height:26%;
+  transform:translate(-50%,-50%) rotate(-45deg);
+  background:#ffd9d9;border-radius:50% 50% 50% 0;
+  box-shadow:0 0 6px rgba(255,120,120,.65);
+}
+.cell.speedup::after,.cell.duel::after{
+  position:absolute;left:0;right:0;bottom:6%;text-align:center;
+  font-size:calc(var(--cell) * .30);line-height:1;color:rgba(255,255,255,.92);
+}
+.cell.speedup::after{content:"速"}
+.cell.duel::after{content:"斗"}
+
+/* 旧地形键（兼容旧存档） */
+.cell.fence{background:#5a6470;border-color:#7c8896}

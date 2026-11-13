@@ -90,10 +90,10 @@
     var box = document.getElementById('cards');
     var msg = document.createElement('div');
     msg.className = 'empty';
-    msg.innerHTML = '<p class="empty-t">数据没有加载成功</p>' +
+    msg.innerHTML = '<p class="empty-t">数据加载失败</p>' +
       '<p class="empty-d">页面缺少 <code>data/data.js</code>。' +
-      '如果你在本地打开，请先运行 <code>python tools/build_web_data.py</code> 生成数据；' +
-      '如果是部署版，请确认 data 目录随站点一起上传。</p>';
+      '本地打开时，请先运行 <code>python tools/build_web_data.py</code> 生成数据；' +
+      '部署版本请确认 data 目录已随站点上传。</p>';
     box.appendChild(msg);
   }
 

@@ -413,7 +413,7 @@
     var pal = b.pal;
     sectionHead(b, '干员', model.pieces.length ? model.pieces.length + ' 名' : '');
     if (!model.pieces.length) {
-      b.text(C.pad, b.y, '先在配队页加入干员，再回来生成一图流。', F.sub, 500, pal.fg3);
+      b.text(C.pad, b.y, '请先在配队页加入干员，再生成一图流。', F.sub, 500, pal.fg3);
       b.y += 70;
       return;
     }
@@ -912,12 +912,12 @@
     if (!el) return;
     var msg = '';
     if (kind === 'file') {
-      msg = '这张图不含头像与图标：用 file:// 直接打开时，浏览器禁止把本地图片导出到画布。' +
-        '用本地 http 预览（例如在 web/ 下执行 python -m http.server）或线上地址打开，就能带图。';
+      msg = '此图不含头像与图标：通过 file:// 直接打开时，浏览器禁止将本地图片导出至画布。' +
+        '请改用本地 HTTP 服务（例如在 web/ 下执行 python -m http.server）或线上地址打开，即可包含图片。';
     } else if (kind === 'standalone') {
-      msg = '这张图不含头像与图标：单文件版为了体积没有内嵌这两类素材，用在线版或目录版打开即可带图。';
+      msg = '此图不含头像与图标：单文件版未内嵌这两类素材。请改用线上版或目录版打开，即可包含图片。';
     } else if (kind === 'toggle') {
-      msg = '这张图不含头像与图标：顶栏的图片开关当前是关闭状态。';
+      msg = '此图不含头像与图标：顶栏的图片开关当前处于关闭状态。';
     }
     if (!msg) {
       el.hidden = true;
@@ -943,7 +943,7 @@
       '<button type="button" class="btn" data-poster-copy-code>复制配队码</button>' +
       '<button type="button" class="btn" data-poster-copy-text>复制分享文本</button>' +
       '</div>' +
-      '<p class="poster-tip">手机上长按图片保存；二维码扫开直达这套配队。</p>' +
+      '<p class="poster-tip">长按图片可保存至相册；扫描二维码可直接打开该配队。</p>' +
       '</div>';
   }
 
@@ -974,7 +974,7 @@
       box.innerHTML = '<img class="poster-img" alt="配队一图流" src="' + esc(url) + '">';
       var tip = document.querySelector('.poster-tip');
       if (tip) {
-        tip.innerHTML = '手机上长按图片保存（' + parts.canvas.width + '×' + parts.canvas.height + '）';
+        tip.innerHTML = '长按图片可保存至相册（' + parts.canvas.width + '×' + parts.canvas.height + '）';
       }
     }
 
@@ -993,7 +993,7 @@
         makeBlobUrl(clean, function (url2) {
           if (token !== state.token) return;
           if (!url2) {
-            box.innerHTML = '<p class="poster-fail">当前环境不允许导出图片，请换用线上版或本地 http 预览。</p>';
+            box.innerHTML = '<p class="poster-fail">当前环境不支持导出图片，请改用线上版或本地 HTTP 预览。</p>';
             return;
           }
           finish(url2);
@@ -1039,7 +1039,7 @@
     var ok = false;
     try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
     if (ta.parentNode) ta.parentNode.removeChild(ta);
-    toast(ok ? okMsg : '复制失败，请手动选中复制');
+    toast(ok ? okMsg : '复制失败，请手动选择文本复制');
   }
 
   function toast(msg) {
@@ -1053,7 +1053,7 @@
       if (t.closest('[data-poster-download]')) {
         e.preventDefault();
         if (state.blob) download();
-        else toast('图片还没生成好');
+        else toast('图片尚未生成');
         return;
       }
       if (t.closest('[data-poster-copy-code]')) {

@@ -408,7 +408,7 @@
     var w = r.read(5);
     var h = r.read(4);
     if (tag == null || w == null || h == null) return null;
-    if (tag !== dataTag(data)) warnings.push('沙盒码来自不同的数据版本，干员/盟约可能对不上');
+    if (tag !== dataTag(data)) warnings.push('沙盒码来自不同的数据版本，干员 / 盟约数据可能不匹配');
     w += 3;
     h += 3;
     if (w < 3 || w > 21 || h < 3 || h > 13) return null;

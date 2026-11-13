@@ -174,13 +174,13 @@
     if (res.morphIssues.length) {
       var parts = [];
       for (var i = 0; i < res.morphIssues.length; i++) parts.push('第 ' + (res.morphIssues[i].slot + 1) + ' 席 ' + res.morphIssues[i].name);
-      warns.push('变形同构体还缺「另一件装备所属盟约」：' + esc(parts.join('、')) + '（在席位里手动指定转职盟约）');
+      warns.push('变形同构体缺少「另一件装备所属盟约」：' + esc(parts.join('、')) + '（请在席位中手动指定转职盟约）');
     }
     for (var w = 0; w < warns.length; w++) h += '<p class="tm-warn">' + warns[w] + '</p>';
 
     if (!s.filled) {
-      h += '<p class="tm-hint">点下面的空位选人，盟约会随着队伍实时判定；' +
-        '每位干员最多带 2 件装备，<b>变形同构体</b>会按另一件装备的盟约给携带者转职。</p>';
+      h += '<p class="tm-hint">点击下方空位选择干员，盟约将随队伍实时判定；' +
+        '每名干员最多携带 2 件装备，<b>变形同构体</b>会按另一件装备的盟约赋予携带者转职。</p>';
     }
     return h;
   }
@@ -371,7 +371,7 @@
         ' value="' + (r.layer > 0 ? r.layer : '') + '" placeholder="0"' +
         ' aria-label="' + esc(r.name) + '层数">' +
         nodes +
-        '<i class="cov-cal" title="点开盟约详情可看按层数算出的具体数值">ⓘ</i>' +
+        '<i class="cov-cal" title="展开盟约详情可查看按层数计算的数值">ⓘ</i>' +
         '</label>';
     }
 
@@ -715,7 +715,7 @@
       }
       if (bag.picks) msg.push('自选干员暂无词条数据');
       body = '<p class="tm-tr-empty">' +
-        (msg.length ? msg.join('；') + '。' : '加入干员后，这里会按触发时机汇总全队词条。') +
+        (msg.length ? msg.join('；') + '。' : '加入干员后，将按触发时机在此汇总全队词条。') +
         '</p>';
     } else {
       var keys = [];
@@ -794,7 +794,7 @@
       '</div>' +
       '<button type="button" class="tm-traits-rail" data-traits-toggle' +
       ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tm-traits-body"' +
-      ' title="上下拖动可移动；拖到屏幕左半边松手吸附左侧；点击展开词条栏">' +
+      ' title="上下拖动可移动；拖至屏幕左半侧释放即吸附左侧；点击展开词条栏">' +
       '<span class="tm-traits-rail-grip" aria-hidden="true">⠿</span>' +
       '<span class="tm-traits-rail-text">词条</span>' +
       '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
@@ -1076,7 +1076,7 @@
         (nActive ? '<span class="badge">' + nActive + '</span>' : '') + '</button>') +
       (isPick ? '' :
         '<button type="button" class="sheet-batch" data-batch-toggle aria-pressed="' +
-        (picker.batch ? 'true' : 'false') + '" title="连续添加：填完一个自动跳到下一个">连续添加</button>') +
+        (picker.batch ? 'true' : 'false') + '" title="连续添加：选择一个后自动进入下一席">连续添加</button>') +
       '<button type="button" class="d-close" data-sheet-close aria-label="关闭">' +
       '<svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>' +
       '</div>';
@@ -1118,7 +1118,7 @@
       sub = '每位干员最多 2 件' + (picker.batch ? ' · 连续添加' : '');
     } else {
       title = (cur && cur.k ? '更换第 ' : '第 ') + (slot + 1) + ' 席';
-      sub = picker.batch ? '连续添加 · 点一名填一席' : '场上 ' + countFilled(team) + ' / ' + team.size;
+      sub = picker.batch ? '连续添加 · 每次选择占用一席' : '场上 ' + countFilled(team) + ' / ' + team.size;
     }
     return { title: title, sub: sub };
   }
@@ -1152,7 +1152,7 @@
     if (origin && /^https?:/.test(origin)) base = origin + global.location.pathname;
     else base = String(global.location.href || '').split('#')[0];
     return '【GSPA 配队】' + code + '\n' + base + '#/team?c=' + code +
-      '\n我分享了一个卫戍协议配队，快来看看吧';
+      '\n分享一套卫戍协议配队，点击链接可直接打开。';
   }
 
   function closeBtnHtml() {
@@ -1169,7 +1169,7 @@
       '</div>' +
       '<div class="share-box">' +
       '<textarea id="share-text" class="sheet-ta" rows="7" readonly spellcheck="false">' + esc(text) + '</textarea>' +
-      '<p class="share-hint"><b>点链接会直接打开这套配队</b>；也可以把整段粘到「导入」。' +
+      '<p class="share-hint"><b>点击链接可直接打开该配队</b>；也可将整段分享文本粘贴至「导入」。' +
       '代码用字典压缩，8 人满编约 22 个字符。</p>' +
       '</div>' +
       '<div class="sheet-foot">' +
@@ -1186,7 +1186,7 @@
       '</div>' +
       '<div class="share-box">' +
       '<textarea id="import-text" class="sheet-ta" rows="7" spellcheck="false"' +
-      ' placeholder="把分享文本整段粘进来，或粘贴带 #/team 的链接…"></textarea>' +
+      ' placeholder="粘贴分享文本或含 #/team 的链接…"></textarea>' +
       '<div class="import-state" id="import-state">等待粘贴…</div>' +
       '</div>' +
       '<div class="sheet-foot">' +
@@ -1448,7 +1448,7 @@
         '</button>';
     }
 
-    if (!shown) out = '<p class="pick-empty">没有匹配的干员，试试换个关键词或减少筛选。</p>';
+    if (!shown) out = '<p class="pick-empty">没有匹配的干员，请更换关键词或减少筛选条件。</p>';
     return out;
   }
 
@@ -1501,7 +1501,7 @@
         '<span class="pick-act">' + (isUsed ? '已选' : '＋') + '</span>' +
         '</button>';
     }
-    if (!shown) out = '<p class="pick-empty">没有匹配的自选干员，试试换个关键词或减少筛选。</p>';
+    if (!shown) out = '<p class="pick-empty">没有匹配的自选干员，请更换关键词或减少筛选条件。</p>';
     return out;
   }
 
@@ -1656,7 +1656,7 @@
 
     // 连续添加：先补满当前干员的第 2 件，再跳到下一位还有空位的干员
     var next = nextGearTarget(team, picker.slot);
-    if (!next) { closeSheet(); toast('没有空余的装备位了'); return; }
+    if (!next) { closeSheet(); toast('没有空余的装备位'); return; }
     picker.slot = next.slot;
     picker.gear = next.gear;
     refreshAfterChoice();
@@ -1978,7 +1978,7 @@
     if ((el = t.closest('[data-team-poster]'))) {
       e.preventDefault();
       if (global.Poster) global.Poster.open();
-      else toast('一图流模块没有加载');
+      else toast('一图流模块未加载');
       return;
     }
     if ((el = t.closest('[data-team-import]'))) { e.preventDefault(); openSheet(-1, 'import', -1); return; }

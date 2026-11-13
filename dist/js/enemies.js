@@ -328,7 +328,7 @@
     });
     els.tagMode.textContent = state.mode === 'and' ? 'AND' : 'OR';
     els.tagMode.setAttribute('data-mode', state.mode);
-    els.tagMode.title = state.mode === 'and' ? '当前：同时满足所有词条（点击切换为 OR）' : '当前：满足任一条件（点击切换为 AND）';
+    els.tagMode.title = state.mode === 'and' ? '当前为「全部满足」；点击切换为 OR' : '当前为「任一满足」；点击切换为 AND';
     els.dualOnly.checked = state.dual;
     els.crossOnly.checked = state.cross;
   }
@@ -402,10 +402,10 @@
 
   function emptyMessage() {
     if (state.tags.length > 1 && state.mode === 'and') {
-      return '当前为 AND：需要同时具备所选词条。跨词条的敌人只有 7 个，切成 OR 可看任一条件。';
+      return '当前为 AND：需同时具备所选词条。跨词条敌人仅 7 个，切换为 OR 可按任一条件筛选。';
     }
-    if (state.q.trim()) return '没有找到「' + state.q.trim() + '」。试试更短的关键词，或清空词条。';
-    return '试试减少筛选条件，或重置。';
+    if (state.q.trim()) return '未找到「' + state.q.trim() + '」。可尝试更短的关键词，或清空词条。';
+    return '可减少筛选条件，或重置。';
   }
 
   function renderActiveFilters() {
@@ -432,7 +432,7 @@
     $('enemyId').textContent = e.id;
     $('enemyTags').innerHTML = e.tags.map(function (t) { return tagHtml(t, true); }).join('');
     $('enemyRoles').innerHTML = e.roles.map(roleHtml).join('');
-    $('enemyDesc').textContent = e.desc || '（没有描述）';
+    $('enemyDesc').textContent = e.desc || '（暂无描述）';
 
     $('enemyLevels').innerHTML = e.levels.map(function (lv) {
       var label = lv.hidden ? '隐秘核心' : (lv.level === 0 ? '0（基础）' : esc(lv.level));
@@ -467,7 +467,7 @@
           '<span class="mini-tag">' + esc(c.tag) + '</span><span class="mini-tag">' + esc(c.half) + '</span><span class="mini-tag">权重 ' + c.weight + '</span>' +
           (c.training ? '<span class="mini-tag" style="color:var(--amber)">训练表</span>' : '') +
         '</div><div class="row2">' + row2 + '</div></li>';
-    }).join('') || '<li class="config-item">没有关联的特殊敌人配置。</li>';
+    }).join('') || '<li class="config-item">暂无关联的特殊敌人配置。</li>';
 
     var prts = 'https://prts.wiki/w/' + encodeURIComponent(e.prtsName || e.name);
     $('enemyPrts').href = prts;
@@ -484,7 +484,7 @@
     var stats = actualStats(e);
     var d = currentDiff();
     if (!stats.scaled) {
-      box.innerHTML = '<h4>实际数值</h4><div class="actual-line">当前显示基础值。选择难度与回合后，这里会自动换算' +
+      box.innerHTML = '<h4>实际数值</h4><div class="actual-line">当前显示基础值。选择难度与回合后，将自动换算' +
         (e.boss ? '领袖生命（取 PRTS 领袖表）与攻击力' : '生命、攻击与移动速度') + '。</div>';
       return;
     }
@@ -673,7 +673,7 @@
       html += '<button type="button" class="link-btn" data-jump-tag="' + esc(jump.tag) + '">查看【' + esc(tagName(jump.tag)) + '】敌人</button>' +
         '<p class="count" style="margin-top:6px">同名机制联动，不代表该地图只会出这类敌人。</p>';
     }
-    html += '<p class="map-warn"><b>注意：</b>地图与敌方势力随机搭配；当前数据没有「地图 → 敌人」的固定关系，不能据此断言某地图必出某敌人。</p>';
+    html += '<p class="map-warn"><b>说明：</b>地图与敌方势力随机搭配，当前数据中没有「地图 → 敌人」的固定对应关系，不能据此判断某地图必定出现某敌人。</p>';
     $('mapDetail').innerHTML = html;
   }
 

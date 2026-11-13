@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
 
   const DATA = window.GSPA_DATA;
@@ -135,7 +135,7 @@
   function applyPreset(preset, opts) {
     if (!preset || !Array.isArray(preset.tiles) || !preset.tiles.length) return false;
     opts = opts || {};
-    if (!opts.force && state && state.board.length && !window.confirm('切换到「' + preset.title + '」会清空场上已部署的干员，继续？')) return false;
+    if (!opts.force && state && state.board.length && !window.confirm('切换至「' + preset.title + '」将清空已部署的干员，是否继续？')) return false;
     MAP_W = preset.w;
     MAP_H = preset.h;
     MAP = preset.tiles.map(function (row) { return row.slice(); });
@@ -411,11 +411,12 @@
   const whTagMode = document.getElementById('whTagMode');
   const importCodeBtn = document.getElementById('importCodeBtn');
   const teamFilterBtn = document.getElementById('teamFilterBtn');
-  const clearWhBtn = document.getElementById('clearWhBtn');
+  const whClearAllBtn = document.getElementById('whClearAllBtn');
   const inspectorEl = document.getElementById('inspector');
   const bondStripEl = document.getElementById('bondStrip');
   const bondPopEl = document.getElementById('bondPop');
   const bondSummaryEl = document.getElementById('bondSummary');
+  const clearLayersBtn = document.getElementById('clearLayersBtn');
   const logsPanel = document.getElementById('logsPanel');
   const logToggle = document.getElementById('logToggle');
   const reportPanel = document.getElementById('reportPanel');
@@ -457,14 +458,14 @@
   const EVENT_TIP = {
     prepStart: '开始本回合休整期，重置本回合叠加上限；触发「进入休整期时」词条。',
     prepEnd: '结束休整期，触发「休整期结束时」与「作战开始时」词条。',
-    battleStart: '作战开始时触发；由「休整期结束」自动进入。',
+    battleStart: '作战开始时触发，由「休整期结束」自动进入。',
     battleEnd: '结束作战期，触发「作战结束时」词条并进入下一回合休整期。',
-    battleCap: '测试用：把场上所有「战斗中·每回合/每场战斗至多叠加」的叠层和已获得特质补到上限；不会自动触发击倒/开技能的其他条件。',
+    battleCap: '测试功能：将场上所有「战斗中·每回合 / 每场战斗至多叠加」的叠层与已获得特质补至上限；不触发击倒、开启技能等其他条件。',
     skill: '对选中干员触发「开启技能时」词条，需要处于作战期。',
-    knockdown: '对选中干员触发「我方被击倒时」词条；只触发已实现规则，special 条目仍会提示未模拟。',
-    gain: '对「待部署区」当前选中的干员触发「获得时」词条；每次获得只触发一次。',
-    refresh: '本回合刷新次数 +1；触发「刷新时」词条（复奏等，待部署区也生效）。',
-    killEnemy: '选中干员后点击：直接由该干员击倒，并强制触发其击倒范围词条一次；未选中干员：进入点格模式，按格内范围内干员结算。'
+    knockdown: '对选中干员触发「我方被击倒时」词条；仅触发已实装规则，特殊条目仍会提示未模拟。',
+    gain: '对「待部署区」当前选中的干员触发「获得时」词条；每次获得仅触发一次。',
+    refresh: '本回合刷新次数 +1，并触发「刷新时」词条（复奏等，待部署区同样生效）。',
+    killEnemy: '选中干员后点击：由该干员击倒，并强制触发其击倒范围词条一次；未选中干员时：进入选择地块模式，按地块范围内干员结算。'
   };
 
   function initState() {
@@ -555,7 +556,7 @@
 
   function combatLocked(action) {
     if (state.phase !== 'combat') return false;
-    toast('作战期不能' + action + '，请等待作战结束');
+    toast('作战期内无法' + action + '，请在作战结束后操作');
     return true;
   }
 
@@ -865,7 +866,7 @@
   }
 
   function showLastReport() {
-    if (!state.lastReport) { toast('还没有可查看的叠层报表'); return; }
+    if (!state.lastReport) { toast('暂无可查看的叠层报表'); return; }
     renderReport();
   }
 
@@ -1007,7 +1008,7 @@
     if (!window.SandboxCode) { toast('沙盒码模块未加载'); return false; }
     const res = SandboxCode.decode(text, DATA);
     if (!res || !res.snapshot) {
-      toast('无法解析这个沙盒码');
+      toast('沙盒码解析失败');
       log('导入沙盒码失败：格式/校验不通过', 'warn');
       return false;
     }
@@ -1020,7 +1021,7 @@
       closeSandboxShare();
       setShareStatus('导入成功', 'ok');
     } else {
-      toast('沙盒码状态不合法，未导入');
+      toast('沙盒码状态无效，未导入');
       log('导入沙盒码失败：状态校验不通过', 'warn');
       setShareStatus('导入失败：状态校验不通过', 'err');
     }
@@ -1039,7 +1040,7 @@
     if (reportPanel) reportPanel.hidden = true;
     if (sandboxCodeText) sandboxCodeText.value = code;
     if (sandboxSharePanel) sandboxSharePanel.hidden = false;
-    setShareStatus('已生成，可直接复制或下载；也可以粘贴别人的码后点“导入”。', '');
+    setShareStatus('已生成，可直接复制或下载；也可粘贴他人的沙盒码后点击「导入」。', '');
     if (sandboxCodeText) {
       sandboxCodeText.focus();
       sandboxCodeText.select();
@@ -1088,10 +1089,10 @@
         const ok = document.execCommand && document.execCommand('copy');
         document.body.removeChild(ta);
         if (ok) toast(okMsg);
-        else toast('复制失败，请使用「导出诊断」');
+        else toast('复制失败，可改用「导出诊断」');
         return !!ok;
       } catch (e) {
-        toast('复制失败，请使用「导出诊断」');
+        toast('复制失败，可改用「导出诊断」');
         return false;
       }
     }
@@ -1766,7 +1767,7 @@
     }
 
     if (event === 'onGain') {
-      if (!ctx.op) { toast('先选中一张待部署区的干员'); return; }
+      if (!ctx.op) { toast('请先选择待部署区中的一名干员'); return; }
       runFor(ctx.op, false);
     } else {
       const boardOps = ctx.op ? [ctx.op] : state.board;
@@ -1825,30 +1826,36 @@
       .sort(egirOrder);
   }
 
+  // 战斗开始的吞噬标记。语义（2026-11-13 修正）：
+  // · 每名阿戈尔都从自己出发、沿「身前一格」连链：被吞噬的阿戈尔继续吞噬自己身前一格；
+  // · 同一目标可以同时被多名阿戈尔吞噬（例如两人身前是同一格），每个吞噬者都要留下标记，
+  //   各自获得目标的基础攻击力/阻挡数（沙盒暂不模拟属性，只记录标记）；
+  // · 层数不在这里去重，由 applyEgirDevour 按「不同目标」只加一次；
+  // · 「更靠左、再靠上」的优先级只在 A→B、B→A 相互吞噬时生效：先手吃掉对方，后者不再反吃。
   function planEgirDevour() {
     const members = egirMembers();
     const marks = [];
-    const devoured = {};
-    // 按「更靠左、再更靠上」的顺序发起；已经被更高优先级单位吞噬的，跳过。
+    const markedBy = {};   // 发起者 uid → 它标记到的目标 uid（用于相互吞噬判定）
     members.forEach(function (start) {
-      if (devoured[start.uid]) return;
-      const chain = {};
-      chain[start.uid] = true;
+      const mine = [];
+      const seen = {};
+      seen[start.uid] = true;
       let current = start;
       while (true) {
         const target = frontOp(current, 1);
         if (!target) break;
-        // 相互吞噬 / 成环：当前链里已经出现过，停止。
-        if (chain[target.uid]) break;
-        // 目标已被更高优先级的吞噬链吃掉：不再重复吞噬。
-        if (devoured[target.uid]) break;
-        devoured[target.uid] = true;
-        chain[target.uid] = true;
-        marks.push({ from: current, to: target, tier: egirTier(target) });
-        // 递归：被吞噬者如果是阿戈尔，继续由它吞噬自己身前一格。
+        // 成环 / 本链已经走过
+        if (seen[target.uid]) break;
+        // 相互吞噬：目标已经标记过我 → 目标优先，我不再标记它
+        if ((markedBy[target.uid] || []).indexOf(start.uid) >= 0) break;
+        seen[target.uid] = true;
+        mine.push(target);
+        // 非阿戈尔：链终止；阿戈尔：继续由它吞噬自己身前一格
         if (opTags(target).indexOf('阿戈尔') < 0) break;
         current = target;
       }
+      markedBy[start.uid] = mine.map(function (t) { return t.uid; });
+      mine.forEach(function (t) { marks.push({ from: start, to: t, tier: egirTier(t) }); });
     });
     return { members: members, marks: marks };
   }
@@ -1862,18 +1869,31 @@
       return 0;
     }
     const plan = planEgirDevour();
-    const devoured = [];
-    let gains = 0;
+    // 同一目标可能被多名阿戈尔同时吞噬：按目标归并，层数每个目标只加一次，
+    // 来源列出全部吞噬者（每个吞噬者各自获得目标的基础攻击力/阻挡数；沙盒不模拟属性）。
+    const rows = [];
+    const rowOf = {};
     plan.marks.forEach(function (mk) {
-      devoured.push(mk.to);
-      gains += addLayer('阿戈尔', mk.tier, '阿戈尔吞噬 · ' + mk.from.name + ' → ' + mk.to.name + '（' + egirTierLabel(mk.to) + ' 阶）', {
+      let row = rowOf[mk.to.uid];
+      if (!row) {
+        row = rowOf[mk.to.uid] = { to: mk.to, tier: mk.tier, froms: [] };
+        rows.push(row);
+      }
+      row.froms.push(mk.from);
+    });
+    const devoured = rows.map(function (row) { return row.to; });
+    let gains = 0;
+    rows.forEach(function (row) {
+      const fromNames = row.froms.map(function (f) { return f.name; }).join('、');
+      gains += addLayer('阿戈尔', row.tier, '阿戈尔吞噬 · ' + fromNames + ' → ' + row.to.name + '（' + egirTierLabel(row.to) + ' 阶）', {
         // 吞噬层是盟约机制产生的，不归到发起吞噬的干员头上。
         opName: '阿戈尔吞噬',
-        targetName: mk.to.name,
+        targetName: row.to.name,
         kind: 'bond:devour',
         detail: '吞噬',
-        tier: mk.tier,
-        markerUid: mk.from.uid
+        tier: row.tier,
+        markerUid: row.froms[0].uid,
+        markerUids: row.froms.map(function (f) { return f.uid; })
       });
     });
     if (!devoured.length) {
@@ -1886,7 +1906,9 @@
       return a.c - b.c || b.r - a.r || a.uid - b.uid;
     });
     const names = downOrder.map(function (t) { return t.name; });
-    log('阿戈尔：战斗开始吞噬 ' + devoured.length + ' 名（' + names.join('、') + '），+' + gains + ' 层', 'event');
+    log('阿戈尔：战斗开始吞噬 ' + devoured.length + ' 名（' + names.join('、') + '）' +
+      (plan.marks.length > devoured.length ? '，' + plan.marks.length + ' 次吞噬标记' : '') +
+      '，+' + gains + ' 层', 'event');
 
     // 被吞噬者按「击倒」结算：触发其自身「我方被击倒时」词条。
     // 沙盒没有 HP/DEF 模型，不把单位移出棋盘，只记录击倒/复活结果。
@@ -2012,7 +2034,7 @@
   }
 
   function applyBattleCaps() {
-    if (state.phase !== 'combat') { toast('只能在作战期补叠层上限'); return; }
+    if (state.phase !== 'combat') { toast('仅可在作战期补满叠层上限'); return; }
     let gains = 0;
     state.board.forEach(function (op) {
       (RULES[op.name] || []).forEach(function (rule) {
@@ -2074,21 +2096,20 @@
     renderAll();
   }
 
-  function placeHand(name, r, c, dir, handId) {
-    let idx = handId ? state.hand.findIndex(function (it) { return it.id === handId; }) : -1;
-    if (idx < 0) idx = state.hand.findIndex(function (it) { return it.name === name; });
-    if (idx < 0) return;
-    if (state.board.length >= MAX_BOARD) { toast('场上最多 ' + MAX_BOARD + ' 名干员'); return; }
-    if (!canPlace(name, r, c)) {
-      const info = TERRAIN[terrainAt(r, c)] || TERRAIN.ground;
-      toast(info.deploy === 'none' ? '这一格不可部署' : info.deploy === 'ranged' ? '高台只能放远程干员' : '这一格不能部署');
-      return;
-    }
-    const item = state.hand[idx];
-    state.hand.splice(idx, 1);
-    const op = { uid: state.uid++, name: name, r: r, c: c, dir: dir || 'right', elite: !!item.elite };
+  function canPlaceOrToast(name, r, c) {
+    if (state.board.length >= MAX_BOARD) { toast('场上干员已达上限（' + MAX_BOARD + ' 名）'); return false; }
+    if (canPlace(name, r, c)) return true;
+    const info = TERRAIN[terrainAt(r, c)] || TERRAIN.ground;
+    toast(info.deploy === 'ranged' ? '高台仅可部署远程干员' : '该地块不可部署');
+    return false;
+  }
+
+  // 真正上场：待部署区与仓库两条来源都汇到这里。
+  function commitPlacement(name, elite, r, c, dir) {
+    const op = { uid: state.uid++, name: name, r: r, c: c, dir: dir || 'right', elite: !!elite };
     state.board.push(op);
     state.selectedHand = null;
+    state.selectedWarehouse = null;
     state.selectedOp = op.uid;
     state.mode = 'idle';
     log('部署 ' + name + (op.elite ? '（精锐）' : '') + ' 到 r' + (r + 1) + 'c' + (c + 1) + ' · 朝' + DIR_LABEL[op.dir], 'event');
@@ -2098,6 +2119,22 @@
       log('休整期部署：只记录位置，不触发「战斗中·部署时」', 'warn');
       renderAll();
     }
+  }
+
+  function placeHand(name, r, c, dir, handId) {
+    let idx = handId ? state.hand.findIndex(function (it) { return it.id === handId; }) : -1;
+    if (idx < 0) idx = state.hand.findIndex(function (it) { return it.name === name; });
+    if (idx < 0) return;
+    if (!canPlaceOrToast(name, r, c)) return;
+    const item = state.hand[idx];
+    state.hand.splice(idx, 1);
+    commitPlacement(name, !!item.elite, r, c, dir);
+  }
+
+  // 仓库 → 棋盘：不经过待部署区，直接按普通（非精锐）状态上场。
+  function placeFromWarehouse(name, r, c, dir) {
+    if (!canPlaceOrToast(name, r, c)) return;
+    commitPlacement(name, false, r, c, dir);
   }
 
   // ---- 拖动放置：第一步拖到格子，第二步从格子拖方向 ----
@@ -2119,7 +2156,7 @@
     origin = origin || 'hand';
     if (origin === 'hand' && !state.hand.some(function (it) { return it.id === handId; })) return;
     if (origin === 'warehouse' && !state.warehouse.includes(name)) return;
-    if (origin === 'hand' && state.board.length >= MAX_BOARD) { toast('场上最多 ' + MAX_BOARD + ' 名干员'); return; }
+    if (origin === 'hand' && state.board.length >= MAX_BOARD) { toast('场上干员已达上限（' + MAX_BOARD + ' 名）'); return; }
     if (e.button != null && e.button !== 0) return;
     if (state.pending) cancelPending();
     hideTip();
@@ -2153,7 +2190,11 @@
         drag.overHand = over;
         if (handPanelEl) handPanelEl.classList.toggle('hand-drop', over);
       }
-      return;
+      // 在待部署区上方时不预览棋盘；否则按普通拖拽继续找可放置格
+      if (over) {
+        if (drag.cell) { drag.cell = null; updateDropPreview(); }
+        return;
+      }
     }
 
     const el = document.elementFromPoint(e.clientX, e.clientY);
@@ -2180,7 +2221,7 @@
   function dropPreviewHtml() {
     return '<div class="drop-preview simple">' +
       '<img src="' + esc(avatarOf(drag.name)) + '" alt="' + esc(drag.name) + '" draggable="false" onerror="this.style.visibility=\'hidden\'">' +
-      '<div class="drop-hint">松手放到这里</div>' +
+      '<div class="drop-hint">释放以放置于此</div>' +
     '</div>';
   }
 
@@ -2222,17 +2263,18 @@
     if (!d.active) return;
     lastDragEnd = Date.now();
     if (d.mode === 'warehouse') {
-      if (d.overHand) addToHand(d.name);
-      else toast('拖到下方「待部署区」');
+      if (d.overHand) { addToHand(d.name); return; }
+      if (d.cell) { beginPending(d.name, d.cell.r, d.cell.c, null, { fromWarehouse: true }); return; }
+      toast('可拖入战场任意可部署地块，或拖入下方「待部署区」');
       return;
     }
     if (d.mode === 'move') {
       if (d.cell) beginMovePending(d.uid, d.cell.r, d.cell.c);
-      else toast('拖到可放置的格子；已有干员的格子会交换位置');
+      else toast('请拖入可部署地块；已有干员的地块将交换位置');
       return;
     }
     if (d.cell) beginPending(d.name, d.cell.r, d.cell.c, d.handId);
-    else toast('把干员拖到可放置的格子上');
+    else toast('请将干员拖入可部署地块');
   }
 
   function onDragCancel() {
@@ -2240,24 +2282,29 @@
     lastDragEnd = Date.now();
   }
 
-  function beginPending(name, r, c, handId) {
+  function beginPending(name, r, c, handId, opts) {
     hideTip();
-    const item = state.hand.find(function (it) { return it.id === handId; });
-    if (!item) return;
-    if (!canPlace(name, r, c)) { toast('这一格不能部署'); return; }
-    state.pending = { kind: 'place', handId: item.id, name: name, r: r, c: c, dir: null, elite: !!item.elite };
+    const fromWarehouse = !!(opts && opts.fromWarehouse);
+    const item = handId ? state.hand.find(function (it) { return it.id === handId; }) : null;
+    if (!fromWarehouse && !item) return;
+    if (!canPlace(name, r, c)) { toast('该地块不可部署'); return; }
+    state.pending = {
+      kind: 'place', handId: fromWarehouse ? null : item.id, name: name, r: r, c: c, dir: null,
+      elite: fromWarehouse ? false : !!item.elite, fromWarehouse: fromWarehouse
+    };
     state.selectedHand = null;
+    state.selectedWarehouse = null;
     state.selectedOp = null;
     state.mode = 'idle';
     renderAll();
-    toast('已放下：拖动方向或点箭头选择朝向');
+    toast('已放置：拖动方向或点击箭头确定朝向');
   }
 
   function beginMovePending(uid, r, c) {
     if (combatLocked('移动干员')) return;
     const op = state.board.find(function (o) { return o.uid === uid; });
     if (!op) return;
-    if (!canMoveTo(uid, r, c)) { toast('这一格不能换过去'); return; }
+    if (!canMoveTo(uid, r, c)) { toast('无法移动至该地块'); return; }
     const snapshot = state.board.map(function (o) { return { uid: o.uid, name: o.name, r: o.r, c: o.c, dir: o.dir, elite: !!o.elite }; });
     const target = opAt(r, c);
     state.board = state.board.filter(function (o) { return o.uid !== uid; });
@@ -2270,7 +2317,7 @@
     state.selectedHand = null;
     state.selectedWarehouse = null;
     renderAll();
-    toast(target && target.uid !== uid ? '已交换位置：给拖动的干员选新朝向' : '正在移动：拖动方向选择朝向');
+    toast(target && target.uid !== uid ? '位置已交换：请为移动的干员确定新朝向' : '移动中：拖动方向确定朝向');
   }
 
   function pendingCellEl() {
@@ -2288,7 +2335,7 @@
       arrows[i].classList.toggle('active', arrows[i].getAttribute('data-dir') === dir);
     }
     const hint = box.querySelector('.pending-hint');
-    if (hint) hint.textContent = dir ? '松手部署 · 朝' + DIR_LABEL[dir] : '拖动方向 / 点箭头（默认右）';
+    if (hint) hint.textContent = dir ? '释放以部署 · 朝' + DIR_LABEL[dir] : '拖动方向 / 点击箭头（默认右）';
   }
 
   function updatePendingRange() {
@@ -2344,7 +2391,7 @@
     cleanupFacing();
     lastDragEnd = Date.now();
     if (dir) confirmPending(dir);
-    else toast('拖动到上 / 右 / 下 / 左箭头再松手选择朝向');
+    else toast('拖动至上 / 右 / 下 / 左箭头后释放，以确定朝向');
   }
 
   function onFacingCancel() {
@@ -2376,6 +2423,7 @@
       renderAll();
       return;
     }
+    if (p.fromWarehouse) { placeFromWarehouse(p.name, p.r, p.c, dir || 'right'); return; }
     placeHand(p.name, p.r, p.c, dir || 'right', p.handId);
   }
 
@@ -2389,7 +2437,7 @@
     state.pending = null;
     cleanupFacing();
     renderAll();
-    toast(p.kind === 'move' ? '已取消移动，位置还原' : '已取消放置');
+    toast(p.kind === 'move' ? '已取消移动，位置已还原' : '已取消放置');
   }
 
   function retreat(uid) {
@@ -2407,8 +2455,8 @@
       state.selectedHand = item.id;
       log('撤退 ' + op.name + (op.elite ? '（精锐）' : '') + '，回到待部署区', 'event');
     } else {
-      log('撤退 ' + op.name + '，待部署区已满，未回到手牌', 'warn');
-      toast('待部署区已满，干员已撤离');
+      log('撤退 ' + op.name + '，待部署区已满，未返回待部署区', 'warn');
+      toast('待部署区已满，干员未返回');
     }
     state.selectedOp = null;
     state.selectedWarehouse = null;
@@ -2474,6 +2522,10 @@
     return f.tiers.length + f.tags.length + f.triggers.length + (f.onlyTeam ? 1 : 0);
   }
 
+  function whFilterAnyCondition() {
+    return whFilterActiveCount() + ((state.whFilter.q || '').trim() ? 1 : 0);
+  }
+
   function updateWhFilterUI() {
     const open = state.whFiltersOpen !== false;
     if (whFilters) whFilters.hidden = !open;
@@ -2482,6 +2534,9 @@
       const n = whFilterActiveCount();
       whFilterBadge.textContent = n;
       whFilterBadge.hidden = !n;
+    }
+    if (whClearAllBtn) {
+      whClearAllBtn.disabled = whFilterAnyCondition() === 0;
     }
     if (whTagMode) {
       const btns = whTagMode.querySelectorAll('[data-wh-mode]');
@@ -2606,7 +2661,7 @@
   }
 
   function importTeamCode() {
-    const text = prompt('粘贴 GSPA3 / GSPA2 配队码（或含配队码的链接）');
+    const text = prompt('请粘贴 GSPA3 / GSPA2 配队码（或包含配队码的链接）');
     if (!text) return;
     if (!window.Code || !Code.decode) { toast('配队码解码器未加载'); return; }
     const res = Code.decode(text, DATA);
@@ -2621,7 +2676,7 @@
       names.push(name);
       items.push(makeHandItem(name, !!s.e));
     });
-    if (!items.length) { toast('配队码里没有可识别的干员'); return; }
+    if (!items.length) { toast('配队码中未包含可识别的干员'); return; }
     state.hand = items.slice(0, MAX_HAND);
     state.teamFilter = names.slice(0, MAX_HAND);
     state.whFilter.onlyTeam = true;
@@ -2636,7 +2691,7 @@
   }
 
   function toggleTeamFilter() {
-    if (!state.teamFilter.length) { toast('先导入配队码'); return; }
+    if (!state.teamFilter.length) { toast('请先导入配队码'); return; }
     state.whFilter.onlyTeam = !state.whFilter.onlyTeam;
     if (teamFilterBtn) teamFilterBtn.classList.toggle('active', !!state.whFilter.onlyTeam);
     updateWhFilterUI();
@@ -2644,9 +2699,11 @@
   }
 
   function clearWhFilters() {
+    if (!whFilterAnyCondition()) return;
     state.whFilter = { q: '', tiers: [], tags: [], triggers: [], tagMode: 'or', onlyTeam: false };
     syncWhControls();
     renderWarehouse();
+    toast('已清除全部筛选条件');
   }
 
   function addToHand(name, elite) {
@@ -2668,7 +2725,7 @@
     const idx = state.hand.findIndex(function (it) { return it.id === id; });
     if (idx < 0) return;
     const item = state.hand[idx];
-    if (state.pending && state.pending.handId === id) { toast('先完成或取消当前放置'); return; }
+    if (state.pending && state.pending.handId === id) { toast('请先完成或取消当前放置'); return; }
     state.hand.splice(idx, 1);
     state.selectedHand = null;
     state.selectedWarehouse = item.name;
@@ -2689,7 +2746,7 @@
   }
 
   function clearHand() {
-    if (!state.hand.length) { toast('待部署区已经是空的'); return; }
+    if (!state.hand.length) { toast('待部署区已为空'); return; }
     if (state.pending) cancelPending();
     state.hand = [];
     state.selectedHand = null;
@@ -2716,14 +2773,14 @@
   }
 
   function killEnemyAtCell(r, c) {
-    if (state.phase !== 'combat') { toast('只能在作战期击倒敌人'); return; }
+    if (state.phase !== 'combat') { toast('仅可在作战期击倒敌人'); return; }
     state.mode = 'idle';
     log('击倒 r' + (r + 1) + 'c' + (c + 1) + ' 的敌人（按格内范围结算）', 'event');
     triggerEvent('onKill', { enemy: { r: r, c: c } });
   }
 
   function killEnemyByOp(op) {
-    if (state.phase !== 'combat') { toast('只能在作战期击倒敌人'); return; }
+    if (state.phase !== 'combat') { toast('仅可在作战期击倒敌人'); return; }
     state.mode = 'idle';
     log('击倒敌人：由 ' + op.name + ' 击倒（不计格，范围词条仍触发一次）', 'event');
     triggerEvent('onKill', { op: op, forceInRange: true, noCell: true });
@@ -2743,7 +2800,7 @@
   }
 
   function handleEvent(name) {
-    if (state.pending) { toast('先完成或取消当前放置'); return; }
+    if (state.pending) { toast('请先完成或取消当前放置'); return; }
     if (name === 'prepStart') {
       if (state.phase !== 'prep') { toast('当前不在休整期'); return; }
       if (state.prepStarted) { toast('本回合休整期已开始'); return; }
@@ -2751,7 +2808,7 @@
       return;
     }
     if (name === 'prepEnd') {
-      if (state.phase !== 'prep' || !state.prepStarted) { toast('先进入休整期'); return; }
+      if (state.phase !== 'prep' || !state.prepStarted) { toast('请先进入休整期'); return; }
       state.phase = 'combat';
       state.prepStarted = false;
       state.battleCounters = {};
@@ -2766,13 +2823,13 @@
     }
     if (name === 'battleStart') {
       if (state.phase !== 'combat') return;
-      if (state.battleStartDone) { toast('本场战斗已结算战斗开始'); return; }
+      if (state.battleStartDone) { toast('本场战斗的开始阶段已结算'); return; }
       beginBattle();
       renderAll();
       return;
     }
     if (name === 'battleEnd') {
-      if (state.phase !== 'combat') { toast('只能在作战期结束作战'); return; }
+      if (state.phase !== 'combat') { toast('仅可在作战期结束作战'); return; }
       triggerEvent('onBattleEnd');
       generateReport('作战期');
       state.phase = 'prep';
@@ -2795,23 +2852,23 @@
       return;
     }
     if (name === 'skill') {
-      if (state.phase !== 'combat') { toast('先结束休整期，进入作战期'); return; }
+      if (state.phase !== 'combat') { toast('请先结束休整期并进入作战期'); return; }
       const op = selectedOpObj();
-      if (!op) { toast('先选中一名已上场干员'); return; }
+      if (!op) { toast('请先选择一名已上场干员'); return; }
       triggerEvent('onSkill', { op: op });
       return;
     }
     if (name === 'knockdown') {
-      if (state.phase !== 'combat') { toast('只能在作战期结算我方击倒'); return; }
+      if (state.phase !== 'combat') { toast('仅可在作战期结算我方被击倒'); return; }
       const op = selectedOpObj();
-      if (!op) { toast('先选中一名已上场干员'); return; }
+      if (!op) { toast('请先选择一名已上场干员'); return; }
       triggerEvent('onKnockdown', { op: op });
       return;
     }
     if (name === 'gain') {
-      if (state.phase !== 'prep') { toast('只能在休整期触发获得时'); return; }
+      if (state.phase !== 'prep') { toast('仅可在休整期触发获得时'); return; }
       const item = state.hand.find(function (it) { return it.id === state.selectedHand; });
-      if (!item) { toast('先选中一张待部署区的干员，再点「获得时」'); return; }
+      if (!item) { toast('请先选择一名待部署区干员，再点击「获得时」'); return; }
       if (item.gained) { toast(item.name + ' 的「获得时」已触发过'); return; }
       item.gained = true;
       if (!item.gainCounted) {
@@ -2835,7 +2892,7 @@
       return;
     }
     if (name === 'killEnemy') {
-      if (state.phase !== 'combat') { toast('只能在作战期击倒敌人'); return; }
+      if (state.phase !== 'combat') { toast('仅可在作战期击倒敌人'); return; }
       const op = selectedOpObj();
       if (op) { killEnemyByOp(op); return; }
       state.mode = state.mode === 'killEnemy' ? 'idle' : 'killEnemy';
@@ -2843,7 +2900,7 @@
       state.selectedWarehouse = null;
       state.selectedOp = null;
       renderAll();
-      if (state.mode === 'killEnemy') toast('点格子击倒格内敌人；点已上场干员则由此干员击倒');
+      if (state.mode === 'killEnemy') toast('点击地块击倒该格敌人；点击已上场干员则由该干员击倒');
       return;
     }
   }
@@ -2890,7 +2947,7 @@
       const gained = item.gained ? ' gained' : '';
       const range = rangeIdOf(name, item.elite);
       return '<div class="hand-card' + sel + pending + elite + gained + '" data-hand="' + esc(name) + '" data-hand-id="' + item.id + '" data-tip="op" data-name="' + esc(name) + '" title="点击选择 ' + esc(name) + '">' +
-        '<button class="hand-del" data-del-hand="' + item.id + '" title="删除这张手牌">×</button>' +
+        '<button class="hand-del" data-del-hand="' + item.id + '" title="从待部署区移除该干员">×</button>' +
         '<button class="hand-elite" data-elite-hand="' + item.id + '" title="切换精锐">' + (item.elite ? '撤精' : '精锐') + '</button>' +
         '<img class="hand-avatar" src="' + esc(avatarOf(name)) + '" alt="' + esc(name) + '" loading="lazy" draggable="false" onerror="this.style.visibility=\'hidden\'">' +
         '<div class="hand-info">' +
@@ -2933,14 +2990,14 @@
     warehouseEl.innerHTML = names.map(function (name) {
       const m = OP_META[name];
       const range = rangeIdOf(name, false);
-      return '<div class="hand-card warehouse-card" data-warehouse="' + esc(name) + '" data-tip="op" data-name="' + esc(name) + '" title="拖到下方待部署区，或点右下角按钮">' +
+      return '<div class="hand-card warehouse-card" data-warehouse="' + esc(name) + '" data-tip="op" data-name="' + esc(name) + '" title="拖入战场直接部署，或拖入下方待部署区；点击右下角按钮加入待部署区">' +
         '<img class="hand-avatar" src="' + esc(avatarOf(name)) + '" alt="' + esc(name) + '" loading="lazy" draggable="false" onerror="this.style.visibility=\'hidden\'">' +
         '<div class="hand-info">' +
           '<div class="hand-name">' + esc(name) + '<span class="tier">' + esc(m.tierLabel || '') + '</span></div>' +
           '<div class="cov-tags">' + covTags(m.tags) + '</div>' +
           '<div class="hand-meta"><span class="range">' + esc(range) + '</span><span class="pos">' + posLabel(m) + '</span></div>' +
         '</div>' +
-        '<button class="add-hand" data-add-hand="' + esc(name) + '" title="加入手牌区">加入手牌区</button>' +
+        '<button class="add-hand" data-add-hand="' + esc(name) + '" title="加入待部署区">加入待部署区</button>' +
       '</div>';
     }).join('');
   }
@@ -2965,7 +3022,7 @@
     return '<div class="pending-preview" data-pending="1" data-tip="op" data-name="' + esc(p.name) + '">' +
       '<img src="' + esc(avatarOf(p.name)) + '" alt="' + esc(p.name) + '" draggable="false" onerror="this.style.visibility=\'hidden\'">' +
       '<div class="pending-wheel"><span class="pending-ring"></span>' + arrows + '<span class="pending-cancel" data-cancel="1">✕</span></div>' +
-      '<div class="pending-hint">' + (p.dir ? '松手部署 · 朝' + DIR_LABEL[p.dir] : '拖动方向 / 点箭头（默认右）') + '</div>' +
+      '<div class="pending-hint">' + (p.dir ? '释放以部署 · 朝' + DIR_LABEL[p.dir] : '拖动方向 / 点击箭头（默认右）') + '</div>' +
     '</div>';
   }
 
@@ -3092,7 +3149,7 @@
           '</div>' +
         '</div>' +
         '<div class="detail-actions"><button class="btn ghost" data-act="cancel-pending">' + (p.kind === 'move' ? '取消并还原' : '取消放置') + '</button></div>' +
-        '<div class="detail-note">' + (p.kind === 'move' ? '已移动/交换：拖动方向选择新朝向；取消会还原位置。' : '从格子向上下左右拖动选朝向，或直接点箭头；松手/点击后部署。') + '</div>';
+        '<div class="detail-note">' + (p.kind === 'move' ? '已移动 / 交换：拖动方向确定新朝向；取消则还原位置。' : '朝向设置：从地块向上下左右拖动，或点击方向箭头；确认后完成部署。') + '</div>';
       return;
     }
     const op = selectedOpObj();
@@ -3116,7 +3173,7 @@
         opBattleCapText(op) +
         opTraitText(op) +
         ruleSummaryHtml(op.name, op.elite) +
-        '<div class="detail-note">选中时棋盘显示攻击范围；拖动干员可移动/换位并重新选朝向；头像右上角紧急出口撤退。</div>';
+        '<div class="detail-note">选中后战场显示攻击范围；拖动干员可移动或交换位置，并重新确定朝向；点击头像右上角的「紧急出口」可撤退。</div>';
       return;
     }
 
@@ -3139,7 +3196,7 @@
           '<button class="btn ghost" data-act="to-warehouse">移回仓库</button>' +
         '</div>' +
         ruleSummaryHtml(hm.name, item.elite) +
-        '<div class="detail-note">拖到棋盘后松手，再从格子向上下左右拖动选朝向。高台只能放远程；不可部署地块会拒绝放置。</div>';
+        '<div class="detail-note">放置干员：将干员拖入战场，放置后拖动方向确定朝向。高台仅可部署远程干员；不可部署地块无法放置干员。</div>';
       return;
     }
 
@@ -3157,12 +3214,12 @@
           '</div>' +
         '</div>' +
         '<div class="detail-actions"><button class="btn" data-act="to-hand">移入待部署区</button></div>' +
-        '<div class="detail-note">拖到下方待部署区，或点按钮。仓库里的干员不参与手牌区效果。</div>';
+        '<div class="detail-note">拖入下方「待部署区」，或点击「移入待部署区」。卡牌仓库中的干员不参与待部署区效果。</div>';
       return;
     }
 
     inspectorEl.innerHTML =
-      '<div class="inspector-empty">拖入干员查看详情。</div>';
+      '<div class="inspector-empty">选择干员查看详情。</div>';
   }
 
   let openBondName = null;
@@ -3175,6 +3232,7 @@
     const ev = getEval();
     const layerCount = ev.rows.filter(function (r) { return (state.layers[r.name] || 0) + (state.temp[r.name] || 0) > 0; }).length;
     if (bondSummaryEl) bondSummaryEl.textContent = ev.summary.active + ' 激活 / ' + ev.rows.length + ' · ' + layerCount + ' 项有层';
+    if (clearLayersBtn) clearLayersBtn.disabled = !hasLayerState();
     if (!bondStripEl) return;
     bondStripEl.innerHTML = ev.rows.map(function (row) {
       const layer = (state.layers[row.name] || 0) + (state.temp[row.name] || 0);
@@ -3257,6 +3315,37 @@
     if (openBondName === name) updateBondPop(name);
   }
 
+  function hasLayerState() {
+    const anyPositive = function (map) {
+      return Object.keys(map || {}).some(function (k) { return (map[k] || 0) > 0; });
+    };
+    return anyPositive(state.layers) || anyPositive(state.temp) ||
+      Object.keys(state.counters || {}).length > 0 ||
+      Object.keys(state.battleCounters || {}).length > 0 ||
+      Object.keys(state.totalCounters || {}).length > 0 ||
+      state.stackEvents.length > 0;
+  }
+
+  // 一键归零：固定层 + 临时层 + 各种上限计数 + 层数事件；不动干员、特质、刷新/获得计数。
+  function clearAllLayers() {
+    if (!hasLayerState()) { toast('暂无可归零的叠层'); return; }
+    const names = {};
+    Object.keys(state.layers || {}).forEach(function (k) { if ((state.layers[k] || 0) > 0) names[k] = true; });
+    Object.keys(state.temp || {}).forEach(function (k) { if ((state.temp[k] || 0) > 0) names[k] = true; });
+    const count = Object.keys(names).length;
+    state.layers = {};
+    state.temp = {};
+    state.counters = {};
+    state.battleCounters = {};
+    state.totalCounters = {};
+    state.stackEvents = [];
+    state.lastReport = null;
+    if (reportPanel) reportPanel.hidden = true;
+    log('所有叠层已归零：固定层 / 临时层 / 上限计数已清空', 'event');
+    renderAll();
+    toast(count ? '已归零 ' + count + ' 个盟约的层数' : '所有叠层已归零');
+  }
+
   function renderLog() {
     if (!logListEl) return;
     if (!state.logs.length) {
@@ -3271,24 +3360,24 @@
 
   function renderHint() {
     if (state.pending) {
-      hintEl.innerHTML = '<b>已放下：</b>金色格为当前朝向的攻击范围预览；拖动方向或点箭头，松手部署；点 ✕ 取消。';
+      hintEl.innerHTML = '<b>已放置：</b>金色地块为当前朝向的攻击范围预览；拖动方向或点击箭头后完成部署；点击 ✕ 取消。';
     } else if (state.mode === 'killEnemy') {
-      hintEl.innerHTML = '<b>击倒敌人：</b>选中干员后点此按钮，直接由该干员击倒并触发其范围词条；未选中时进入点格模式。';
+      hintEl.innerHTML = '<b>击倒敌人：</b>选中干员后点击此按钮，由该干员击倒并触发其范围词条；未选中干员时进入选择地块模式。';
     } else if (state.selectedOp && capAuraHintFor(selectedOpObj())) {
       hintEl.innerHTML = capAuraHintFor(selectedOpObj()) + '<br><span class="muted">仅作战期生效。</span>';
     } else if (state.phase === 'combat') {
       const sel = selectedOpObj();
-      hintEl.innerHTML = '<b>作战期：</b>已上场干员锁定，不能移动、撤退或晋升；仍可从待部署区部署并触发「部署时」。' + (sel ? '已选中 ' + esc(sel.name) + '，可开启技能。' : '可选中干员开启技能，或击倒敌人。');
+      hintEl.innerHTML = '<b>作战期：</b>已上场干员锁定，无法移动、撤退或晋升；仍可从卡牌仓库 / 待部署区部署，并触发「部署时」。' + (sel ? '已选中 ' + esc(sel.name) + '，可开启技能。' : '可选择干员开启技能，或击倒敌人。');
     } else if (state.selectedHand) {
       const item = selectedHandItem();
-      hintEl.innerHTML = '<b>' + esc(item ? item.name : '') + (item && item.elite ? '（精锐）' : '') + '：</b>拖到棋盘，松手后再拖方向；点「获得时」只触发该干员。';
+      hintEl.innerHTML = '<b>' + esc(item ? item.name : '') + (item && item.elite ? '（精锐）' : '') + '：</b>拖入战场并放置后，再拖动方向确定朝向；「获得时」仅对该干员生效。';
     } else if (state.selectedWarehouse) {
-      hintEl.innerHTML = '<b>' + esc(state.selectedWarehouse) + '：</b>拖到下方「待部署区」，或点右侧「移入待部署区」。';
+      hintEl.innerHTML = '<b>' + esc(state.selectedWarehouse) + '：</b>拖入战场即可部署，或拖入下方「待部署区」；也可点击右侧「移入待部署区」。';
     } else if (state.selectedOp) {
       const op = selectedOpObj();
-      hintEl.innerHTML = op ? '<b>' + esc(op.name) + '：</b>棋盘显示攻击范围；点右上角箭头改朝向。' : '';
+      hintEl.innerHTML = op ? '<b>' + esc(op.name) + '：</b>战场显示攻击范围；点击头像左上角的方向环可调整朝向。' : '';
     } else {
-      hintEl.innerHTML = '拖一张手牌到地面/高台；松手后拖方向选朝向。';
+      hintEl.innerHTML = '将卡牌仓库或待部署区中的干员拖入战场地块，放置后拖动方向确定朝向。';
     }
   }
 
@@ -3306,40 +3395,40 @@
     if (prepStartBtn) {
       prepStartBtn.hidden = !(state.phase === 'prep' && !state.prepStarted);
       prepStartBtn.disabled = state.phase !== 'prep' || state.prepStarted;
-      prepStartBtn.title = state.phase !== 'prep' ? '只能在休整期使用' : state.prepStarted ? '本回合休整期已开始' : '开始本回合休整期';
+      prepStartBtn.title = state.phase !== 'prep' ? '仅可在休整期使用' : state.prepStarted ? '本回合休整期已开始' : '开始本回合休整期';
     }
     if (prepEndBtn) {
       prepEndBtn.disabled = state.phase !== 'prep' || !state.prepStarted;
-      prepEndBtn.title = state.phase !== 'prep' ? '当前不在休整期' : !state.prepStarted ? '先进入休整期' : '结束休整期并进入作战期';
+      prepEndBtn.title = state.phase !== 'prep' ? '当前不在休整期' : !state.prepStarted ? '请先进入休整期' : '结束休整期并进入作战期';
     }
     if (battleEndBtn) {
       battleEndBtn.disabled = state.phase !== 'combat';
-      battleEndBtn.title = state.phase === 'combat' ? '结束本回合作战期' : '只能在作战期使用';
+      battleEndBtn.title = state.phase === 'combat' ? '结束本回合作战期' : '仅可在作战期使用';
     }
     if (battleCapBtn) {
       battleCapBtn.disabled = state.phase !== 'combat';
-      battleCapBtn.title = state.phase === 'combat' ? '测试用：补满战斗中每回合/每场战斗叠层和已获得特质' : '只能在作战期使用';
+      battleCapBtn.title = state.phase === 'combat' ? '测试功能：补满本回合战斗中的叠层与已获得特质' : '仅可在作战期使用';
     }
     if (gainBtn) {
       const gainItem = selectedHandItem();
       const gainOk = state.phase === 'prep' && !!gainItem && !gainItem.gained;
       gainBtn.disabled = !gainOk;
-      gainBtn.title = gainOk ? '对选中手牌触发获得时' : state.phase !== 'prep' ? '只能在休整期触发获得时' : gainItem ? '这张手牌已经触发过获得时' : '先选中一张待部署区手牌';
+      gainBtn.title = gainOk ? '对选中待部署区干员触发获得时' : state.phase !== 'prep' ? '仅可在休整期触发获得时' : gainItem ? '该干员已触发过获得时' : '请先选择一名待部署区干员';
     }
     if (killBtn) {
       killBtn.disabled = state.phase !== 'combat';
-      killBtn.title = state.phase === 'combat' ? '点格子或干员，触发击倒' : '只能在作战期击倒敌人';
+      killBtn.title = state.phase === 'combat' ? '点击地块或干员触发击倒' : '仅可在作战期击倒敌人';
       killBtn.classList.toggle('active', state.mode === 'killEnemy');
     }
     if (skillBtn) {
       const ok = !!state.selectedOp && state.phase === 'combat';
       skillBtn.disabled = !ok;
-      skillBtn.title = ok ? '对选中干员触发「开启技能」' : '选中已上场干员并进入作战期后可用';
+      skillBtn.title = ok ? '对选中干员触发「开启技能」' : '需选中已上场干员并处于作战期';
     }
     if (knockdownBtn) {
       const ok = !!state.selectedOp && state.phase === 'combat';
       knockdownBtn.disabled = !ok;
-      knockdownBtn.title = ok ? '对选中干员触发「我方被击倒」' : '选中已上场干员并进入作战期后可用';
+      knockdownBtn.title = ok ? '对选中干员触发「我方被击倒」' : '需选中已上场干员并处于作战期';
     }
   }
 
@@ -3548,8 +3637,8 @@
       const dirEl = e.target.closest('.pending-dir');
       if (dirEl) { confirmPending(dirEl.getAttribute('data-dir')); return; }
       if (e.target.closest('.pending-cancel')) { cancelPending(); return; }
-      if (e.target.closest('.pending-preview')) { toast('拖动方向或点箭头选择朝向'); return; }
-      toast('先完成或取消当前放置');
+      if (e.target.closest('.pending-preview')) { toast('请拖动方向或点击箭头确定朝向'); return; }
+      toast('请先完成或取消当前放置');
       return;
     }
     const eliteEl = e.target.closest('.op-elite');
@@ -3577,7 +3666,7 @@
       return;
     }
     if (state.selectedHand) {
-      toast('拖动手牌到棋盘，拖动上 / 右 / 下 / 左选择朝向');
+      toast('请将待部署区干员拖入战场，拖动上 / 右 / 下 / 左确定朝向');
       return;
     }
     state.selectedHand = null;
@@ -3652,7 +3741,7 @@
   if (sandboxCopyBtn) sandboxCopyBtn.addEventListener('click', copySandboxCode);
   if (sandboxImportBtn) sandboxImportBtn.addEventListener('click', function () {
     const text = sandboxCodeText ? String(sandboxCodeText.value || '').trim() : '';
-    if (!text) { toast('先在文本框里粘贴沙盒码'); return; }
+    if (!text) { toast('请先在文本框中粘贴沙盒码'); return; }
     importSandboxCode(text);
   });
   if (sandboxDownloadBtn) sandboxDownloadBtn.addEventListener('click', downloadSandboxCode);
@@ -3669,7 +3758,7 @@
   }
 
   if (clearHandBtn) clearHandBtn.addEventListener('click', clearHand);
-  if (whSearch) whSearch.addEventListener('input', function () { state.whFilter.q = whSearch.value; renderWarehouse(); });
+  if (whSearch) whSearch.addEventListener('input', function () { state.whFilter.q = whSearch.value; updateWhFilterUI(); renderWarehouse(); });
   if (whFilterToggle) whFilterToggle.addEventListener('click', toggleWhFilterPanel);
   if (whFilters) {
     whFilters.addEventListener('click', function (e) {
@@ -3689,7 +3778,7 @@
   }
   if (importCodeBtn) importCodeBtn.addEventListener('click', importTeamCode);
   if (teamFilterBtn) teamFilterBtn.addEventListener('click', toggleTeamFilter);
-  if (clearWhBtn) clearWhBtn.addEventListener('click', clearWhFilters);
+  if (whClearAllBtn) whClearAllBtn.addEventListener('click', clearWhFilters);
 
   if (freePlus) freePlus.addEventListener('click', function () { state.freeRefreshes++; renderStatus(); });
   if (freeMinus) freeMinus.addEventListener('click', function () { state.freeRefreshes = Math.max(0, state.freeRefreshes - 1); renderStatus(); });
@@ -3719,12 +3808,14 @@
     renderLog();
   });
 
+  if (clearLayersBtn) clearLayersBtn.addEventListener('click', clearAllLayers);
+
   // ---- 战场选择 ----
   if (mapPickBtn) mapPickBtn.addEventListener('click', openMapPicker);
   function showCurrentMapDetail() {
     const p = presetById(CURRENT_PRESET);
     if (p && window.GSPA_MAP_PICKER) window.GSPA_MAP_PICKER.showDetail(p);
-    else toast('先在「更换战场」里选一张战场');
+    else toast('请先在「更换战场」中选择战场');
   }
   if (mapThumbEl) { mapThumbEl.style.cursor = 'zoom-in'; mapThumbEl.addEventListener('click', showCurrentMapDetail); }
   if (mapNameEl) { mapNameEl.style.cursor = 'pointer'; mapNameEl.addEventListener('click', showCurrentMapDetail); }

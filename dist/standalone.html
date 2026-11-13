@@ -1978,7 +1978,7 @@ body.is-dragging .slot { pointer-events: none; }
     <div class="cards" id="cards"></div>
     <div class="empty" id="empty" hidden>
       <p class="empty-t">没有匹配的条目</p>
-      <p class="empty-d">试试减少筛选条件，或换一个关键词。</p>
+      <p class="empty-d">可减少筛选条件，或更换关键词。</p>
       <button class="btn btn-primary" type="button" data-reset>重置所有条件</button>
     </div>
   </section>
@@ -1992,7 +1992,7 @@ body.is-dragging .slot { pointer-events: none; }
 <footer class="footer" id="footer"></footer>
 
 <noscript>
-  <div class="noscript">这个工具需要启用 JavaScript 才能运行。数据本身已内嵌在页面里，不会发起任何网络请求。</div>
+  <div class="noscript">本工具需启用 JavaScript 才能运行。数据已内嵌于页面中，不会发起任何网络请求。</div>
 </noscript>
 
 <script>
@@ -4894,7 +4894,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '<span class="pill">' + esc(s.strategyRole) + '</span></h4>' +
       '<p>' + (st ? Search.format(st.text, toks) : '第 1 回合获得该特殊干员') + '</p>' +
       '</button>' +
-      '<p class="d-note">它不是普通干员池里的条目，默认不显示；直接搜索「' +
+      '<p class="d-note">该干员不属于普通干员条目，默认不显示；可直接搜索「' +
       esc((s.aliases || []).slice(0, 3).join('」「')) + '」或从策略详情进入。</p>' +
       (s.unpackNote ? '<p class="d-note">解包溯源：' + esc(s.unpackNote) + '</p>' : '') +
       '</div>';
@@ -5074,7 +5074,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
         '<p>' + esc(sp && sp.special ? prtsMetaLine(sp.special.prts) : '') +
         ' · 点击查看干员档案</p></div></div></button>' +
         '<p class="d-note">策略角色「' + esc(s.role) + '」是策略发起人，不等于被召唤的干员；' +
-        '该干员默认是隐藏条目，从这里进入可直接打开完整档案。</p></div>';
+        '该干员默认为隐藏条目，可由此处直接打开完整档案。</p></div>';
     }
 
     if (s.fixedUnits && s.fixedUnits.units.length) {
@@ -5225,8 +5225,8 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     return '<article class="about">' +
       '<h2>GSPA · 眼镜卫戍协议小助手</h2>' +
       '<p>GSPA 是 <b>G</b>lasses-<b>S</b>tronghold-<b>P</b>rotocol-<b>A</b>ssistant 的缩写，即「眼镜卫戍协议小助手」。</p>' +
-      '<p>把《明日方舟》卫戍协议的数据表做成一个<b>打开即用、用完即走</b>的查询工具。' +
-      '没有后端、没有登录、没有任何外部请求：整站就是一份静态文件，数据已经内嵌在页面里。</p>' +
+      '<p>将《明日方舟》卫戍协议的数据表整理为<b>免安装、免登录</b>的查询工具。' +
+      '站点为纯静态文件，无后端与外部请求，数据已内嵌于页面中。</p>' +
 
       '<div class="stats">' +
       '<div class="stat"><b>' + c.operators + '</b><span>干员条目</span></div>' +
@@ -5240,24 +5240,24 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '<div class="stat"><b>' + c.buffs + '</b><span>补给增益</span></div>' +
       '</div>' +
 
-      '<h3>怎么用</h3>' +
+      '<h3>使用方式</h3>' +
       '<ul>' +
-      '<li><b>搜索</b>：空格分隔多个关键词，全部命中才显示；关键词会在卡片里高亮。</li>' +
-      '<li><b>筛选</b>：阶数、盟约、触发时机、售价可多选；盟约支持「全部（AND）／任一（OR）」切换。</li>' +
-      '<li><b>深链</b>：地址栏就是状态。点右上角分享按钮复制链接，发给别人打开即还原视图、筛选和详情。</li>' +
-      '<li><b>键盘</b>：<code>/</code> 聚焦搜索框，<code>Esc</code> 关闭详情，<code>←</code> <code>→</code> 在结果间切换。</li>' +
-      '<li><b>标题</b>：卡片上的盟约标签统一用「盟约图标 + 名称」显示，底色由盟约名哈希固定，全站一致；点击标签直接筛该盟约。</li>' +
-      '<li><b>图片</b>：顶栏的人像按钮可一键隐藏干员头像与道具 / 策略 / 盟约图标，隐藏后干员用色块 + 首字，盟约标签退回色点 + 名称；偏好会记住。</li>' +
+      '<li><b>搜索</b>：以空格分隔多个关键词，仅显示全部命中的条目；关键词在卡片中高亮。</li>' +
+      '<li><b>筛选</b>：阶数、盟约、触发时机与售价支持多选；盟约支持「全部（AND）／任一（OR）」切换。</li>' +
+      '<li><b>深链</b>：地址栏即当前状态。点击右上角分享按钮可复制链接，他人打开后将还原视图、筛选与详情。</li>' +
+      '<li><b>键盘</b>：<code>/</code> 聚焦搜索框，<code>Esc</code> 关闭详情，<code>←</code> <code>→</code> 切换结果。</li>' +
+      '<li><b>标题</b>：卡片上的盟约标签统一显示为「盟约图标 + 名称」，底色由盟约名哈希固定，全站一致；点击标签可直接按该盟约筛选。</li>' +
+      '<li><b>图片</b>：顶栏的人像按钮可隐藏干员头像与道具 / 策略 / 盟约图标；隐藏后干员以「色块 + 首字」显示，盟约标签退回「色点 + 名称」，偏好将被保留。</li>' +
       '</ul>' +
 
       '<h3>数据来源</h3>' +
       '<p>数据取自官方 Android 热更新解包（本期 V3_1），并经过构建期校验：表头守卫、行数断言、' +
-      '枚举校验、引用完整性检查。页脚显示的数据版本即源表修改时间，可据此确认看到的是不是最新一版。</p>' +
+      '枚举校验、引用完整性检查。页脚显示的数据版本即源表修改时间，可用于确认当前数据版本。</p>' +
       '<p>干员头像与道具 / 策略 / 盟约图标均抓取自 ' +
       '<a href="https://prts.wiki" target="_blank" rel="noopener noreferrer">PRTS wiki</a>，' +
       '并锚定本期「卫戍协议·规程」页面实际渲染的文件；策略图标为「策略发起人」头像，' +
       '不混用 2024 / 2025-11「盟约」/ 2026-03「盟约 下半」的素材。游戏美术版权归鹰角网络所有，' +
-      '此处仅作非商业的玩家查询用途；如果权利人提出异议，关闭图片显示或删除对应文件即可。</p>' +
+      '此处仅作非商业的玩家查询用途；如权利人提出异议，可关闭图片显示或删除相应文件。</p>' +
       '<p>已知限制：自选干员单独成类、不占盟约固定 10 人，全队最多 2 名；「绝技」没有固定成员，按精锐数量判定；' +
       '「盟约·辅助干员」与「“暴躁铁皮”」默认隐藏，可搜索「优等生」「Pith」「森蚺」「暴躁铁皮」直接命中，' +
       '也可从策略详情跳转，或在筛选里打开隐藏条目。</p>' +
@@ -6025,13 +6025,13 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     if (res.morphIssues.length) {
       var parts = [];
       for (var i = 0; i < res.morphIssues.length; i++) parts.push('第 ' + (res.morphIssues[i].slot + 1) + ' 席 ' + res.morphIssues[i].name);
-      warns.push('变形同构体还缺「另一件装备所属盟约」：' + esc(parts.join('、')) + '（在席位里手动指定转职盟约）');
+      warns.push('变形同构体缺少「另一件装备所属盟约」：' + esc(parts.join('、')) + '（请在席位中手动指定转职盟约）');
     }
     for (var w = 0; w < warns.length; w++) h += '<p class="tm-warn">' + warns[w] + '</p>';
 
     if (!s.filled) {
-      h += '<p class="tm-hint">点下面的空位选人，盟约会随着队伍实时判定；' +
-        '每位干员最多带 2 件装备，<b>变形同构体</b>会按另一件装备的盟约给携带者转职。</p>';
+      h += '<p class="tm-hint">点击下方空位选择干员，盟约将随队伍实时判定；' +
+        '每名干员最多携带 2 件装备，<b>变形同构体</b>会按另一件装备的盟约赋予携带者转职。</p>';
     }
     return h;
   }
@@ -6222,7 +6222,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
         ' value="' + (r.layer > 0 ? r.layer : '') + '" placeholder="0"' +
         ' aria-label="' + esc(r.name) + '层数">' +
         nodes +
-        '<i class="cov-cal" title="点开盟约详情可看按层数算出的具体数值">ⓘ</i>' +
+        '<i class="cov-cal" title="展开盟约详情可查看按层数计算的数值">ⓘ</i>' +
         '</label>';
     }
 
@@ -6566,7 +6566,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       }
       if (bag.picks) msg.push('自选干员暂无词条数据');
       body = '<p class="tm-tr-empty">' +
-        (msg.length ? msg.join('；') + '。' : '加入干员后，这里会按触发时机汇总全队词条。') +
+        (msg.length ? msg.join('；') + '。' : '加入干员后，将按触发时机在此汇总全队词条。') +
         '</p>';
     } else {
       var keys = [];
@@ -6645,7 +6645,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '</div>' +
       '<button type="button" class="tm-traits-rail" data-traits-toggle' +
       ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tm-traits-body"' +
-      ' title="上下拖动可移动；拖到屏幕左半边松手吸附左侧；点击展开词条栏">' +
+      ' title="上下拖动可移动；拖至屏幕左半侧释放即吸附左侧；点击展开词条栏">' +
       '<span class="tm-traits-rail-grip" aria-hidden="true">⠿</span>' +
       '<span class="tm-traits-rail-text">词条</span>' +
       '<span class="tm-traits-rail-count">' + bag.total + '</span>' +
@@ -6927,7 +6927,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
         (nActive ? '<span class="badge">' + nActive + '</span>' : '') + '</button>') +
       (isPick ? '' :
         '<button type="button" class="sheet-batch" data-batch-toggle aria-pressed="' +
-        (picker.batch ? 'true' : 'false') + '" title="连续添加：填完一个自动跳到下一个">连续添加</button>') +
+        (picker.batch ? 'true' : 'false') + '" title="连续添加：选择一个后自动进入下一席">连续添加</button>') +
       '<button type="button" class="d-close" data-sheet-close aria-label="关闭">' +
       '<svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>' +
       '</div>';
@@ -6969,7 +6969,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       sub = '每位干员最多 2 件' + (picker.batch ? ' · 连续添加' : '');
     } else {
       title = (cur && cur.k ? '更换第 ' : '第 ') + (slot + 1) + ' 席';
-      sub = picker.batch ? '连续添加 · 点一名填一席' : '场上 ' + countFilled(team) + ' / ' + team.size;
+      sub = picker.batch ? '连续添加 · 每次选择占用一席' : '场上 ' + countFilled(team) + ' / ' + team.size;
     }
     return { title: title, sub: sub };
   }
@@ -7003,7 +7003,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     if (origin && /^https?:/.test(origin)) base = origin + global.location.pathname;
     else base = String(global.location.href || '').split('#')[0];
     return '【GSPA 配队】' + code + '\n' + base + '#/team?c=' + code +
-      '\n我分享了一个卫戍协议配队，快来看看吧';
+      '\n分享一套卫戍协议配队，点击链接可直接打开。';
   }
 
   function closeBtnHtml() {
@@ -7020,7 +7020,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '</div>' +
       '<div class="share-box">' +
       '<textarea id="share-text" class="sheet-ta" rows="7" readonly spellcheck="false">' + esc(text) + '</textarea>' +
-      '<p class="share-hint"><b>点链接会直接打开这套配队</b>；也可以把整段粘到「导入」。' +
+      '<p class="share-hint"><b>点击链接可直接打开该配队</b>；也可将整段分享文本粘贴至「导入」。' +
       '代码用字典压缩，8 人满编约 22 个字符。</p>' +
       '</div>' +
       '<div class="sheet-foot">' +
@@ -7037,7 +7037,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '</div>' +
       '<div class="share-box">' +
       '<textarea id="import-text" class="sheet-ta" rows="7" spellcheck="false"' +
-      ' placeholder="把分享文本整段粘进来，或粘贴带 #/team 的链接…"></textarea>' +
+      ' placeholder="粘贴分享文本或含 #/team 的链接…"></textarea>' +
       '<div class="import-state" id="import-state">等待粘贴…</div>' +
       '</div>' +
       '<div class="sheet-foot">' +
@@ -7299,7 +7299,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
         '</button>';
     }
 
-    if (!shown) out = '<p class="pick-empty">没有匹配的干员，试试换个关键词或减少筛选。</p>';
+    if (!shown) out = '<p class="pick-empty">没有匹配的干员，请更换关键词或减少筛选条件。</p>';
     return out;
   }
 
@@ -7352,7 +7352,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
         '<span class="pick-act">' + (isUsed ? '已选' : '＋') + '</span>' +
         '</button>';
     }
-    if (!shown) out = '<p class="pick-empty">没有匹配的自选干员，试试换个关键词或减少筛选。</p>';
+    if (!shown) out = '<p class="pick-empty">没有匹配的自选干员，请更换关键词或减少筛选条件。</p>';
     return out;
   }
 
@@ -7507,7 +7507,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
 
     // 连续添加：先补满当前干员的第 2 件，再跳到下一位还有空位的干员
     var next = nextGearTarget(team, picker.slot);
-    if (!next) { closeSheet(); toast('没有空余的装备位了'); return; }
+    if (!next) { closeSheet(); toast('没有空余的装备位'); return; }
     picker.slot = next.slot;
     picker.gear = next.gear;
     refreshAfterChoice();
@@ -7829,7 +7829,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     if ((el = t.closest('[data-team-poster]'))) {
       e.preventDefault();
       if (global.Poster) global.Poster.open();
-      else toast('一图流模块没有加载');
+      else toast('一图流模块未加载');
       return;
     }
     if ((el = t.closest('[data-team-import]'))) { e.preventDefault(); openSheet(-1, 'import', -1); return; }
@@ -8542,7 +8542,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var pal = b.pal;
     sectionHead(b, '干员', model.pieces.length ? model.pieces.length + ' 名' : '');
     if (!model.pieces.length) {
-      b.text(C.pad, b.y, '先在配队页加入干员，再回来生成一图流。', F.sub, 500, pal.fg3);
+      b.text(C.pad, b.y, '请先在配队页加入干员，再生成一图流。', F.sub, 500, pal.fg3);
       b.y += 70;
       return;
     }
@@ -9041,12 +9041,12 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     if (!el) return;
     var msg = '';
     if (kind === 'file') {
-      msg = '这张图不含头像与图标：用 file:// 直接打开时，浏览器禁止把本地图片导出到画布。' +
-        '用本地 http 预览（例如在 web/ 下执行 python -m http.server）或线上地址打开，就能带图。';
+      msg = '此图不含头像与图标：通过 file:// 直接打开时，浏览器禁止将本地图片导出至画布。' +
+        '请改用本地 HTTP 服务（例如在 web/ 下执行 python -m http.server）或线上地址打开，即可包含图片。';
     } else if (kind === 'standalone') {
-      msg = '这张图不含头像与图标：单文件版为了体积没有内嵌这两类素材，用在线版或目录版打开即可带图。';
+      msg = '此图不含头像与图标：单文件版未内嵌这两类素材。请改用线上版或目录版打开，即可包含图片。';
     } else if (kind === 'toggle') {
-      msg = '这张图不含头像与图标：顶栏的图片开关当前是关闭状态。';
+      msg = '此图不含头像与图标：顶栏的图片开关当前处于关闭状态。';
     }
     if (!msg) {
       el.hidden = true;
@@ -9072,7 +9072,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       '<button type="button" class="btn" data-poster-copy-code>复制配队码</button>' +
       '<button type="button" class="btn" data-poster-copy-text>复制分享文本</button>' +
       '</div>' +
-      '<p class="poster-tip">手机上长按图片保存；二维码扫开直达这套配队。</p>' +
+      '<p class="poster-tip">长按图片可保存至相册；扫描二维码可直接打开该配队。</p>' +
       '</div>';
   }
 
@@ -9103,7 +9103,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       box.innerHTML = '<img class="poster-img" alt="配队一图流" src="' + esc(url) + '">';
       var tip = document.querySelector('.poster-tip');
       if (tip) {
-        tip.innerHTML = '手机上长按图片保存（' + parts.canvas.width + '×' + parts.canvas.height + '）';
+        tip.innerHTML = '长按图片可保存至相册（' + parts.canvas.width + '×' + parts.canvas.height + '）';
       }
     }
 
@@ -9122,7 +9122,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
         makeBlobUrl(clean, function (url2) {
           if (token !== state.token) return;
           if (!url2) {
-            box.innerHTML = '<p class="poster-fail">当前环境不允许导出图片，请换用线上版或本地 http 预览。</p>';
+            box.innerHTML = '<p class="poster-fail">当前环境不支持导出图片，请改用线上版或本地 HTTP 预览。</p>';
             return;
           }
           finish(url2);
@@ -9168,7 +9168,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var ok = false;
     try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
     if (ta.parentNode) ta.parentNode.removeChild(ta);
-    toast(ok ? okMsg : '复制失败，请手动选中复制');
+    toast(ok ? okMsg : '复制失败，请手动选择文本复制');
   }
 
   function toast(msg) {
@@ -9182,7 +9182,7 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
       if (t.closest('[data-poster-download]')) {
         e.preventDefault();
         if (state.blob) download();
-        else toast('图片还没生成好');
+        else toast('图片尚未生成');
         return;
       }
       if (t.closest('[data-poster-copy-code]')) {
@@ -9307,10 +9307,10 @@ window.GSPA_DATA = {"version":"2026-11-11 01:05","generatedAt":"2026-11-11 01:38
     var box = document.getElementById('cards');
     var msg = document.createElement('div');
     msg.className = 'empty';
-    msg.innerHTML = '<p class="empty-t">数据没有加载成功</p>' +
+    msg.innerHTML = '<p class="empty-t">数据加载失败</p>' +
       '<p class="empty-d">页面缺少 <code>data/data.js</code>。' +
-      '如果你在本地打开，请先运行 <code>python tools/build_web_data.py</code> 生成数据；' +
-      '如果是部署版，请确认 data 目录随站点一起上传。</p>';
+      '本地打开时，请先运行 <code>python tools/build_web_data.py</code> 生成数据；' +
+      '部署版本请确认 data 目录已随站点上传。</p>';
     box.appendChild(msg);
   }
 

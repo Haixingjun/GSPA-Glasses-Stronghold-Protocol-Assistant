@@ -77,7 +77,9 @@
         kind: options.kind || 'rule',
         detail: options.detail || '',
         tier: options.tier == null ? null : options.tier,
-        markerUid: options.markerUid == null ? null : options.markerUid
+        markerUid: options.markerUid == null ? null : options.markerUid,
+        // 同一目标可能被多名阿戈尔同时吞噬：markerUids 记录全部吞噬者
+        markerUids: Array.isArray(options.markerUids) ? options.markerUids.slice() : null
       };
       events.push(ev);
       if (events.length > maxEvents) events.shift();
