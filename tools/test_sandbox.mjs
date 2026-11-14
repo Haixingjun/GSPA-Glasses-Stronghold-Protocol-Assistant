@@ -179,6 +179,14 @@ sandboxSrc = sandboxSrc.replace(
     applyDeputLayers: applyDeputLayers,
     applySpecialBattleCaps: applySpecialBattleCaps,
     getEval: getEval,
+    itemCapOf: itemCapOf,
+    openGearEditor: openGearEditor,
+    closeGearEditor: closeGearEditor,
+    toggleOpElite: toggleOpElite,
+    addGearToOp: addGearToOp,
+    removeGearAtIndex: removeGearAtIndex,
+    toggleGearForm: toggleGearForm,
+    gearEditor: function () { return gearEditor; },
     effectiveBattleCap: effectiveBattleCap,
     setBondLayer: setBondLayer,
     bondPopHtml: bondPopHtml,
@@ -1384,6 +1392,92 @@ ok('一键归零后「补满叠层」可以重新结算', () => {
   s.phase = 'combat';
   sb.handleEvent('battleCap');
   assert.equal(layer('阿戈尔'), first, '归零后上限计数也应重置，能重新补满');
+});
+
+ok('特殊干员装备槽：“暴躁铁皮”普通 4 件 / 精锐 6 件', () => {
+  const s = reset();
+  s.phase = 'prep';
+  const op = addBoard('“暴躁铁皮”', false, 0, 0, 'right');
+  assert.equal(sb.itemCapOf(op), 4);
+  const gearNames = ctx.window.GSPA_DATA.items.filter((x) => x.type === '装备').map((x) => x.name);
+  sb.openGearEditor(op.uid);
+  for (let i = 0; i < 4; i++) sb.addGearToOp(gearNames[i]);
+  assert.equal(op.it.length, 4, '普通状态应能装 4 件');
+  sb.addGearToOp(gearNames[4]);
+  assert.equal(op.it.length, 4, '普通状态第 5 件应被拒绝');
+
+  sb.toggleOpElite(op.uid);
+  assert.equal(op.elite, true);
+  assert.equal(sb.itemCapOf(op), 6);
+  sb.addGearToOp(gearNames[4]);
+  sb.addGearToOp(gearNames[5]);
+  assert.equal(op.it.length, 6, '精锐状态应能装 6 件');
+
+  sb.toggleOpElite(op.uid);
+  assert.equal(op.elite, false);
+  assert.equal(op.it.length, 4, '撤销精锐后应截断到 4 件');
+  sb.closeGearEditor();
+});
+
+ok('沙盒装备：变形同构体按另一件装备给携带者转职', () => {
+  const s = reset();
+  s.phase = 'prep';
+  const op = addBoard('拜松', false, 0, 0, 'right');
+  op.it = [{ k: '维式重锤', e: false }, { k: '变形同构体', e: false }];
+  let ev = sb.getEval();
+  assert.equal(ev.rows.find((r) => r.name === '维多利亚').count, 1, '应通过转职计入维多利亚');
+  assert.ok(sb.state().board[0].it.length === 2);
+
+  // 另一件装备没有收录盟约时，用 op.m 手动指定兜底
+  op.it = [{ k: '变形同构体', e: false }];
+  op.m = '萨尔贡';
+  ev = sb.getEval();
+  assert.equal(ev.rows.find((r) => r.name === '萨尔贡').count, 1, '手动转职应计入萨尔贡');
+});
+
+ok('沙盒装备界面：场上角标、详情效果、编辑面板可渲染', () => {
+  const s = reset();
+  s.phase = 'prep';
+  const op = addBoard('拜松', false, 0, 0, 'right');
+  op.it = [{ k: '维式重锤', e: false }, { k: '变形同构体', e: false }];
+  s.selectedOp = op.uid;
+  sb.renderAll();
+  assert.match(nodes.get('board').innerHTML, /class="op-gear-count"/, '场上应显示装备数角标');
+  assert.match(nodes.get('board').innerHTML, /data-gear-op="/, '选中干员应有编辑装备按钮');
+  assert.match(nodes.get('inspector').innerHTML, /class="gear-panel"/, '详情应渲染装备区');
+  assert.match(nodes.get('inspector').innerHTML, /gear-row-eff/, '详情应显示装备效果描述');
+  assert.match(nodes.get('inspector').innerHTML, /data-act="gear-edit"/, '详情应有编辑按钮');
+  assert.match(nodes.get('inspector').innerHTML, /维多利亚/, '转职盟约应显示在详情中');
+
+  sb.openGearEditor(op.uid);
+  assert.equal(nodes.get('gearModal').hidden, false, '编辑面板应打开');
+  assert.match(nodes.get('gearEquipped').innerHTML, /data-gear-remove=/, '已装备区应有卸下按钮');
+  assert.match(nodes.get('gearList').innerHTML, /data-gear-add-item=/, '装备列表应有添加按钮');
+  assert.match(nodes.get('gearList').innerHTML, /gear-pick-eff/, '装备列表应显示效果描述');
+  sb.removeGearAtIndex(0, op);
+  assert.equal((op.it || []).length, 1, '卸下后应只剩 1 件');
+  assert.ok(s.logs.some((l) => /卸下/.test(l.text)), '卸下应写入日志');
+  sb.closeGearEditor();
+  assert.equal(nodes.get('gearModal').hidden, true);
+});
+
+ok('沙盒码：装备与转职随场上干员往返，4/6 件不截断', () => {
+  const s = reset();
+  s.phase = 'prep';
+  const op = addBoard('“暴躁铁皮”', true, 1, 1, 'right');
+  const gear = ctx.window.GSPA_DATA.items
+    .filter((x) => x.type === '装备' && x.name !== '变形同构体').slice(0, 5)
+    .map((x, i) => ({ k: x.name, e: i % 2 === 1 }));
+  gear.push({ k: '变形同构体', e: false });
+  op.it = gear;
+  op.m = '维多利亚';
+  const code = sb.makeSandboxCode();
+  assert.match(code, /^GSPS1\./);
+  sb.reset();
+  assert.equal(sb.importSandboxCode(code), true);
+  const back = sb.state().board[0];
+  assert.deepEqual(JSON.parse(JSON.stringify(back.it)), JSON.parse(JSON.stringify(gear)), '6 件装备应完整还原');
+  assert.equal(back.m, '维多利亚', '转职盟约应完整还原');
 });
 
 console.log('\n' + passed + ' 项通过' + (process.exitCode ? '，存在失败' : ''));

@@ -1,33 +1,33 @@
 GSPA · 眼镜卫戍协议小助手 · 构建产物说明
 ========================================
-构建时间：2026-11-13 15:38:44
-数据版本：2026-11-11 01:05
-数据生成：2026-11-11 01:38:50
-资源指纹：9a23de0a
+构建时间：2026-11-14 22:22:32
+数据版本：2026-11-14 22:20
+数据生成：2026-11-14 22:22:08
+资源指纹：05feea20
 
 部署：把整个 dist/ 目录上传到站点根目录或任意子目录即可。
 单文件：dist/standalone.html 可单独发送 / 双击打开，无需其他文件。
 头像：dist/assets/avatars 共 418 个 WebP（3951.5 KB），懒加载；单文件版不含头像。
 图标：dist/assets/icons 共 314 个 WebP（2027.7 KB，本期「规程」道具 / 策略 / 盟约）；单文件版不含图标。
-缓存：资源已带 ?v=9a23de0a，index.html / enemies.html / sandbox.html / map-editor.html 建议 no-cache，静态资源可长缓存。
+缓存：资源已带 ?v=05feea20，index.html / enemies.html / sandbox.html / map-editor.html 建议 no-cache，静态资源可长缓存。
 
 首屏（gzip 前 → 后）：
   index.html           9.4 KB  →   3.2 KB
-  assets/app.css      71.0 KB  →  14.9 KB
-  js/store.js         21.7 KB  →   6.4 KB
+  assets/app.css      71.0 KB  →  15.0 KB
+  js/store.js         22.3 KB  →   6.7 KB
   js/search.js        13.0 KB  →   4.3 KB
-  js/calc.js          16.5 KB  →   5.9 KB
-  js/code.js          11.5 KB  →   4.0 KB
-  js/ui.js            61.7 KB  →  15.5 KB
+  js/calc.js          17.5 KB  →   6.3 KB
+  js/code.js          14.6 KB  →   4.9 KB
+  js/ui.js            61.7 KB  →  15.6 KB
   js/qr.js            16.1 KB  →   5.5 KB
-  js/team.js          89.4 KB  →  24.9 KB
-  js/poster.js        39.3 KB  →  13.2 KB
+  js/team.js          90.3 KB  →  25.4 KB
+  js/poster.js        39.3 KB  →  13.3 KB
   js/app.js           18.6 KB  →   5.6 KB
-  data/data.js       244.6 KB  →  39.1 KB
-  合计                 612.8 KB  →  142.3 KB
+  data/data.js       244.7 KB  →  39.2 KB
+  合计                 618.6 KB  →  144.8 KB
   预算 145 KB（gzip）：通过
 
-单文件版 standalone.html：612.2 KB（gzip 136.4 KB）
+单文件版 standalone.html：618.0 KB（gzip 139.3 KB）
 
 dist 文件清单：
   .nojekyll                    0.0 KB
@@ -445,9 +445,9 @@ dist 文件清单：
   assets/maps/map12-1.webp    52.6 KB
   assets/maps/map12-2.webp    51.5 KB
   assets/maps/map12-3.webp    49.1 KB
-  assets/sandbox.css          53.7 KB
-  data/data.js               244.6 KB
-  data/data.json             303.6 KB
+  assets/sandbox.css          60.4 KB
+  data/data.js               244.7 KB
+  data/data.json             303.8 KB
   data/enemies.js            109.0 KB
   data/maps.js                29.3 KB
   data/operator_positions.js   4.1 KB
@@ -457,23 +457,23 @@ dist 文件清单：
   enemies.html                11.3 KB
   index.html                   9.4 KB
   js/app.js                   18.6 KB
-  js/calc.js                  16.5 KB
-  js/code.js                  11.5 KB
+  js/calc.js                  17.5 KB
+  js/code.js                  14.6 KB
   js/enemies.js               38.6 KB
   js/map-editor.js            14.8 KB
   js/map-presets.js            6.0 KB
   js/poster.js                39.3 KB
   js/qr.js                    16.1 KB
-  js/sandbox-code.js          17.9 KB
-  js/sandbox.js              165.2 KB
+  js/sandbox-code.js          20.8 KB
+  js/sandbox.js              181.7 KB
   js/search.js                13.0 KB
   js/stack-core.js             8.8 KB
-  js/store.js                 21.7 KB
-  js/team.js                  89.4 KB
+  js/store.js                 22.3 KB
+  js/team.js                  90.3 KB
   js/ui.js                    61.7 KB
   map-editor.html              3.1 KB
   robots.txt                   0.0 KB
-  sandbox.html                10.8 KB
-  standalone.html            612.2 KB
+  sandbox.html                11.6 KB
+  standalone.html            618.0 KB
   assets/avatars/ (418 个)    3951.5 KB
   assets/icons/ (314 个)      2027.7 KB

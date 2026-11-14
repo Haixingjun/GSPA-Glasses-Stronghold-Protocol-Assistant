@@ -16,6 +16,11 @@
   const OP = {};
   DATA.operators.forEach(o => { OP[o.name] = o; });
 
+  // 装备索引：沙盒只结算“转职（变形同构体）”与效果描述，不把数值加成写进叠层。
+  const GEAR_ITEMS = (DATA.items || []).filter(function (it) { return it && it.type === '装备'; });
+  const GEAR_BY_NAME = {};
+  GEAR_ITEMS.forEach(function (it) { GEAR_BY_NAME[it.name] = it; });
+
   let MAP_W = 9;
   let MAP_H = 5;
   const MAX_BOARD = 8;
@@ -146,6 +151,7 @@
       state.pending = null;
       state.selectedOp = null;
       state.mode = 'idle';
+      closeGearEditor();
     }
     persistMap();
     renderAll();
@@ -413,6 +419,12 @@
   const teamFilterBtn = document.getElementById('teamFilterBtn');
   const whClearAllBtn = document.getElementById('whClearAllBtn');
   const inspectorEl = document.getElementById('inspector');
+  const gearModal = document.getElementById('gearModal');
+  const gearTitleEl = document.getElementById('gearTitle');
+  const gearSubEl = document.getElementById('gearSub');
+  const gearEquippedEl = document.getElementById('gearEquipped');
+  const gearListEl = document.getElementById('gearList');
+  const gearSearchEl = document.getElementById('gearSearch');
   const bondStripEl = document.getElementById('bondStrip');
   const bondPopEl = document.getElementById('bondPop');
   const bondSummaryEl = document.getElementById('bondSummary');
@@ -449,6 +461,8 @@
 
   let state = null;
   let ledger = null;
+  // 装备编辑面板状态：只作用于场上已放置的干员。
+  const gearEditor = { open: false, uid: 0, q: '', eliteMode: {} };
   const BUS = CORE.createEventBus();
   let toastTimer = 0;
   let drag = null;
@@ -591,6 +605,74 @@
     return { id: 'h' + (state.uid++), name: name, elite: !!elite, gained: false };
   }
 
+  /* ---------------- 装备（只结算转职 + 效果描述） ---------------- */
+  function itemCapOf(op) {
+    if (!op) return window.Calc.RULES.itemsMax;
+    return window.Calc.itemCapacity(op.name, !!op.elite);
+  }
+
+  function normGearEntry(raw) {
+    if (!raw) return null;
+    if (typeof raw === 'string') return { k: raw, e: false };
+    if (raw.k) return { k: String(raw.k), e: !!raw.e };
+    return null;
+  }
+
+  /** 校验 + 去重 + 按干员槽位截断；用于导入沙盒码 / 旧快照。 */
+  function normalizeGearList(list, name, elite) {
+    const cap = name ? window.Calc.itemCapacity(name, !!elite) : window.Calc.RULES.itemsMax;
+    const out = [];
+    const seen = {};
+    (list || []).forEach(function (raw) {
+      const entry = normGearEntry(raw);
+      if (!entry || seen[entry.k] || !GEAR_BY_NAME[entry.k]) return;
+      seen[entry.k] = 1;
+      out.push(entry);
+    });
+    return out.slice(0, cap);
+  }
+
+  function hasMorphGear(op) {
+    return !!(op && op.it && op.it.some(function (it) { return it.k === window.Calc.MORPH_ITEM; }));
+  }
+
+  /** 变形同构体：另一件装备所属盟约；未收录时用 op.m 手动指定兜底。 */
+  function morphInfoOf(op) {
+    const items = (op && op.it) || [];
+    let partner = null;
+    let hasMorph = false;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].k === window.Calc.MORPH_ITEM) hasMorph = true;
+      else if (!partner) partner = items[i];
+    }
+    if (!hasMorph) return { hasMorph: false, partner: '', covenant: '', manual: false };
+    const def = partner ? GEAR_BY_NAME[partner.k] : null;
+    let covenant = def && def.covenant ? def.covenant : '';
+    let manual = false;
+    if (!covenant && op.m) { covenant = op.m; manual = true; }
+    return {
+      hasMorph: true,
+      partner: partner ? partner.k : '',
+      partnerCovenant: def && def.covenant ? def.covenant : '',
+      covenant: covenant,
+      manual: manual
+    };
+  }
+
+  function gearEffectOf(it, elite) {
+    if (!it) return '';
+    return elite && it.hasElite ? (it.eliteText || it.normalText || '') : (it.normalText || '');
+  }
+
+  function gearIconHtml(it, size) {
+    const px = size || 24;
+    if (it && it.icon) {
+      return '<img class="gear-ico" src="' + esc(it.icon) + '" alt="" width="' + px + '" height="' + px +
+        '" loading="lazy" onerror="this.style.visibility=\'hidden\'">';
+    }
+    return '<span class="gear-ico-fb" style="width:' + px + 'px;height:' + px + 'px">装</span>';
+  }
+
   function avatarOf(name) {
     const m = metaOf(name);
     return m && m.avatar ? m.avatar : '';
@@ -619,8 +701,13 @@
 
   function getEval() {
     const slots = state.board.map(function (o) {
-      // 自选干员不在 DATA.operators 里，Calc 需要走 slots[i].p
-      return OP[o.name] ? { k: o.name, e: !!o.elite } : { p: o.name, e: !!o.elite };
+      // 自选干员不在 DATA.operators 里，Calc 需要走 slots[i].p。
+      // 装备也带进 Calc：变形同构体据此给携带者追加盟约（转职）。
+      const base = OP[o.name] ? { k: o.name } : { p: o.name };
+      base.e = !!o.elite;
+      if (o.it && o.it.length) base.it = o.it;
+      if (o.m) base.m = o.m;
+      return base;
     });
     return window.Calc.evaluate({ size: MAX_BOARD, slots: slots, layers: state.layers }, DATA);
   }
@@ -637,13 +724,16 @@
   }
 
   function selfActiveBonds(op) {
-    const m = metaOf(op.name);
-    return (m && m.tags ? m.tags : []).filter(function (b) { return isBondActive(b); });
+    return opTags(op).filter(function (b) { return isBondActive(b); });
   }
 
+  /** 干员当前实际拥有的盟约标签：基础标签 + 变形同构体转职。 */
   function opTags(op) {
     const m = op ? metaOf(op.name) : null;
-    return m && m.tags ? m.tags : [];
+    const tags = m && m.tags ? m.tags.slice() : [];
+    const mi = morphInfoOf(op);
+    if (mi.hasMorph && mi.covenant && tags.indexOf(mi.covenant) < 0) tags.push(mi.covenant);
+    return tags;
   }
 
   function areAdjacent(a, b) {
@@ -888,7 +978,11 @@
         return { id: item.id, name: item.name, elite: !!item.elite, gained: !!item.gained };
       }),
       board: state.board.map(function (op) {
-        return { uid: op.uid, name: op.name, elite: !!op.elite, r: op.r, c: op.c, dir: op.dir };
+        return {
+          uid: op.uid, name: op.name, elite: !!op.elite, r: op.r, c: op.c, dir: op.dir,
+          it: (op.it || []).map(normGearEntry).filter(function (it) { return !!it; }),
+          m: op.m || ''
+        };
       }),
       layers: cloneCounters(state.layers),
       temp: cloneCounters(state.temp),
@@ -927,6 +1021,7 @@
     if (!(w >= 3 && w <= 21 && h >= 3 && h <= 13)) return false;
     if (snap.map.tiles.length !== h || snap.map.tiles.some(function (row) { return !Array.isArray(row) || row.length !== w; })) return false;
 
+    closeGearEditor();
     const st = initState();
     st.round = Math.max(1, Math.floor(Number(snap.round) || 1));
     st.phase = snap.phase === 'combat' ? 'combat' : 'prep';
@@ -943,7 +1038,15 @@
     st.board = rawBoard.filter(function (op) {
       return op && OP_META[op.name] && Number(op.r) >= 0 && Number(op.r) < h && Number(op.c) >= 0 && Number(op.c) < w;
     }).map(function (op) {
-      return { uid: Number(op.uid) || 0, name: op.name, elite: !!op.elite, r: Number(op.r) || 0, c: Number(op.c) || 0, dir: DIR_LABEL[op.dir] ? op.dir : 'right' };
+      const elite = !!op.elite;
+      const gear = normalizeGearList(op.it, op.name, elite);
+      const out = {
+        uid: Number(op.uid) || 0, name: op.name, elite: elite,
+        r: Number(op.r) || 0, c: Number(op.c) || 0, dir: DIR_LABEL[op.dir] ? op.dir : 'right'
+      };
+      if (gear.length) out.it = gear;
+      if (op.m && hasMorphGear(out)) out.m = String(op.m);
+      return out;
     });
     if (st.board.length !== rawBoard.length) (warnings || []).push('有干员坐标越界或数据无效，已跳过');
     st.layers = cloneCounters(snap.layers);
@@ -2442,6 +2545,7 @@
 
   function retreat(uid) {
     if (combatLocked('撤退')) return;
+    if (gearEditor.open && gearEditor.uid === uid) closeGearEditor();
     const idx = state.board.findIndex(function (o) { return o.uid === uid; });
     if (idx < 0) return;
     const op = state.board[idx];
@@ -2768,8 +2872,10 @@
     const op = state.board.find(function (o) { return o.uid === uid; });
     if (!op) return;
     op.elite = !op.elite;
+    const removed = trimGearToCap(op);
+    if (removed) log('撤销精锐后 ' + op.name + ' 的装备槽缩减，已移除 ' + removed + ' 件超出的装备', 'warn');
     renderAll();
-    toast(op.name + (op.elite ? ' 已设为精锐' : ' 已撤销精锐'));
+    toast(op.name + (op.elite ? ' 已设为精锐' : ' 已撤销精锐') + (removed ? '，超出的装备已移除' : ''));
   }
 
   function killEnemyAtCell(r, c) {
@@ -3004,10 +3110,15 @@
 
   function opHtml(op, selected) {
     const trait = state.grantedTraits.some(function (t) { return t.targetUid === op.uid; });
+    const gearCount = (op.it || []).length;
+    const gearCap = itemCapOf(op);
     return '<div class="op' + (selected ? ' selected' : '') + (op.elite ? ' elite' : '') + '" data-uid="' + op.uid + '" data-tip="op" data-name="' + esc(op.name) + '">' +
       '<img src="' + esc(avatarOf(op.name)) + '" alt="' + esc(op.name) + '" loading="lazy" draggable="false" onerror="this.style.visibility=\'hidden\'">' +
       '<div class="op-name">' + esc(op.name) + (trait ? '<span class="tag">特质</span>' : '') + '</div>' +
       '<div class="facing" data-uid="' + op.uid + '" style="--rot:' + DIR_ROT[op.dir] + 'deg" title="朝向（拖动干员可重新选择）"><span>➤</span></div>' +
+      (gearCount ? '<button type="button" class="op-gear-count" data-gear-op="' + op.uid + '"' +
+        ' title="已装备 ' + gearCount + ' / ' + gearCap + ' 件，点击编辑">装' + gearCount + '</button>' : '') +
+      (selected ? '<button class="op-gear-edit" data-gear-op="' + op.uid + '" title="编辑装备（添加 / 卸下）">装</button>' : '') +
       (selected ? '<button class="op-retreat" data-retreat="' + op.uid + '" title="撤退（紧急出口）">' + exitIcon() + '</button>' : '') +
       (selected ? '<button class="op-elite" data-elite-op="' + op.uid + '" title="' + (op.elite ? '撤销精锐' : '设为精锐') + '">' + eliteIcon() + '</button>' : '') +
     '</div>';
@@ -3132,6 +3243,245 @@
     }).join('<br>') + '</div>';
   }
 
+  function covOptions(selected) {
+    let opts = '<option value="">选择盟约…</option>';
+    DATA.covenants.forEach(function (c) {
+      opts += '<option value="' + esc(c.name) + '"' + (c.name === selected ? ' selected' : '') + '>' + esc(c.name) + '</option>';
+    });
+    return opts;
+  }
+
+  /** 右侧详情里的装备区：已装备列表 + 转职结论 / 手动选择 + 编辑入口。 */
+  function gearInspectorHtml(op) {
+    const items = op.it || [];
+    const cap = itemCapOf(op);
+    const mi = morphInfoOf(op);
+    let rows = '';
+    for (let i = 0; i < items.length; i++) {
+      const entry = normGearEntry(items[i]);
+      const def = entry ? GEAR_BY_NAME[entry.k] : null;
+      if (!def) continue;
+      const eff = gearEffectOf(def, entry.e);
+      rows += '<div class="gear-row">' +
+        '<span class="gear-row-ico">' + gearIconHtml(def, 22) + '</span>' +
+        '<div class="gear-row-main">' +
+          '<div class="gear-row-name">' + esc(def.name) + (entry.e ? '<span class="gear-elite-tag">进阶</span>' : '') + '</div>' +
+          '<div class="gear-row-eff">' + nl2br(eff || '无效果描述') + '</div>' +
+        '</div>' +
+        '<button type="button" class="gear-row-x" data-act="gear-remove" data-gear-index="' + i + '"' +
+        ' title="卸下 ' + esc(def.name) + '" aria-label="卸下 ' + esc(def.name) + '">×</button>' +
+      '</div>';
+    }
+    if (!rows) rows = '<div class="gear-empty">未装备。装备目前只结算转职与效果描述，数值加成不计入叠层。</div>';
+
+    let morph = '';
+    if (mi.hasMorph) {
+      if (mi.covenant) {
+        morph = '<div class="gear-morph"><span>转职</span>' + covIcon(mi.covenant) +
+          '<b>' + esc(mi.covenant) + '</b>' + (mi.manual ? '<span class="muted">（手动指定）</span>' : '') + '</div>';
+      } else {
+        morph = '<label class="gear-morph is-ask"><span>转职</span>' +
+          '<select data-gear-morph aria-label="变形同构体转职盟约">' + covOptions('') + '</select></label>';
+      }
+    }
+    const special = cap > window.Calc.RULES.itemsMax
+      ? '<span class="gear-special">特殊槽位 ' + cap + ' 件</span>' : '';
+    return '<div class="gear-panel">' +
+      '<div class="gear-panel-head"><b>装备</b><span class="muted">' + items.length + ' / ' + cap + '</span>' +
+        special + '<button type="button" class="mini" data-act="gear-edit">编辑装备</button></div>' +
+      rows + morph +
+    '</div>';
+  }
+
+  /* ---------------- 装备编辑面板（仿配队装备面板） ---------------- */
+  function gearEditorOp() {
+    return state.board.find(function (o) { return o.uid === gearEditor.uid; }) || null;
+  }
+
+  function openGearEditor(uid) {
+    const op = state.board.find(function (o) { return o.uid === uid; });
+    if (!op) return;
+    gearEditor.open = true;
+    gearEditor.uid = uid;
+    gearEditor.q = '';
+    gearEditor.eliteMode = {};
+    if (gearSearchEl) gearSearchEl.value = '';
+    hideTip();
+    renderGearEditor();
+    if (gearModal) gearModal.hidden = false;
+    document.body.classList.add('gear-open');
+  }
+
+  function closeGearEditor() {
+    if (!gearEditor.open) return;
+    gearEditor.open = false;
+    gearEditor.uid = 0;
+    gearEditor.q = '';
+    gearEditor.eliteMode = {};
+    if (gearModal) gearModal.hidden = true;
+    if (gearSearchEl) gearSearchEl.value = '';
+    document.body.classList.remove('gear-open');
+    hideTip();
+  }
+
+  function gearEquippedHtml(op) {
+    const items = op.it || [];
+    const cap = itemCapOf(op);
+    const mi = morphInfoOf(op);
+    let rows = '';
+    for (let i = 0; i < items.length; i++) {
+      const entry = normGearEntry(items[i]);
+      const def = entry ? GEAR_BY_NAME[entry.k] : null;
+      if (!def) continue;
+      const eff = gearEffectOf(def, entry.e);
+      rows += '<div class="gear-eq-row">' +
+        '<span class="gear-row-ico">' + gearIconHtml(def, 26) + '</span>' +
+        '<div class="gear-row-main">' +
+          '<div class="gear-row-name">' + esc(def.name) + (entry.e ? '<span class="gear-elite-tag">进阶</span>' : '') + '</div>' +
+          '<div class="gear-row-eff">' + nl2br(eff || '无效果描述') + '</div>' +
+        '</div>' +
+        '<button type="button" class="gear-row-x" data-gear-remove="' + i + '"' +
+        ' title="卸下 ' + esc(def.name) + '" aria-label="卸下 ' + esc(def.name) + '">×</button>' +
+      '</div>';
+    }
+    if (!rows) rows = '<div class="gear-empty">还没有装备。从下方列表点「＋」添加。</div>';
+
+    let morph = '';
+    if (mi.hasMorph) {
+      if (mi.covenant) {
+        morph = '<div class="gear-morph"><span>转职</span>' + covIcon(mi.covenant) +
+          '<b>' + esc(mi.covenant) + '</b>' + (mi.manual ? '<span class="muted">（手动指定）</span>' : '') + '</div>';
+      } else {
+        morph = '<label class="gear-morph is-ask"><span>转职</span>' +
+          '<select data-gear-morph aria-label="变形同构体转职盟约">' + covOptions('') + '</select></label>';
+      }
+    }
+    return '<div class="gear-eq-head"><b>已装备 ' + items.length + ' / ' + cap + '</b>' +
+      (cap > window.Calc.RULES.itemsMax ? '<span class="gear-special">“暴躁铁皮”特殊槽位</span>' : '') +
+      '</div><div class="gear-eq-list">' + rows + '</div>' + morph;
+  }
+
+  function gearEditorListHtml(op) {
+    const items = op.it || [];
+    const wornAt = {};
+    for (let w = 0; w < items.length; w++) wornAt[items[w].k] = w;
+    const q = (gearEditor.q || '').trim().toLowerCase();
+    let out = '';
+    let shown = 0;
+    for (let i = 0; i < GEAR_ITEMS.length; i++) {
+      const it = GEAR_ITEMS[i];
+      const hay = (it.name + ' ' + (it.normalText || '') + ' ' + (it.eliteText || '') + ' ' + (it.covenant || '')).toLowerCase();
+      if (q && hay.indexOf(q) < 0) continue;
+      shown++;
+      const worn = wornAt[it.name] != null;
+      const elite = worn ? !!items[wornAt[it.name]].e : !!gearEditor.eliteMode[it.name];
+      const eff = gearEffectOf(it, elite);
+      out += '<div class="gear-pick' + (worn ? ' is-worn' : '') + '">' +
+        '<span class="gear-pick-ico">' + gearIconHtml(it, 30) + '</span>' +
+        '<div class="gear-pick-main">' +
+          '<div class="gear-pick-name">' + esc(it.name) +
+            (it.covenant ? '<span class="gear-cov">' + covIcon(it.covenant) + esc(it.covenant) + '</span>' : '') +
+          '</div>' +
+          '<div class="gear-pick-eff">' + nl2br(eff || '无效果描述') + '</div>' +
+        '</div>' +
+        (it.hasElite
+          ? '<button type="button" class="gear-form-btn" data-gear-form="' + esc(it.name) + '"' +
+            ' aria-pressed="' + (elite ? 'true' : 'false') + '" title="' +
+            (elite ? '取消进阶，按普通形态装备' : '以进阶形态装备') + '">' + (elite ? '取消进阶' : '进阶') + '</button>'
+          : '') +
+        (worn
+          ? '<button type="button" class="gear-add-btn is-worn" disabled>已装备</button>'
+          : '<button type="button" class="gear-add-btn" data-gear-add-item="' + esc(it.name) + '"' +
+            ' title="添加到 ' + esc(op.name) + '">＋</button>') +
+      '</div>';
+    }
+    if (!shown) out = '<div class="gear-empty">没有匹配的装备</div>';
+    return out;
+  }
+
+  function renderGearEditor() {
+    if (!gearEditor.open) return;
+    const op = gearEditorOp();
+    if (!op) { closeGearEditor(); return; }
+    const cap = itemCapOf(op);
+    if (gearTitleEl) gearTitleEl.textContent = op.name + ' · 装备';
+    if (gearSubEl) {
+      gearSubEl.textContent = 'r' + (op.r + 1) + 'c' + (op.c + 1) + ' · ' + (op.elite ? '精锐' : '普通') +
+        ' · ' + (op.it || []).length + ' / ' + cap + ' 件' +
+        (cap > window.Calc.RULES.itemsMax ? '（特殊干员槽位）' : '');
+    }
+    if (gearEquippedEl) gearEquippedEl.innerHTML = gearEquippedHtml(op);
+    if (gearListEl) gearListEl.innerHTML = gearEditorListHtml(op);
+  }
+
+  function addGearToOp(name) {
+    const op = gearEditorOp();
+    const def = GEAR_BY_NAME[name];
+    if (!op || !def) return;
+    const cap = itemCapOf(op);
+    op.it = op.it || [];
+    if (op.it.some(function (it) { return it.k === name; })) {
+      toast('已经装备了 ' + name);
+      return;
+    }
+    if (op.it.length >= cap) {
+      toast('装备槽已满（' + cap + ' 件）');
+      return;
+    }
+    const elite = !!gearEditor.eliteMode[name];
+    op.it.push({ k: name, e: elite });
+    if (!hasMorphGear(op)) delete op.m;
+    log('为 ' + op.name + ' 装备 ' + name + (elite ? '（进阶）' : '') + ' · ' + (op.it.length + ' / ' + cap), 'event');
+    renderAll();
+    toast('已装备 ' + name);
+  }
+
+  function removeGearAtIndex(index, targetOp) {
+    const op = targetOp || gearEditorOp();
+    if (!op || !op.it || !op.it[index]) return;
+    const entry = normGearEntry(op.it[index]);
+    op.it.splice(index, 1);
+    if (!op.it.length) delete op.it;
+    if (!hasMorphGear(op)) delete op.m;
+    log('卸下 ' + op.name + ' 的 ' + (entry ? entry.k : '装备'), 'event');
+    renderAll();
+    toast('已卸下 ' + (entry ? entry.k : '装备'));
+  }
+
+  function toggleGearForm(name) {
+    const op = gearEditorOp();
+    if (!op) return;
+    const idx = (op.it || []).findIndex(function (it) { return it.k === name; });
+    if (idx >= 0) {
+      op.it[idx].e = !op.it[idx].e;
+      log(op.name + ' 的 ' + name + (op.it[idx].e ? ' 已进阶' : ' 已取消进阶'), 'event');
+      renderAll();
+      toast(name + (op.it[idx].e ? '：已进阶' : '：已取消进阶'));
+    } else {
+      gearEditor.eliteMode[name] = !gearEditor.eliteMode[name];
+      renderGearEditor();
+      toast(name + (gearEditor.eliteMode[name] ? '：本次添加为进阶形态' : '：本次添加为普通形态'));
+    }
+  }
+
+  function setOpMorph(covenant, targetOp) {
+    const op = targetOp || gearEditorOp();
+    if (!op || !hasMorphGear(op)) return;
+    if (covenant) op.m = covenant; else delete op.m;
+    log(op.name + ' 的变形同构体转职：' + (covenant || '未指定'), 'event');
+    renderAll();
+  }
+
+  function trimGearToCap(op) {
+    if (!op || !op.it) return 0;
+    const cap = itemCapOf(op);
+    if (op.it.length <= cap) return 0;
+    const removed = op.it.length - cap;
+    op.it = op.it.slice(0, cap);
+    if (!hasMorphGear(op)) delete op.m;
+    return removed;
+  }
+
   function renderInspector() {
     if (!inspectorEl) return;
     if (state.pending) {
@@ -3170,6 +3520,7 @@
           '<button class="btn" data-act="skill"' + (state.phase !== 'combat' ? ' disabled title="进入作战期后可用"' : '') + '>开启技能</button>' +
           '<button class="btn ghost" data-act="toggle-op-elite"' + (state.phase === 'combat' ? ' disabled title="作战期锁定"' : '') + '>' + (op.elite ? '撤销精锐' : '设为精锐') + '</button>' +
         '</div>' +
+        gearInspectorHtml(op) +
         opBattleCapText(op) +
         opTraitText(op) +
         ruleSummaryHtml(op.name, op.elite) +
@@ -3375,7 +3726,7 @@
       hintEl.innerHTML = '<b>' + esc(state.selectedWarehouse) + '：</b>拖入战场即可部署，或拖入下方「待部署区」；也可点击右侧「移入待部署区」。';
     } else if (state.selectedOp) {
       const op = selectedOpObj();
-      hintEl.innerHTML = op ? '<b>' + esc(op.name) + '：</b>战场显示攻击范围；点击头像左上角的方向环可调整朝向。' : '';
+      hintEl.innerHTML = op ? '<b>' + esc(op.name) + '：</b>战场显示攻击范围；点击干员左下角「装」可编辑装备，点击右上角「紧急出口」可撤退。' : '';
     } else {
       hintEl.innerHTML = '将卡牌仓库或待部署区中的干员拖入战场地块，放置后拖动方向确定朝向。';
     }
@@ -3442,6 +3793,7 @@
     renderLog();
     renderHint();
     renderEventBar();
+    if (gearEditor.open) renderGearEditor();
   }
 
   // ---- hover tooltip ----
@@ -3620,7 +3972,8 @@
 
   boardEl.addEventListener('pointerdown', function (e) {
     if (state.pending) return;
-    if (e.target.closest('.op-retreat') || e.target.closest('.op-elite')) return;
+    if (e.target.closest('.op-retreat') || e.target.closest('.op-elite') ||
+        e.target.closest('.op-gear-edit') || e.target.closest('.op-gear-count')) return;
     const opEl = e.target.closest('.op');
     if (opEl) startMoveDrag(Number(opEl.getAttribute('data-uid')), e);
   });
@@ -3641,6 +3994,8 @@
       toast('请先完成或取消当前放置');
       return;
     }
+    const gearEl = e.target.closest('.op-gear-edit, .op-gear-count');
+    if (gearEl) { openGearEditor(Number(gearEl.getAttribute('data-gear-op'))); return; }
     const eliteEl = e.target.closest('.op-elite');
     if (eliteEl) { toggleOpElite(Number(eliteEl.getAttribute('data-elite-op'))); return; }
     const retreatEl = e.target.closest('.op-retreat');
@@ -3674,6 +4029,11 @@
     renderAll();
   });
 
+  inspectorEl.addEventListener('change', function (e) {
+    const sel = e.target.closest('[data-gear-morph]');
+    if (sel) setOpMorph(sel.value, selectedOpObj());
+  });
+
   inspectorEl.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
@@ -3684,9 +4044,34 @@
     else if (act === 'gain-hand') handleEvent('gain');
     else if (act === 'toggle-hand-elite' && state.selectedHand) toggleHandElite(state.selectedHand);
     else if (act === 'toggle-op-elite' && op) toggleOpElite(op.uid);
+    else if (act === 'gear-edit' && op) openGearEditor(op.uid);
+    else if (act === 'gear-remove' && op) removeGearAtIndex(Number(btn.getAttribute('data-gear-index')), op);
     else if (act === 'to-warehouse' && state.selectedHand) moveHandToWarehouse(state.selectedHand);
     else if (act === 'to-hand' && state.selectedWarehouse) addToHand(state.selectedWarehouse);
   });
+
+  if (gearModal) {
+    gearModal.addEventListener('click', function (e) {
+      if (e.target === gearModal) { closeGearEditor(); return; }
+      if (e.target.closest('#gearClose')) { closeGearEditor(); return; }
+      const rm = e.target.closest('[data-gear-remove]');
+      if (rm) { removeGearAtIndex(Number(rm.getAttribute('data-gear-remove'))); return; }
+      const add = e.target.closest('[data-gear-add-item]');
+      if (add) { addGearToOp(add.getAttribute('data-gear-add-item')); return; }
+      const form = e.target.closest('[data-gear-form]');
+      if (form) { toggleGearForm(form.getAttribute('data-gear-form')); return; }
+    });
+    gearModal.addEventListener('change', function (e) {
+      const sel = e.target.closest('[data-gear-morph]');
+      if (sel) setOpMorph(sel.value);
+    });
+  }
+  if (gearSearchEl) {
+    gearSearchEl.addEventListener('input', function () {
+      gearEditor.q = gearSearchEl.value;
+      renderGearEditor();
+    });
+  }
 
   eventBarEl.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-event]');
@@ -3730,6 +4115,7 @@
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
+      if (gearEditor.open) { closeGearEditor(); return; }
       hideBondPop();
       closeSandboxShare();
     }
@@ -3789,6 +4175,7 @@
     if (drag) cleanupDrag();
     if (facing) cleanupFacing();
     state = initState();
+    closeGearEditor();
     hideBondPop();
     hideTip();
     if (reportPanel) reportPanel.hidden = true;

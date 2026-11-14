@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>战场地图 · 叠层沙盘</title>
+<link rel="stylesheet" href="assets/map-tiles.css?v=05feea20">
+<link rel="stylesheet" href="assets/map-editor.css?v=05feea20">
+<link rel="stylesheet" href="assets/map-picker.css?v=05feea20">
+</head>
+<body>
+<div class="editor-page" id="editorPage">
+  <header class="ed-head">
+    <div>
+      <h1>战场地图</h1>
+      <p>按官方地图图片选择「卫戍协议：规程」的战场场地，或直接绘制；保存后应用到沙盘。</p>
+    </div>
+    <div class="ed-head-actions">
+      <button class="btn primary" id="openPicker">从图片选择战场</button>
+      <a class="btn ghost" href="sandbox.html">返回沙盘</a>
+    </div>
+  </header>
+
+  <section class="ed-controls">
+    <div class="ed-current">
+      <img id="edThumb" alt="">
+      <div>
+        <b id="edMapName">空白训练场</b>
+        <span class="muted" id="editorStatus">9 × 5</span>
+      </div>
+    </div>
+    <div class="ed-brushes" id="brushBar">
+      <button class="mini brush active" data-brush="ground">地面</button>
+      <button class="mini brush" data-brush="highAny">高台</button>
+      <button class="mini brush" data-brush="highSpecial">特殊高台</button>
+      <button class="mini brush" data-brush="box">箱子</button>
+      <button class="mini brush" data-brush="high">高台·仅远程</button>
+      <button class="mini brush" data-brush="floor">不可部署</button>
+      <button class="mini brush" data-brush="void">不可通行</button>
+      <button class="mini brush" data-brush="spawn">侵入点</button>
+      <button class="mini brush" data-brush="goal">终点</button>
+      <button class="mini brush" data-brush="telin">传送入口</button>
+      <button class="mini brush" data-brush="telout">传送出口</button>
+    </div>
+    <div class="ed-row">
+      <div class="ed-size">
+        <label>宽 <input id="mapWInput" type="number" min="3" max="21" step="1" value="9"></label>
+        <label>高 <input id="mapHInput" type="number" min="3" max="13" step="1" value="5"></label>
+        <button class="mini" id="applySize">应用尺寸</button>
+      </div>
+      <div class="ed-actions">
+        <button class="mini" id="clearMap">清空为空白</button>
+        <button class="mini" id="exportMap">导出 JSON</button>
+        <button class="mini" id="importMap">导入 JSON</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="ed-canvas">
+    <div class="ed-grid" id="editorGrid"></div>
+  </main>
+
+  <footer class="ed-foot">
+    <span class="muted">拖动笔刷连续绘制 · 保存后应用到沙盘</span>
+    <button class="btn primary" id="saveMap">保存并返回沙盘</button>
+  </footer>
+</div>
+
+<div class="map-modal" id="presetModal" hidden>
+  <div class="map-modal-card" id="presetModalCard"></div>
+</div>
+<div class="ed-tip" id="edTip" hidden></div>
+<script src="data/maps.js?v=05feea20"></script>
+<script src="js/map-presets.js?v=05feea20"></script>
+<script src="js/map-editor.js?v=05feea20"></script>
+</body>
+</html>

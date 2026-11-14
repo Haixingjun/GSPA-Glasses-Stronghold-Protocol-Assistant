@@ -1,6 +1,6 @@
 {
- "version": "2026-11-11 01:05",
- "generatedAt": "2026-11-11 01:38:50",
+ "version": "2026-11-14 22:20",
+ "generatedAt": "2026-11-14 22:22:08",
  "source": "卫戍协议数据表.xlsx",
  "counts": {
   "operators": 143,
@@ -51,8 +51,10 @@
  },
  "pickMeta": {
   "source": "卫戍协议数据表.xlsx / 自选干员",
-  "rule": "6★、非固定干员；按 ingameFaction ∪ hiddenFaction 推导核心盟约，无匹配为协防干员",
-  "note": "自选干员单列，不计入盟约固定 10 人；配队中按 tags 参与激活/强化"
+  "rule": "6★、非固定干员；mainPower 取最具体阵营（team > group > nation）+ 隐藏阵营（subPower）推导核心盟约，无匹配为协防干员",
+  "note": "自选干员单列，不计入盟约固定 10 人；配队中按 tags 参与激活/强化",
+  "checkedAt": "2026-11-14",
+  "checkSource": "source/unpacked/pick_factions.json"
  },
  "operators": [
   {
@@ -4182,7 +4184,6 @@
     "叙拉古"
    ],
    "tags": [
-    "炎",
     "叙拉古"
    ],
    "tagsSource": "阵营并集",
@@ -4320,9 +4321,9 @@
     "拉特兰"
    ],
    "tags": [
-    "炎"
+    "协防干员"
    ],
-   "tagsSource": "阵营并集",
+   "tagsSource": "无核心→协防",
    "charId": "char_103_angel",
    "prts": {
     "page": "能天使",
@@ -4429,9 +4430,9 @@
     "拉特兰"
    ],
    "tags": [
-    "炎"
+    "协防干员"
    ],
-   "tagsSource": "阵营并集",
+   "tagsSource": "无核心→协防",
    "charId": "char_1041_angel2",
    "prts": {
     "page": "新约能天使",
@@ -4779,9 +4780,9 @@
    ],
    "hiddenFactions": [],
    "tags": [
-    "维多利亚"
+    "协防干员"
    ],
-   "tagsSource": "阵营并集",
+   "tagsSource": "无核心→协防",
    "charId": "char_450_necras",
    "prts": {
     "page": "死芒",
@@ -4833,9 +4834,9 @@
    ],
    "hiddenFactions": [],
    "tags": [
-    "维多利亚"
+    "协防干员"
    ],
-   "tagsSource": "阵营并集",
+   "tagsSource": "无核心→协防",
    "charId": "char_1020_reed2",
    "prts": {
     "page": "焰影苇草",
@@ -8604,22 +8605,19 @@
     "赤刃明霄陈",
     "煌",
     "假日威龙陈",
-    "缄默德克萨斯",
     "林",
     "琳琅诗怀雅",
     "令",
     "莫斯提马",
-    "能天使",
     "年",
     "司霆惊蛰",
     "望",
-    "新约能天使",
     "星熊",
     "斩业星熊",
     "重岳",
     "左乐"
    ],
-   "pickCount": 19
+   "pickCount": 16
   },
   {
    "key": "sargonShip",
@@ -8712,11 +8710,9 @@
     "号角",
     "傀影",
     "琴柳",
-    "死芒",
-    "推进之王",
-    "焰影苇草"
+    "推进之王"
    ],
-   "pickCount": 9
+   "pickCount": 7
   },
   {
    "key": "kjeragShip",
@@ -9516,6 +9512,10 @@
    "icon": "assets/icons/cv-b0925f13-48.webp",
    "iconFull": "assets/icons/cv-b0925f13-96.webp",
    "pickMembers": [
+    "能天使",
+    "新约能天使",
+    "死芒",
+    "焰影苇草",
     "阿斯卡纶",
     "艾拉",
     "嵯峨",
@@ -9546,7 +9546,7 @@
     "伊芙利特",
     "伊内丝"
    ],
-   "pickCount": 29
+   "pickCount": 33
   },
   {
    "key": "soloShip",

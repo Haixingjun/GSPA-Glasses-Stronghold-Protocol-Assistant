@@ -248,6 +248,30 @@ check('URL 往返：席位数、精锐、装备、转职、层数都能还原', 
   assert.match(hash, /L=/);
 });
 
+check('特殊干员：“暴躁铁皮”4 / 6 件装备在 URL 与分享码中完整保留', () => {
+  const gearNames = win.GSPA_DATA.items.filter((x) => x.type === '装备').slice(0, 6).map((x) => x.name);
+  const t4 = Calc.emptyTeam(8);
+  t4.slots[0] = { k: '“暴躁铁皮”', e: false, it: gearNames.slice(0, 4).map((k) => ({ k: k, e: false })) };
+  Store.setTeam(t4);
+  assert.equal(Store.getTeam().slots[0].it.length, 4, '普通状态应保留 4 件');
+  assert.equal(Store.parseHash(win.location.hash).team.slots[0].it.length, 4, 'URL 应保留 4 件');
+  let dec = win.Code.decode(win.Code.encode(Store.getTeam(), win.GSPA_DATA), win.GSPA_DATA);
+  assert.equal(dec.team.slots[0].it.length, 4, '分享码应保留 4 件');
+
+  const t6 = Store.getTeam();
+  t6.slots[0].e = true;
+  t6.slots[0].it = gearNames.map((k, i) => ({ k: k, e: i % 2 === 1 }));
+  Store.setTeam(t6);
+  assert.equal(Store.getTeam().slots[0].it.length, 6, '精锐状态应保留 6 件');
+  assert.equal(Store.parseHash(win.location.hash).team.slots[0].it.length, 6, 'URL 应保留 6 件');
+  dec = win.Code.decode(win.Code.encode(Store.getTeam(), win.GSPA_DATA), win.GSPA_DATA);
+  assert.equal(dec.team.slots[0].it.length, 6, '分享码应保留 6 件');
+
+  // 撤销精锐后槽位回到 4 件，超出部分截断，避免留下非法状态。
+  Team._toggleElite(0);
+  assert.equal(Store.getTeam().slots[0].it.length, 4, '撤销精锐后应截断到 4 件');
+});
+
 check('空队伍 URL 不带 t=（避免脏链接）', () => {
   Store.setTeam(Calc.emptyTeam(8));
   assert.doesNotMatch(Store.buildUrl(Store.state), /[?&]t=/);

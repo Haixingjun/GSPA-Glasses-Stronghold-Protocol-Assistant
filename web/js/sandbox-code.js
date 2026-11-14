@@ -3,7 +3,8 @@
    --------------------------------------------------------------------------
    和配队码一样用「位流 + 字典下标 + base64url」，但沙盒需要保存：
      地图 / 回合 / 阶段 / 待部署区 / 场上干员与朝向 / 固定层 / 临时层 /
-     刷新次数 / 免费刷新 / 本回合获得数 / 特质 / 各类上限计数器。
+     刷新次数 / 免费刷新 / 本回合获得数 / 特质 / 各类上限计数器 /
+     场上干员的装备与变形同构体转职。
 
    文本形态：`GSPS1.<base64url>`，末尾 1 字节校验和。
    不依赖 DOM，也不依赖 code.js（数据指纹优先复用 Code.dataTag）。
@@ -19,6 +20,8 @@
     'telin', 'telout', 'mire', 'infection', 'speedup', 'duel', 'highSpecial', 'box'
   ];
   var DIRS = ['right', 'down', 'left', 'up'];
+  // 装备扩展段（追加在计数器之后，老版本解码器会忽略末尾的扩展位）
+  var BITS_GEAR_COUNT = 3, BITS_GEAR_ITEM = 7, BITS_GEAR_ELITE = 1, BITS_GEAR_MORPH = 8;
   var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
   var B64_LOOKUP = {};
   (function () {
@@ -50,11 +53,12 @@
   }
 
   function indexOf(data) {
-    var idx = { op: {}, pick: {}, cov: {} };
+    var idx = { op: {}, pick: {}, cov: {}, item: {} };
     var i;
     for (i = 0; i < (data.operators || []).length; i++) idx.op[data.operators[i].name] = i;
     for (i = 0; i < (data.picks || []).length; i++) idx.pick[data.picks[i].name] = i;
     for (i = 0; i < (data.covenants || []).length; i++) idx.cov[data.covenants[i].name] = i;
+    for (i = 0; i < (data.items || []).length; i++) idx.item[data.items[i].name] = i;
     return idx;
   }
 
@@ -377,6 +381,38 @@
     writeCounterMap(w, snap.battleCounters);
     writeCounterMap(w, snap.totalCounters);
 
+    // 装备扩展段：场上每名干员按顺序写「件数 + 每件（下标+1、进阶）+ 转职盟约+1」。
+    // 没有装备时写 1 位 0，老码的尾部填充 0 同样会被新解码器识别为「无扩展段」。
+    var anyGear = false;
+    for (i = 0; i < board.length; i++) {
+      var gop = board[i];
+      if ((gop && gop.it && gop.it.length) || (gop && gop.m)) { anyGear = true; break; }
+    }
+    w.write(anyGear ? 1 : 0, 1);
+    if (anyGear) {
+      for (i = 0; i < board.length; i++) {
+        var bop = board[i] || {};
+        var gear = [];
+        var rawGear = bop.it || [];
+        for (var gi = 0; gi < rawGear.length && gear.length < 6; gi++) {
+          var ge = rawGear[gi];
+          var gname = ge && typeof ge === 'string' ? ge : (ge && ge.k);
+          if (!gname || idx.item[gname] == null) continue;
+          var gdup = false;
+          for (var gj = 0; gj < gear.length; gj++) if (gear[gj].i === idx.item[gname] + 1) gdup = true;
+          if (gdup) continue;
+          gear.push({ i: idx.item[gname] + 1, e: ge && typeof ge === 'object' && ge.e ? 1 : 0 });
+        }
+        var gm = bop.m && idx.cov[bop.m] != null ? idx.cov[bop.m] + 1 : 0;
+        w.write(gear.length, BITS_GEAR_COUNT);
+        for (var gk = 0; gk < gear.length; gk++) {
+          w.write(gear[gk].i, BITS_GEAR_ITEM);
+          w.write(gear[gk].e, BITS_GEAR_ELITE);
+        }
+        w.write(gm, BITS_GEAR_MORPH);
+      }
+    }
+
     var bytes = w.finish();
     var sum = 0;
     for (i = 0; i < bytes.length; i++) sum = (sum * 31 + bytes[i]) & 0xff;
@@ -499,6 +535,30 @@
     var counters = readCounterMap(r, warnings);
     var battleCounters = readCounterMap(r, warnings);
     var totalCounters = readCounterMap(r, warnings);
+
+    // 装备扩展段（可选）：没有扩展段时 gearFlag 为 0（或老码尾部没有剩余位）。
+    var gearFlag = r.read(1);
+    if (gearFlag) {
+      for (i = 0; i < board.length; i++) {
+        var gearCount = r.read(BITS_GEAR_COUNT);
+        if (gearCount == null) { warnings.push('装备数据不完整，已忽略'); break; }
+        var gearList = [];
+        var gearBroken = false;
+        for (var gg = 0; gg < gearCount; gg++) {
+          var gearIdx = r.read(BITS_GEAR_ITEM);
+          var gearElite = r.read(BITS_GEAR_ELITE);
+          if (gearIdx == null || gearElite == null) { warnings.push('装备数据不完整，已忽略'); gearBroken = true; break; }
+          if (gearIdx > 0 && data.items[gearIdx - 1] && data.items[gearIdx - 1].type === '装备') {
+            gearList.push({ k: data.items[gearIdx - 1].name, e: !!gearElite });
+          }
+        }
+        if (gearBroken) break;
+        var gearMorph = r.read(BITS_GEAR_MORPH);
+        if (gearMorph == null) { warnings.push('装备转职数据不完整，已忽略'); break; }
+        if (gearList.length) board[i].it = gearList;
+        if (gearMorph > 0 && data.covenants[gearMorph - 1]) board[i].m = data.covenants[gearMorph - 1].name;
+      }
+    }
 
     // 清掉明显的重复 ID；生成器不会产出这种码，坏码/手工改码时给提示。
     var seenHand = {};

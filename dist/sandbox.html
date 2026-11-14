@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>叠层沙盘 · 空白训练场</title>
-<link rel="stylesheet" href="assets/map-tiles.css?v=9a23de0a">
-<link rel="stylesheet" href="assets/sandbox.css?v=9a23de0a">
-<link rel="stylesheet" href="assets/map-picker.css?v=9a23de0a">
+<link rel="stylesheet" href="assets/map-tiles.css?v=05feea20">
+<link rel="stylesheet" href="assets/sandbox.css?v=05feea20">
+<link rel="stylesheet" href="assets/map-picker.css?v=05feea20">
 </head>
 <body>
 <div id="app">
@@ -86,7 +86,7 @@
     <section class="board-panel">
       <div class="board-head">
         <div class="map-current">
-          <img id="mapThumb" src="assets/maps/map01-1.webp?v=9a23de0a" alt="当前战场">
+          <img id="mapThumb" src="assets/maps/map01-1.webp?v=05feea20" alt="当前战场">
           <div class="mc-text">
             <b id="mapName">战场 01 · 场地 1</b>
             <span class="mc-size" id="mapSizeLabel">20 × 7</span>
@@ -209,21 +209,38 @@
 <div class="map-modal" id="mapModal" hidden>
   <div class="map-modal-card" id="mapModalCard"></div>
 </div>
+<section class="gear-modal" id="gearModal" hidden>
+  <div class="gear-sheet" role="dialog" aria-modal="true" aria-labelledby="gearTitle">
+    <header class="gear-head">
+      <div class="gear-title">
+        <h3 id="gearTitle">编辑装备</h3>
+        <p class="gear-sub" id="gearSub"></p>
+      </div>
+      <button type="button" class="mini" id="gearClose">关闭</button>
+    </header>
+    <div class="gear-equipped" id="gearEquipped"></div>
+    <div class="gear-search">
+      <input id="gearSearch" type="search" placeholder="搜索装备名 / 效果 / 盟约…" autocomplete="off" aria-label="搜索装备">
+    </div>
+    <div class="gear-list" id="gearList"></div>
+    <p class="gear-foot">装备目前只结算「变形同构体」的转职与效果描述；攻击、防御等数值加成不进入叠层计算。</p>
+  </div>
+</section>
 <div class="tip" id="tip" hidden></div>
 <div class="toast" id="toast" role="status"></div>
 
-<script src="data/data.js?v=9a23de0a"></script>
-<script src="data/ranges.js?v=9a23de0a"></script>
-<script src="data/operator_positions.js?v=9a23de0a"></script>
-<script src="data/operator_ranges.js?v=9a23de0a"></script>
-<script src="data/operator_rules.js?v=9a23de0a"></script>
-<script src="data/maps.js?v=9a23de0a"></script>
-<script src="js/code.js?v=9a23de0a"></script>
-<script src="js/sandbox-code.js?v=9a23de0a"></script>
-<script src="js/calc.js?v=9a23de0a"></script>
-<script src="js/stack-core.js?v=9a23de0a"></script>
-<script src="js/map-presets.js?v=9a23de0a"></script>
-<script src="js/sandbox.js?v=9a23de0a"></script>
+<script src="data/data.js?v=05feea20"></script>
+<script src="data/ranges.js?v=05feea20"></script>
+<script src="data/operator_positions.js?v=05feea20"></script>
+<script src="data/operator_ranges.js?v=05feea20"></script>
+<script src="data/operator_rules.js?v=05feea20"></script>
+<script src="data/maps.js?v=05feea20"></script>
+<script src="js/code.js?v=05feea20"></script>
+<script src="js/sandbox-code.js?v=05feea20"></script>
+<script src="js/calc.js?v=05feea20"></script>
+<script src="js/stack-core.js?v=05feea20"></script>
+<script src="js/map-presets.js?v=05feea20"></script>
+<script src="js/sandbox.js?v=05feea20"></script>
 </body>
 </html>
 

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>叠层沙盘 · 空白训练场</title>
+<link rel="stylesheet" href="assets/map-tiles.css?v=05feea20">
+<link rel="stylesheet" href="assets/sandbox.css?v=05feea20">
+<link rel="stylesheet" href="assets/map-picker.css?v=05feea20">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">叠</div>
+      <div>
+        <h1>叠层沙盘</h1>
+      </div>
+    </div>
+    <div class="top-state">
+      <span class="state-chip" id="roundBadge">第 1 回合</span>
+      <span class="state-chip phase" id="phaseBadge">休整期</span>
+      <button class="btn small ghost" id="mapEditorOpen" href="map-editor.html" onclick="location.href='map-editor.html'" title="打开战场地图：按图片选择或手动绘制">战场地图</button>
+      <button class="btn small ghost" id="sandboxShareBtn" title="生成或导入沙盒码，分享当前沙盘状态">沙盒码</button>
+      <button class="btn ghost" id="resetBtn">重置</button>
+      <a class="btn ghost" href="index.html">返回图鉴</a>
+    </div>
+  </header>
+
+  <section class="bond-strip-wrap">
+    <div class="bond-strip-head">
+      <span class="bond-title">盟约</span>
+      <span class="muted" id="bondSummary"></span>
+      <button class="bond-clear" id="clearLayersBtn" type="button" title="将全部盟约的固定层 / 临时层归零，并清空上限计数">归零</button>
+    </div>
+    <div class="bond-strip" id="bondStrip"></div>
+  </section>
+  <div class="bond-pop" id="bondPop" hidden></div>
+
+  <main class="layout">
+    
+
+    <aside class="panel warehouse-panel">
+      <div class="panel-head">
+        <h2>卡牌仓库</h2>
+        <span class="muted" id="warehouseCount"></span>
+      </div>
+      <div class="wh-filter">
+        <div class="wh-search-row">
+          <input id="whSearch" type="search" placeholder="搜索干员 / 盟约 / 职业" autocomplete="off">
+          <button class="mini wh-filter-toggle" id="whFilterToggle" type="button" aria-expanded="true" aria-controls="whFilters" title="展开 / 收起筛选">筛选<span class="wh-filter-badge" id="whFilterBadge" hidden>0</span></button>
+        </div>
+        <div class="wh-filters" id="whFilters">
+          <div class="wh-fhead wh-fhead-all">
+            <span>筛选条件</span>
+            <button type="button" class="wh-clear-all-btn" id="whClearAllBtn" title="清除搜索、阶数、盟约、触发时机与配队码筛选">清除全部</button>
+          </div>
+          <div class="wh-fgroup">
+            <div class="wh-fhead"><span>阶数</span><button type="button" class="wh-clear" data-wh-clear="tiers">清除</button></div>
+            <div class="chips" id="whTierChips"></div>
+          </div>
+          <div class="wh-fgroup">
+            <div class="wh-fhead"><span>盟约</span>
+              <span class="wh-mode" id="whTagMode">
+                <button type="button" data-wh-mode="or" aria-pressed="true">任一</button>
+                <button type="button" data-wh-mode="and" aria-pressed="false">全部</button>
+              </span>
+              <button type="button" class="wh-clear" data-wh-clear="tags">清除</button>
+            </div>
+            <div class="chips" id="whCovChips"></div>
+          </div>
+          <div class="wh-fgroup">
+            <div class="wh-fhead"><span>触发时机</span><button type="button" class="wh-clear" data-wh-clear="triggers">清除</button></div>
+            <div class="chips" id="whTriggerChips"></div>
+          </div>
+        </div>
+        <div class="wh-actions">
+          <button class="mini" id="importCodeBtn" title="导入 GSPA3 / GSPA2 配队码">导入配队码</button>
+          <button class="mini" id="teamFilterBtn" title="仅显示导入配队码中的干员，再次点击取消">只显示配对码干员</button>
+        </div>
+      </div>
+      <div class="warehouse-list" id="warehouseList"></div>
+    </aside>
+
+    <section class="board-panel">
+      <div class="board-head">
+        <div class="map-current">
+          <img id="mapThumb" src="assets/maps/map01-1.webp?v=05feea20" alt="当前战场">
+          <div class="mc-text">
+            <b id="mapName">战场 01 · 场地 1</b>
+            <span class="mc-size" id="mapSizeLabel">20 × 7</span>
+          </div>
+          <button class="btn small ghost" id="mapPickBtn" title="按官方地图图片选择规程战场">更换战场</button>
+        </div>
+        
+        <div class="legend">
+          <span><i class="sw ground"></i>地面</span>
+          <span><i class="sw high"></i>高台</span>
+          <span><i class="sw highSpecial"></i>特殊高台</span>
+          <span><i class="sw box"></i>箱子</span>
+          <span><i class="sw floor"></i>不可部署</span>
+          <span><i class="sw void"></i>不可通行</span>
+          <span><i class="sw spawn"></i>侵入点</span>
+          <span><i class="sw goal"></i>终点</span>
+        </div>
+      </div>
+
+      <div class="event-bar" id="eventBar">
+        <div class="event-row event-main">
+          <div class="phase-progress" id="phaseProgress" data-phase="prep" aria-label="回合阶段：休整期">
+            <span class="pp-thumb" aria-hidden="true"></span>
+            <span class="pp-step" data-phase="prep" aria-current="step">休整期</span>
+            <span class="pp-step" data-phase="combat">作战期</span>
+          </div>
+          <span class="event-sep"></span>
+          <button class="btn" data-event="prepEnd" data-tip="event">休整期结束</button>
+          <button class="btn" data-event="gain" data-tip="event">获得时</button>
+          <button class="btn" data-event="battleEnd" data-tip="event">作战结束</button>
+          <button class="btn" data-event="prepStart" data-tip="event">进入休整期</button>
+        </div>
+        <div class="event-row event-combat" id="combatBar" hidden>
+          <span class="event-combat-label">作战操作</span>
+          <button class="btn" data-event="skill" data-tip="event">开启技能</button>
+          <button class="btn" data-event="knockdown" data-tip="event">我方击倒</button>
+          <button class="btn mode" data-event="killEnemy" data-tip="event">击倒敌人</button>
+          <button class="btn" data-event="battleCap" data-tip="event">补满叠层</button>
+        </div>
+      </div>
+
+      <div class="board-scroll">
+        <div class="board" id="board" aria-label="空白训练场棋盘"></div>
+      </div>
+      <div class="hint" id="hint">选择一名干员，再点击地面或高台。</div>
+    </section>
+
+    <aside class="side">
+      <section class="panel inspector" id="inspector"></section>
+
+      <section class="panel logs" id="logsPanel">
+        <div class="panel-head">
+          <h2>事件日志</h2>
+          <div class="log-tools">
+            <button class="mini" id="copyLogBtn" title="复制日志与当前状态，用于问题反馈">复制日志</button>
+            <button class="mini" id="exportDiagBtn" title="下载包含日志、状态和沙盒码的 JSON 诊断文件">导出诊断</button>
+            <button class="mini" id="reportToggle">报表</button>
+            <button class="mini" id="logToggle">收起</button>
+            <button class="mini" id="clearLog">清空</button>
+          </div>
+        </div>
+        <div class="log-list" id="logList"></div>
+      </section>
+    </aside>
+    <aside class="panel hand-panel bottom-hand" id="handPanel">
+      <div class="panel-head">
+        <h2>待部署区</h2>
+        <div class="hand-tools">
+          <span class="muted" id="handCount"></span>
+          <span class="muted" id="refreshCount"></span>
+          <span class="free-refresh" title="记录获得的免费刷新次数；刷新时优先消耗">
+            <span>免费</span><button id="freeMinus" class="mini" title="减少免费刷新">−</button><b id="freeCount">0</b><button id="freePlus" class="mini" title="记录 1 次免费刷新">+</button>
+          </span>
+          <button class="btn small ghost" id="clearHandBtn" title="清空待部署区">清空</button>
+          <button class="btn small" id="refreshBtn" data-tip="event" data-event="refresh" title="触发「刷新时」词条">刷新</button>
+        </div>
+      </div>
+      <div class="hand-list" id="handList"></div>
+    </aside>
+
+  </main>
+
+</div>
+
+<div class="landscape-tip" id="landscapeTip" role="status">
+  <div class="rotate-ico">⟳</div>
+  <h3>请横屏使用</h3>
+  <p>手机竖屏空间不足，请横屏使用；横屏后将自动适配一屏。</p>
+</div>
+<section class="report-panel" id="reportPanel" hidden>
+  <header class="report-head">
+    <div>
+      <span class="report-kicker">叠层报表</span>
+      <h3 id="reportTitle">叠层总结</h3>
+    </div>
+    <button class="mini" id="reportClose">关闭</button>
+  </header>
+  <div class="report-body" id="reportBody"></div>
+  <footer class="report-foot"><span id="reportRound"></span></footer>
+</section>
+<section class="report-panel share-panel" id="sandboxSharePanel" hidden>
+  <header class="report-head">
+    <div>
+      <span class="report-kicker">沙盒码 · GSPS1</span>
+      <h3>分享 / 导入沙盒测试</h3>
+    </div>
+    <button class="mini" id="sandboxShareClose">关闭</button>
+  </header>
+  <div class="report-body share-body">
+    <p class="share-tip">沙盒码包含地图、回合、阶段、场上/待部署区、固定/临时层、刷新、特质和战斗计数；不包含事件日志。将沙盒码分享给他人即可复现当前沙盘。</p>
+    <textarea id="sandboxCodeText" spellcheck="false" placeholder="GSPS1… 粘贴沙盒码后点击「导入」"></textarea>
+    <div class="share-actions">
+      <button class="btn small" id="sandboxCopyBtn">复制</button>
+      <button class="btn small ghost" id="sandboxImportBtn">导入文本框中的沙盒码</button>
+      <button class="btn small ghost" id="sandboxDownloadBtn">下载 .txt</button>
+    </div>
+    <div class="share-status" id="sandboxShareStatus"></div>
+  </div>
+</section>
+<div class="map-modal" id="mapModal" hidden>
+  <div class="map-modal-card" id="mapModalCard"></div>
+</div>
+<section class="gear-modal" id="gearModal" hidden>
+  <div class="gear-sheet" role="dialog" aria-modal="true" aria-labelledby="gearTitle">
+    <header class="gear-head">
+      <div class="gear-title">
+        <h3 id="gearTitle">编辑装备</h3>
+        <p class="gear-sub" id="gearSub"></p>
+      </div>
+      <button type="button" class="mini" id="gearClose">关闭</button>
+    </header>
+    <div class="gear-equipped" id="gearEquipped"></div>
+    <div class="gear-search">
+      <input id="gearSearch" type="search" placeholder="搜索装备名 / 效果 / 盟约…" autocomplete="off" aria-label="搜索装备">
+    </div>
+    <div class="gear-list" id="gearList"></div>
+    <p class="gear-foot">装备目前只结算「变形同构体」的转职与效果描述；攻击、防御等数值加成不进入叠层计算。</p>
+  </div>
+</section>
+<div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="data/data.js?v=05feea20"></script>
+<script src="data/ranges.js?v=05feea20"></script>
+<script src="data/operator_positions.js?v=05feea20"></script>
+<script src="data/operator_ranges.js?v=05feea20"></script>
+<script src="data/operator_rules.js?v=05feea20"></script>
+<script src="data/maps.js?v=05feea20"></script>
+<script src="js/code.js?v=05feea20"></script>
+<script src="js/sandbox-code.js?v=05feea20"></script>
+<script src="js/calc.js?v=05feea20"></script>
+<script src="js/stack-core.js?v=05feea20"></script>
+<script src="js/map-presets.js?v=05feea20"></script>
+<script src="js/sandbox.js?v=05feea20"></script>
+</body>
+</html>
+
+
+
+

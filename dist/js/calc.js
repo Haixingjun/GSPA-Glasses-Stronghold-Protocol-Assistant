@@ -12,8 +12,9 @@
                   协防干员：按表内人数列 2 人。
 
    装备：
-   · 每名干员最多 2 件装备，只影响「变形同构体」这一类改变盟约归属的效果；
-     其它装备只做展示（数值加成不进盟约计数）。
+   · 大多数干员最多 2 件装备；特殊干员按 EQUIP_SLOT_OVERRIDES 放宽（“暴躁铁皮”4 件，
+     精锐 6 件）。配队只影响「变形同构体」这一类改变盟约归属的效果；其它装备只做展示
+     （数值加成不进盟约计数），沙盒同样只结算转职与效果描述。
    · 变形同构体：携带者获得「另一件携带装备」所属的盟约；另一件装备的盟约
      未收录时用 slot.m（手动指定）兜底。已有该盟约则不重复计数。
 
@@ -35,6 +36,24 @@
   };
 
   var MORPH_ITEM = '变形同构体';
+
+  /**
+   * 特殊干员的装备槽位。
+   * “暴躁铁皮”（PRTS 天赋【酋长之威】）在卫戍协议中可穿戴 4 件装备，
+   * 精锐状态额外 +2 件（共 6 件）。名字同时收录带引号与不带引号的写法，
+   * 避免不同数据源/旧存档的引号差异导致槽位回退成 2。
+   */
+  var EQUIP_SLOT_OVERRIDES = {
+    '“暴躁铁皮”': { normal: 4, elite: 6 },
+    '暴躁铁皮': { normal: 4, elite: 6 }
+  };
+
+  /** 某名干员当前可携带的装备件数；未知干员按通用上限 2 件。 */
+  function itemCapacity(name, elite) {
+    var rule = EQUIP_SLOT_OVERRIDES[name];
+    if (!rule) return RULES.itemsMax;
+    return elite ? rule.elite : rule.normal;
+  }
 
   /**
    * 仍然只有 special 文本、但已有明确“每回合/每场至多 N 层”的叠层上限。
@@ -215,7 +234,8 @@
 
       var piece = { op: effective, pick: pick, elite: !!s.e, slot: i, items: [], extra: [] };
       var names = s.it || [];
-      for (j = 0; j < names.length && j < RULES.itemsMax; j++) {
+      var itemCap = itemCapacity(effective.name, !!s.e);
+      for (j = 0; j < names.length && j < itemCap; j++) {
         var raw = names[j];
         var nm = raw && typeof raw === 'string' ? raw : (raw && raw.k);
         var eliteItem = raw && typeof raw === 'object' ? !!raw.e : false;
@@ -417,6 +437,8 @@
   global.Calc = {
     RULES: RULES,
     MORPH_ITEM: MORPH_ITEM,
+    EQUIP_SLOT_OVERRIDES: EQUIP_SLOT_OVERRIDES,
+    itemCapacity: itemCapacity,
     SPECIAL_CAPS: SPECIAL_CAPS,
     evaluate: evaluate,
     emptyTeam: emptyTeam,

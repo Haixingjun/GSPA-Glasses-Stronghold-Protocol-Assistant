@@ -48,6 +48,9 @@ COV_FUNC_LABEL = {
 }
 COV_META_PATH = os.path.join(ROOT, "data", "covenant_meta.json")
 SPECIAL_PATH = os.path.join(ROOT, "data", "special_operators.json")
+# 解包阵营快照：自选干员的 mainPower / subPower（character_table）与 power 层级（handbook_team_table），
+# 用于构建期复核「自选干员」的核心盟约；快照缺失时跳过（只告警）。
+PICK_FACTIONS_PATH = os.path.join(ROOT, "source", "unpacked", "pick_factions.json")
 
 errors, warnings = [], []
 
@@ -93,6 +96,29 @@ def int_or(v):
         return int(float(v))
     except Exception:
         return None
+
+
+# 自选干员的核心盟约推导口径（2026-11-14 复核）：
+#   mainPower 取最具体阵营（team > group > nation）+ 全部 subPower（隐藏阵营），
+#   与核心盟约 powerIdList 求交，空 -> 协防干员。
+# 数据来自 source/unpacked/pick_factions.json（解包 character_table / handbook_team_table / activity_table）。
+PICK_CORE_ORDER = ["炎", "萨尔贡", "维多利亚", "谢拉格", "阿戈尔", "叙拉古", "卡西米尔", "乌萨斯", "伊比利亚", "莱塔尼亚"]
+
+
+def derive_pick_tags(char_id, snap):
+    rec = (snap.get("picks") or {}).get(char_id)
+    if not rec:
+        return None
+    powers = snap.get("powers") or {}
+    lv = lambda pid: (powers.get(pid) or {}).get("level", 0)  # noqa: E731
+    main = list(rec.get("mainPower") or [])
+    chosen = ([max(main, key=lv)] if main else [])
+    for pid in rec.get("subPower") or []:
+        if pid not in chosen:
+            chosen.append(pid)
+    cores = snap.get("cores") or {}
+    hit = [c for c in PICK_CORE_ORDER if set(cores.get(c, [])) & set(chosen)]
+    return hit if hit else ["协防干员"]
 
 
 # ---------------------------------------------------------------- 读表
@@ -544,6 +570,31 @@ if PICK_ROWS:
     if missing_avatar:
         warn("自选干员有 %d/%d 名缺少头像（先跑 prepare_avatars.py）" % (missing_avatar, len(PICK_ROWS)))
 
+    # 构建期复核：主表「核心盟约」必须与解包 character_table 推导一致（口径见 derive_pick_tags）。
+    if os.path.exists(PICK_FACTIONS_PATH):
+        try:
+            _snap = json.load(open(PICK_FACTIONS_PATH, encoding="utf-8"))
+        except Exception as exc:
+            warn("解包阵营快照读取失败：%s（跳过自选干员阵营复核）" % exc)
+        else:
+            _checked = 0
+            _bad = 0
+            for _p in picks:
+                _exp = derive_pick_tags(_p["charId"], _snap)
+                if _exp is None:
+                    warn("自选干员「%s」不在解包阵营快照中（%s）" % (_p["name"], _p["charId"]))
+                    continue
+                _checked += 1
+                if sorted(_exp) != sorted(_p["tags"]):
+                    _bad += 1
+                    err("自选干员「%s」核心盟约 %s 与解包推导 %s 不一致（改主表或更新 source/unpacked/pick_factions.json）"
+                        % (_p["name"], "/".join(_p["tags"]), "/".join(_exp)))
+            if _checked:
+                print("自选干员阵营复核：%d 名，%s" % (_checked, "全部一致" if not _bad else "%d 名不一致" % _bad))
+    else:
+        warn("缺少 %s：跳过自选干员阵营复核（可用 tools/check_pick_factions.py 生成/检查）"
+             % os.path.relpath(PICK_FACTIONS_PATH, ROOT))
+
 # ---------------------------------------------------------------- 盟约
 NUM_RE = re.compile(r"(\d+)")
 
@@ -709,8 +760,10 @@ payload = {
     "specialMeta": SPECIAL_META,
     "pickMeta": {
         "source": "卫戍协议数据表.xlsx / 自选干员",
-        "rule": "6★、非固定干员；按 ingameFaction ∪ hiddenFaction 推导核心盟约，无匹配为协防干员",
+        "rule": "6★、非固定干员；mainPower 取最具体阵营（team > group > nation）+ 隐藏阵营（subPower）推导核心盟约，无匹配为协防干员",
         "note": "自选干员单列，不计入盟约固定 10 人；配队中按 tags 参与激活/强化",
+        "checkedAt": "2026-11-14",
+        "checkSource": "source/unpacked/pick_factions.json",
     },
     "operators": operators,
     "picks": picks,
@@ -820,6 +873,7 @@ else:
         ("策略", "strategies", ["role", "name", "category", "hp", "text", "specialOperator", "fixedUnits"]),
         ("特殊干员", "operators", ["special"]),
         ("盟约", "covenants", ["name", "desc", "rank", "family", "functions", "members"]),
+        ("自选干员", "picks", ["tags", "tagsSource", "factions", "hiddenFactions", "nation"]),
     ]
     total = 0
     for label, key, fields in groups:

@@ -16,8 +16,14 @@
            有装备时再跟：6 bit 装备1+1，6 bit 装备2+1，5 bit 转职盟约+1
      3 bit  层数条数 M
      M × { 5 bit 盟约下标，14 bit 数值 }
+     1 bit  扩展段标志（1=有第 3 件及以后的装备）
+     4 bit  扩展记录数 E
+     E × { 4 bit 席位下标，3 bit 追加件数 K，K × (6 bit 装备下标+1，1 bit 进阶) }
 
-   文本形态：`GSPA2.<base64url>`，前缀用来在一段聊天记录里被正则捞出来。
+    扩展段是为“暴躁铁皮”（普通 4 / 精锐 6 件）加的：老版本解码器会忽略
+    末尾扩展位，只显示前 2 件；新版本能完整还原 4/6 件，GSPA3 前缀不变。
+
+   文本形态：`GSPA3.<base64url>`，前缀用来在一段聊天记录里被正则捞出来。
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -31,6 +37,16 @@
   var BITS_OP = 8, BITS_FLAG = 1, BITS_PICK = 8;
   var BITS_ITEM = 6, BITS_ITEM_ELITE = 1, BITS_COV = 5;
   var BITS_LAYER_N = 3, BITS_LAYER_VAL = 14;
+  var BITS_EXTRA_N = 4, BITS_EXTRA_COUNT = 3, BITS_SLOT_INDEX = 4;
+
+  /** 某席位可携带的装备件数；与 Calc.itemCapacity 同源，未知时回退 2。 */
+  function gearCapFor(s) {
+    if (!s || !s.k) return 2;
+    if (global.Calc && typeof global.Calc.itemCapacity === 'function') {
+      return global.Calc.itemCapacity(s.k, !!s.e);
+    }
+    return 2;
+  }
 
   function fnv1a(str) {
     var h = 2166136261;
@@ -149,10 +165,14 @@
 
       var gear = [];
       var list = s.it || [];
-      for (var g = 0; g < list.length && gear.length < 2; g++) {
+      var gearCap = gearCapFor(s);
+      for (var g = 0; g < list.length && gear.length < gearCap; g++) {
         var raw = list[g];
         var nm = raw && typeof raw === 'string' ? raw : (raw && raw.k);
         if (!nm || idx.item[nm] == null) continue;
+        var dupGear = false;
+        for (var gj = 0; gj < gear.length; gj++) if (gear[gj].i === idx.item[nm] + 1) dupGear = true;
+        if (dupGear) continue;
         gear.push({ i: idx.item[nm] + 1, e: (raw && typeof raw === 'object' && raw.e) ? 1 : 0 });
       }
 
@@ -166,9 +186,11 @@
       var opIdx = s.k && idx.op[s.k] != null ? idx.op[s.k] + 1 : 0;
       if (!opIdx && !pick) continue;
       recs.push({
+        slotIndex: i,
         op: opIdx,
         elite: s.e ? 1 : 0,
         pick: pick,
+        gear: gear,
         items: [gear[0] || { i: 0, e: 0 }, gear[1] || { i: 0, e: 0 }],
         morph: morph
       });
@@ -207,7 +229,56 @@
       w.write(layers[i][1], BITS_LAYER_VAL);
     }
 
+    // 扩展段：第 3 件及以后的装备（“暴躁铁皮”最多 4/6 件）。
+    // 追加在末尾而不是改主记录，老版本解码器仍能读前 2 件，GSPA3 前缀不变。
+    var extras = [];
+    for (i = 0; i < recs.length; i++) {
+      if (recs[i].gear.length > 2) extras.push(recs[i]);
+    }
+    w.write(extras.length ? 1 : 0, BITS_FLAG);
+    if (extras.length) {
+      w.write(Math.min(15, extras.length), BITS_EXTRA_N);
+      for (i = 0; i < extras.length; i++) {
+        var ex = extras[i].gear.slice(2, 2 + 4);
+        w.write(extras[i].slotIndex, BITS_SLOT_INDEX);
+        w.write(ex.length, BITS_EXTRA_COUNT);
+        for (var ej = 0; ej < ex.length; ej++) {
+          w.write(ex[ej].i, BITS_ITEM);
+          w.write(ex[ej].e, BITS_ITEM_ELITE);
+        }
+      }
+    }
+
     return PREFIX + toB64(w.finish());
+  }
+
+  /** 读取扩展段：第 3 件及以后的装备；没有扩展段（老码）时静默返回。 */
+  function readExtraGear(r, team, data, warnings) {
+    var flag = r.read(BITS_FLAG);
+    if (!flag) return;
+    var count = r.read(BITS_EXTRA_N);
+    if (count == null) { warnings.push('装备扩展段不完整，已忽略'); return; }
+    for (var i = 0; i < count; i++) {
+      var slotIdx = r.read(BITS_SLOT_INDEX);
+      var extraN = r.read(BITS_EXTRA_COUNT);
+      if (slotIdx == null || extraN == null) { warnings.push('装备扩展段不完整，已忽略'); return; }
+      var extra = [];
+      for (var j = 0; j < extraN; j++) {
+        var ii = r.read(BITS_ITEM);
+        var ee = r.read(BITS_ITEM_ELITE);
+        if (ii == null || ee == null) { warnings.push('装备扩展段不完整，已忽略'); return; }
+        if (ii > 0 && data.items[ii - 1]) extra.push({ k: data.items[ii - 1].name, e: !!ee });
+      }
+      var slot = team.slots[slotIdx];
+      if (!slot || !extra.length) continue;
+      slot.it = slot.it || [];
+      var cap = gearCapFor(slot);
+      for (var k = 0; k < extra.length && slot.it.length < cap; k++) {
+        var dup = false;
+        for (var m = 0; m < slot.it.length; m++) if (slot.it[m].k === extra[k].k) dup = true;
+        if (!dup) slot.it.push(extra[k]);
+      }
+    }
   }
 
   /* ---------------- 解码 ---------------- */
@@ -320,6 +391,8 @@
         if (cov && v > 0) team.layers[cov.name] = v;
       }
     }
+
+    readExtraGear(r, team, data, warnings);
 
     return { team: team, warnings: warnings, placed: placed };
   }

@@ -111,6 +111,32 @@ test('分享码：转职盟约、两件装备与「进阶形态」分别还原',
   assert.equal(res.team.slots[0].m, '萨尔贡');
 });
 
+test('分享码：特殊干员 4 / 6 件装备经扩展段完整还原', () => {
+  const gearNames = data.items.filter((x) => x.type === '装备').slice(0, 6).map((x) => x.name);
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = {
+    k: '“暴躁铁皮”', e: true,
+    it: gearNames.map((k, i) => ({ k: k, e: i % 2 === 1 }))
+  };
+  const code = Code.encode(team, data);
+  assert.match(code, /^GSPA3\./, '扩展段不改变 GSPA3 前缀');
+  const res = Code.decode(code, data);
+  assert.ok(res);
+  assert.deepEqual(res.team.slots[0].it, team.slots[0].it, '6 件装备应完整还原');
+});
+
+test('分享码：旧版两件装备码仍能解码（无扩展段）', () => {
+  const team = Calc.emptyTeam(8);
+  team.slots[0] = {
+    k: '拜松', e: false,
+    it: [{ k: '维式重锤', e: false }, { k: '变形同构体', e: true }],
+    m: '维多利亚'
+  };
+  const res = Code.decode(Code.encode(team, data), data);
+  assert.deepEqual(res.team.slots[0].it, team.slots[0].it);
+  assert.equal(res.team.slots[0].m, '维多利亚');
+});
+
 test('分享码：自选干员（p）随 GSPA3 还原，最多 2 名', () => {
   const team = Calc.emptyTeam(8);
   team.slots[0] = { p: '斩业星熊', e: true };

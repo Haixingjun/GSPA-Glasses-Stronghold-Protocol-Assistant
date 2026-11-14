@@ -311,6 +311,15 @@
     }
   }
 
+  /** 席位当前可携带的装备件数：特殊干员由 Calc 统一判定（“暴躁铁皮”4 / 精锐 6） */
+  function itemCapOfSlot(s) {
+    if (!s || !s.k) return ITEMS_MAX;
+    if (global.Calc && typeof global.Calc.itemCapacity === 'function') {
+      return global.Calc.itemCapacity(s.k, !!s.e);
+    }
+    return ITEMS_MAX;
+  }
+
   function applyItems(value, slots) {
     if (!value) return;
     var parts = String(value).split(',');
@@ -323,7 +332,10 @@
       if (idx === null || idx < 0 || idx >= slots.length || !slots[idx]) continue;
       var names = raw.slice(at + 1).split('+');
       var out = [];
-      for (var j = 0; j < names.length && out.length < ITEMS_MAX; j++) {
+      // 按该干员的实际槽位收集；“暴躁铁皮”普通 4 / 精锐 6，
+      // 这样它的第 3 件及以后不会在 URL 往返时被丢掉。
+      var cap = itemCapOfSlot(slots[idx]);
+      for (var j = 0; j < names.length && out.length < cap; j++) {
         var seg = names[j];
         var elite = false;
         if (seg.charAt(seg.length - 1) === '*') { elite = true; seg = seg.slice(0, -1); }
@@ -391,7 +403,8 @@
       var s = slots[i];
       if (!s || !s.it || !s.it.length) continue;
       var names = [];
-      for (var j = 0; j < s.it.length && j < ITEMS_MAX; j++) {
+      var cap = itemCapOfSlot(s);
+      for (var j = 0; j < s.it.length && j < cap; j++) {
         var it = normItem(s.it[j]);
         if (!it) continue;
         names.push(encodeURIComponent(it.k) + (it.e ? '*' : ''));
@@ -623,7 +636,8 @@
     if (s.p) out.p = String(s.p);
     if (s.it && s.it.length) {
       out.it = [];
-      for (var i = 0; i < s.it.length && out.it.length < ITEMS_MAX; i++) {
+      var cap = itemCapOfSlot(s);
+      for (var i = 0; i < s.it.length && out.it.length < cap; i++) {
         var it = normItem(s.it[i]);
         if (!it) continue;
         var dup = false;

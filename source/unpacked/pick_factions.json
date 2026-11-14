@@ -1,0 +1,756 @@
+{
+ "meta": {
+  "season": "卫戍协议·规程",
+  "gameDataVersion": "26-11-06-12-56-09-07186384",
+  "source": "Kengxxiao/ArknightsGameData zh_CN/gamedata/excel/{character_table,handbook_team_table,activity_table}.json（master，2026-11-14 抓取）",
+  "rule": "mainPower 取最具体阵营（team > group > nation）+ 全部 subPower（隐藏阵营）；与核心盟约 powerIdList 求交，空→协防干员",
+  "note": "角色 mainPower/subPower 直接来自解包 character_table；power 名称与层级来自 handbook_team_table；核心盟约 powerIdList 来自 activity_table.autoChessData.bondInfoDict（本季生效的 10 个核心）。"
+ },
+ "powers": {
+  "abyssal": {
+   "name": "深海猎人",
+   "level": 1
+  },
+  "action4": {
+   "name": "行动组A4",
+   "level": 2
+  },
+  "babel": {
+   "name": "巴别塔",
+   "level": 1
+  },
+  "bolivar": {
+   "name": "玻利瓦尔",
+   "level": 0
+  },
+  "chiave": {
+   "name": "贾维团伙",
+   "level": 2
+  },
+  "columbia": {
+   "name": "哥伦比亚",
+   "level": 0
+  },
+  "egir": {
+   "name": "阿戈尔",
+   "level": 0
+  },
+  "elite": {
+   "name": "罗德岛-精英干员",
+   "level": 1
+  },
+  "followers": {
+   "name": "使徒",
+   "level": 2
+  },
+  "glasgow": {
+   "name": "格拉斯哥帮",
+   "level": 1
+  },
+  "higashi": {
+   "name": "东",
+   "level": 0
+  },
+  "iberia": {
+   "name": "伊比利亚",
+   "level": 0
+  },
+  "karlan": {
+   "name": "喀兰贸易",
+   "level": 1
+  },
+  "kazimierz": {
+   "name": "卡西米尔",
+   "level": 0
+  },
+  "kjerag": {
+   "name": "谢拉格",
+   "level": 0
+  },
+  "laios": {
+   "name": "莱欧斯小队",
+   "level": 2
+  },
+  "laterano": {
+   "name": "拉特兰",
+   "level": 0
+  },
+  "lee": {
+   "name": "鲤氏侦探事务所",
+   "level": 2
+  },
+  "leithanien": {
+   "name": "莱塔尼亚",
+   "level": 0
+  },
+  "lgd": {
+   "name": "龙门近卫局",
+   "level": 1
+  },
+  "lungmen": {
+   "name": "炎-龙门",
+   "level": 0
+  },
+  "minos": {
+   "name": "米诺斯",
+   "level": 0
+  },
+  "mujica": {
+   "name": "Ave Mujica",
+   "level": 2
+  },
+  "penguin": {
+   "name": "企鹅物流",
+   "level": 1
+  },
+  "pinus": {
+   "name": "红松骑士团",
+   "level": 1
+  },
+  "rainbow": {
+   "name": "彩虹小队",
+   "level": 2
+  },
+  "reserve6": {
+   "name": "行动预备组A6",
+   "level": 2
+  },
+  "rhine": {
+   "name": "莱茵生命",
+   "level": 1
+  },
+  "rhodes": {
+   "name": "罗德岛",
+   "level": 0
+  },
+  "rim": {
+   "name": "雷姆必拓",
+   "level": 0
+  },
+  "sami": {
+   "name": "萨米",
+   "level": 0
+  },
+  "sargon": {
+   "name": "萨尔贡",
+   "level": 0
+  },
+  "sees": {
+   "name": "S.E.E.S.",
+   "level": 2
+  },
+  "siesta": {
+   "name": "汐斯塔",
+   "level": 1
+  },
+  "siracusa": {
+   "name": "叙拉古",
+   "level": 0
+  },
+  "student": {
+   "name": "乌萨斯学生自治团",
+   "level": 2
+  },
+  "sui": {
+   "name": "炎-岁",
+   "level": 1
+  },
+  "sweep": {
+   "name": "S.W.E.E.P.",
+   "level": 1
+  },
+  "tara": {
+   "name": "塔拉",
+   "level": 1
+  },
+  "ursus": {
+   "name": "乌萨斯",
+   "level": 0
+  },
+  "victoria": {
+   "name": "维多利亚",
+   "level": 0
+  },
+  "yan": {
+   "name": "炎",
+   "level": 0
+  }
+ },
+ "cores": {
+  "炎": [
+   "yan",
+   "sui",
+   "lungmen",
+   "lee",
+   "lgd"
+  ],
+  "萨尔贡": [
+   "sargon"
+  ],
+  "维多利亚": [
+   "victoria",
+   "glasgow"
+  ],
+  "谢拉格": [
+   "kjerag",
+   "karlan"
+  ],
+  "阿戈尔": [
+   "egir",
+   "abyssal"
+  ],
+  "叙拉古": [
+   "siracusa",
+   "chiave"
+  ],
+  "卡西米尔": [
+   "kazimierz",
+   "pinus"
+  ],
+  "乌萨斯": [
+   "ursus",
+   "student"
+  ],
+  "伊比利亚": [
+   "iberia"
+  ],
+  "莱塔尼亚": [
+   "leithanien"
+  ]
+ },
+ "picks": {
+  "char_225_haak": {
+   "name": "阿",
+   "mainPower": [
+    "lungmen",
+    "lee"
+   ],
+   "subPower": []
+  },
+  "char_010_chen": {
+   "name": "陈",
+   "mainPower": [
+    "lungmen",
+    "lgd"
+   ],
+   "subPower": []
+  },
+  "char_1050_chen3": {
+   "name": "赤刃明霄陈",
+   "mainPower": [
+    "yan"
+   ],
+   "subPower": [
+    "rhodes"
+   ]
+  },
+  "char_017_huang": {
+   "name": "煌",
+   "mainPower": [
+    "rhodes",
+    "elite"
+   ],
+   "subPower": [
+    "yan",
+    "victoria"
+   ]
+  },
+  "char_1013_chen2": {
+   "name": "假日威龙陈",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": [
+    "yan"
+   ]
+  },
+  "char_1028_texas2": {
+   "name": "缄默德克萨斯",
+   "mainPower": [
+    "lungmen",
+    "penguin"
+   ],
+   "subPower": [
+    "siracusa"
+   ]
+  },
+  "char_4080_lin": {
+   "name": "林",
+   "mainPower": [
+    "lungmen"
+   ],
+   "subPower": []
+  },
+  "char_1033_swire2": {
+   "name": "琳琅诗怀雅",
+   "mainPower": [
+    "lungmen"
+   ],
+   "subPower": []
+  },
+  "char_2023_ling": {
+   "name": "令",
+   "mainPower": [
+    "yan",
+    "sui"
+   ],
+   "subPower": []
+  },
+  "char_213_mostma": {
+   "name": "莫斯提马",
+   "mainPower": [
+    "laterano"
+   ],
+   "subPower": [
+    "lungmen",
+    "penguin"
+   ]
+  },
+  "char_103_angel": {
+   "name": "能天使",
+   "mainPower": [
+    "lungmen",
+    "penguin"
+   ],
+   "subPower": [
+    "laterano"
+   ]
+  },
+  "char_2014_nian": {
+   "name": "年",
+   "mainPower": [
+    "yan",
+    "sui"
+   ],
+   "subPower": []
+  },
+  "char_1043_leizi2": {
+   "name": "司霆惊蛰",
+   "mainPower": [
+    "yan"
+   ],
+   "subPower": []
+  },
+  "char_2027_wang": {
+   "name": "望",
+   "mainPower": [
+    "yan",
+    "sui"
+   ],
+   "subPower": []
+  },
+  "char_1041_angel2": {
+   "name": "新约能天使",
+   "mainPower": [
+    "lungmen",
+    "penguin"
+   ],
+   "subPower": [
+    "laterano"
+   ]
+  },
+  "char_136_hsguma": {
+   "name": "星熊",
+   "mainPower": [
+    "lungmen",
+    "lgd"
+   ],
+   "subPower": [
+    "higashi"
+   ]
+  },
+  "char_1044_hsgma2": {
+   "name": "斩业星熊",
+   "mainPower": [
+    "lungmen",
+    "lgd"
+   ],
+   "subPower": [
+    "higashi"
+   ]
+  },
+  "char_2024_chyue": {
+   "name": "重岳",
+   "mainPower": [
+    "yan",
+    "sui"
+   ],
+   "subPower": []
+  },
+  "char_4121_zuole": {
+   "name": "左乐",
+   "mainPower": [
+    "yan"
+   ],
+   "subPower": []
+  },
+  "char_1026_gvial2": {
+   "name": "百炼嘉维尔",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": [
+    "sargon"
+   ]
+  },
+  "char_4138_narant": {
+   "name": "娜仁图亚",
+   "mainPower": [
+    "sargon"
+   ],
+   "subPower": []
+  },
+  "char_4056_titi": {
+   "name": "缇缇",
+   "mainPower": [
+    "sargon"
+   ],
+   "subPower": [
+    "minos"
+   ]
+  },
+  "char_377_gdglow": {
+   "name": "澄闪",
+   "mainPower": [
+    "victoria"
+   ],
+   "subPower": []
+  },
+  "char_222_bpipe": {
+   "name": "风笛",
+   "mainPower": [
+    "victoria"
+   ],
+   "subPower": []
+  },
+  "char_4039_horn": {
+   "name": "号角",
+   "mainPower": [
+    "victoria"
+   ],
+   "subPower": []
+  },
+  "char_250_phatom": {
+   "name": "傀影",
+   "mainPower": [
+    "victoria"
+   ],
+   "subPower": []
+  },
+  "char_479_sleach": {
+   "name": "琴柳",
+   "mainPower": [
+    "victoria"
+   ],
+   "subPower": []
+  },
+  "char_450_necras": {
+   "name": "死芒",
+   "mainPower": [
+    "victoria",
+    "tara"
+   ],
+   "subPower": []
+  },
+  "char_112_siege": {
+   "name": "推进之王",
+   "mainPower": [
+    "victoria",
+    "glasgow"
+   ],
+   "subPower": []
+  },
+  "char_1020_reed2": {
+   "name": "焰影苇草",
+   "mainPower": [
+    "victoria",
+    "tara"
+   ],
+   "subPower": []
+  },
+  "char_172_svrash": {
+   "name": "银灰",
+   "mainPower": [
+    "kjerag",
+    "karlan"
+   ],
+   "subPower": []
+  },
+  "char_1502_crosly": {
+   "name": "弑君者",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": [
+    "siracusa",
+    "ursus"
+   ]
+  },
+  "char_1015_aglna2": {
+   "name": "予愿安洁莉娜",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": [
+    "siracusa"
+   ]
+  },
+  "char_4195_radian": {
+   "name": "电弧",
+   "mainPower": [
+    "rhodes",
+    "elite"
+   ],
+   "subPower": [
+    "ursus"
+   ]
+  },
+  "char_4246_dminon": {
+   "name": "国度",
+   "mainPower": [
+    "ursus"
+   ],
+   "subPower": []
+  },
+  "char_197_poca": {
+   "name": "早露",
+   "mainPower": [
+    "ursus",
+    "student"
+   ],
+   "subPower": []
+  },
+  "char_4011_lessng": {
+   "name": "止颂",
+   "mainPower": [
+    "leithanien"
+   ],
+   "subPower": []
+  },
+  "char_4132_ascln": {
+   "name": "阿斯卡纶",
+   "mainPower": [
+    "rhodes",
+    "sweep"
+   ],
+   "subPower": [
+    "babel"
+   ]
+  },
+  "char_4123_ela": {
+   "name": "艾拉",
+   "mainPower": [
+    "rainbow"
+   ],
+   "subPower": []
+  },
+  "char_362_saga": {
+   "name": "嵯峨",
+   "mainPower": [
+    "higashi"
+   ],
+   "subPower": []
+  },
+  "char_4048_doroth": {
+   "name": "多萝西",
+   "mainPower": [
+    "columbia",
+    "rhine"
+   ],
+   "subPower": []
+  },
+  "char_300_phenxi": {
+   "name": "菲亚梅塔",
+   "mainPower": [
+    "laterano"
+   ],
+   "subPower": []
+  },
+  "char_4182_oblvns": {
+   "name": "丰川祥子",
+   "mainPower": [
+    "mujica"
+   ],
+   "subPower": []
+  },
+  "char_340_shwaz": {
+   "name": "黑",
+   "mainPower": [
+    "columbia",
+    "siesta"
+   ],
+   "subPower": []
+  },
+  "char_456_ash": {
+   "name": "灰烬",
+   "mainPower": [
+    "rainbow"
+   ],
+   "subPower": []
+  },
+  "char_4217_makoto": {
+   "name": "结城理",
+   "mainPower": [
+    "sees"
+   ],
+   "subPower": [
+    "laterano"
+   ]
+  },
+  "char_003_kalts": {
+   "name": "凯尔希",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": [
+    "babel"
+   ]
+  },
+  "char_1052_kalts2": {
+   "name": "凯尔希·思衡托",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": []
+  },
+  "char_2013_cerber": {
+   "name": "刻俄柏",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": [
+    "bolivar"
+   ]
+  },
+  "char_4117_ray": {
+   "name": "莱伊",
+   "mainPower": [
+    "rim"
+   ],
+   "subPower": []
+  },
+  "char_4141_marcil": {
+   "name": "玛露西尔",
+   "mainPower": [
+    "laios"
+   ],
+   "subPower": []
+  },
+  "char_248_mgllan": {
+   "name": "麦哲伦",
+   "mainPower": [
+    "columbia",
+    "rhine"
+   ],
+   "subPower": []
+  },
+  "char_4229_aphris": {
+   "name": "谬因",
+   "mainPower": [
+    "columbia"
+   ],
+   "subPower": []
+  },
+  "char_4212_nasti": {
+   "name": "娜斯提",
+   "mainPower": [
+    "columbia",
+    "rhine"
+   ],
+   "subPower": []
+  },
+  "char_311_mudrok": {
+   "name": "泥岩",
+   "mainPower": [
+    "rhodes"
+   ],
+   "subPower": []
+  },
+  "char_1029_yato2": {
+   "name": "麒麟R夜刀",
+   "mainPower": [
+    "rhodes",
+    "action4"
+   ],
+   "subPower": [
+    "higashi"
+   ]
+  },
+  "char_4235_thumpy": {
+   "name": "珊比",
+   "mainPower": [
+    "rim"
+   ],
+   "subPower": []
+  },
+  "char_147_shining": {
+   "name": "闪灵",
+   "mainPower": [
+    "followers"
+   ],
+   "subPower": []
+  },
+  "char_1032_excu2": {
+   "name": "圣约送葬人",
+   "mainPower": [
+    "laterano"
+   ],
+   "subPower": []
+  },
+  "char_245_cello": {
+   "name": "塑心",
+   "mainPower": [
+    "laterano"
+   ],
+   "subPower": []
+  },
+  "char_2012_typhon": {
+   "name": "提丰",
+   "mainPower": [
+    "sami"
+   ],
+   "subPower": []
+  },
+  "char_1035_wisdel": {
+   "name": "维什戴尔",
+   "mainPower": [
+    "babel"
+   ],
+   "subPower": [
+    "rhodes"
+   ]
+  },
+  "char_4194_rmixer": {
+   "name": "信仰搅拌机",
+   "mainPower": [
+    "laterano"
+   ],
+   "subPower": []
+  },
+  "char_1048_orchd2": {
+   "name": "焰狐龙梓兰",
+   "mainPower": [
+    "rhodes",
+    "reserve6"
+   ],
+   "subPower": [
+    "columbia"
+   ]
+  },
+  "char_134_ifrit": {
+   "name": "伊芙利特",
+   "mainPower": [
+    "columbia",
+    "rhine"
+   ],
+   "subPower": []
+  },
+  "char_4087_ines": {
+   "name": "伊内丝",
+   "mainPower": [
+    "babel"
+   ],
+   "subPower": []
+  }
+ }
+}

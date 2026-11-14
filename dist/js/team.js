@@ -180,7 +180,8 @@
 
     if (!s.filled) {
       h += '<p class="tm-hint">点击下方空位选择干员，盟约将随队伍实时判定；' +
-        '每名干员最多携带 2 件装备，<b>变形同构体</b>会按另一件装备的盟约赋予携带者转职。</p>';
+        '每名干员最多携带 2 件装备（<b>“暴躁铁皮”</b>普通 4 件、精锐 6 件），' +
+        '<b>变形同构体</b>会按另一件装备的盟约赋予携带者转职。</p>';
     }
     return h;
   }
@@ -270,8 +271,15 @@
       '</div>';
   }
 
+  /** 席位当前的装备槽上限：普通 2 件；“暴躁铁皮”普通 4 / 精锐 6 件。 */
+  function itemCapForSlot(s) {
+    if (!s || !s.k) return Store.ITEMS_MAX;
+    return Calc.itemCapacity(s.k, !!s.e);
+  }
+
   function gearHtml(slot, i) {
     var items = slot.it || [];
+    var cap = itemCapForSlot(slot);
     var h = '<div class="slot-gear">';
     for (var k = 0; k < items.length; k++) {
       var entry = normItem(items[k]);
@@ -286,9 +294,9 @@
         (entry.e ? '<i class="gear-elite" aria-hidden="true">进</i>' : '') +
         '</button>';
     }
-    if (items.length < Store.ITEMS_MAX) {
+    if (items.length < cap) {
       h += '<button type="button" class="gear-add" data-gear-add="' + i + '"' +
-        ' aria-label="添加装备" title="添加装备">＋</button>';
+        ' aria-label="添加装备" title="添加装备（' + items.length + '/' + cap + ' 件）">＋</button>';
     }
     h += '</div>';
     return h;
@@ -1113,9 +1121,13 @@
       title = '第 ' + (slot + 1) + ' 席 · 自选干员';
       sub = '6★ · 需自身持有 · 不计入盟约固定 10 人';
     } else if (isItem) {
+      var cap = itemCapForSlot(cur);
+      var capText = cap > Store.ITEMS_MAX
+        ? '当前最多 ' + cap + ' 件' + (cur && cur.e ? '（精锐）' : '')
+        : '每位干员最多 2 件';
       title = '第 ' + (slot + 1) + ' 席' + (curName ? ' · ' + curName : '') +
         (picker.gear >= 0 ? ' · 更换装备' : ' · 添加装备');
-      sub = '每位干员最多 2 件' + (picker.batch ? ' · 连续添加' : '');
+      sub = capText + (picker.batch ? ' · 连续添加' : '');
     } else {
       title = (cur && cur.k ? '更换第 ' : '第 ') + (slot + 1) + ' 席';
       sub = picker.batch ? '连续添加 · 每次选择占用一席' : '场上 ' + countFilled(team) + ' / ' + team.size;
@@ -1630,11 +1642,12 @@
     var s = team.slots[picker.slot];
     if (!s) return;
 
+    var cap = itemCapForSlot(s);
     var entry = { k: name, e: !!elite };
     s.it = s.it || [];
     if (picker.gear >= 0) s.it[picker.gear] = entry;
-    else if (s.it.length < Store.ITEMS_MAX) s.it.push(entry);
-    else s.it[Store.ITEMS_MAX - 1] = entry;
+    else if (s.it.length < cap) s.it.push(entry);
+    else s.it[cap - 1] = entry;
 
     var seen = {};
     var dedup = [];
@@ -1644,7 +1657,7 @@
       seen[it.k] = 1;
       dedup.push(it);
     }
-    s.it = dedup.slice(0, Store.ITEMS_MAX);
+    s.it = dedup.slice(0, cap);
 
     var hasMorph = false;
     for (i = 0; i < s.it.length; i++) if (s.it[i].k === Calc.MORPH_ITEM) hasMorph = true;
@@ -1692,14 +1705,14 @@
   function nextGearTarget(team, from) {
     var n = team.slots.length;
     var first = team.slots[from];
-    if (first && first.k && (first.it || []).length < Store.ITEMS_MAX) {
+    if (first && first.k && (first.it || []).length < itemCapForSlot(first)) {
       return { slot: from, gear: -1 };
     }
     for (var k = 1; k <= n; k++) {
       var idx = (from + k) % n;
       if (idx < 0) idx += n;
       var s = team.slots[idx];
-      if (s && s.k && (s.it || []).length < Store.ITEMS_MAX) return { slot: idx, gear: -1 };
+      if (s && s.k && (s.it || []).length < itemCapForSlot(s)) return { slot: idx, gear: -1 };
     }
     return null;
   }
@@ -1727,6 +1740,12 @@
     var team = Store.getTeam();
     if (!team.slots[i]) return;
     team.slots[i].e = !team.slots[i].e;
+    // 撤销精锐后“暴躁铁皮”的槽位从 6 回到 4，超出的装备要截断，避免 URL 里留下非法件数。
+    var cap = itemCapForSlot(team.slots[i]);
+    if (team.slots[i].it && team.slots[i].it.length > cap) {
+      team.slots[i].it = team.slots[i].it.slice(0, cap);
+      toast('撤销精锐后装备槽变为 ' + cap + ' 件，已移除超出的装备');
+    }
     var changed = Store.setTeam(team);
     // Store 的 commit 在极端情况下会判定「没有变化」而不通知；词条栏的叠层上限
     // 必须跟随普通 / 精锐切换，这里兜底重绘一次，避免看起来像精锐无效。
